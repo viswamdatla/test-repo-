@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Academic Information - School Kit Manager</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#e4e2e1",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#303030",
+                        "on-tertiary-fixed": "#291800",
+                        "tertiary": "#7f5300",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#d4e3ff",
+                        "secondary-container": "#c1d9fe",
+                        "outline": "#717783",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "primary-container": "#2976c7",
+                        "surface-container-low": "#f6f3f2",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffddb4",
+                        "primary": "#005da7",
+                        "surface-container": "#f0eded",
+                        "on-secondary-fixed-variant": "#314867",
+                        "on-secondary": "#ffffff",
+                        "background": "#fbf9f8",
+                        "surface-bright": "#fbf9f8",
+                        "on-secondary-fixed": "#001c39",
+                        "on-surface-variant": "#414751",
+                        "on-primary-container": "#fdfcff",
+                        "on-background": "#1b1c1c",
+                        "secondary-fixed": "#d4e3ff",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#eae8e7",
+                        "on-primary-fixed-variant": "#004883",
+                        "inverse-on-surface": "#f3f0f0",
+                        "error": "#ba1a1a",
+                        "secondary": "#496080",
+                        "inverse-primary": "#a4c9ff",
+                        "on-tertiary-container": "#fffbff",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#a06900",
+                        "surface": "#fbf9f8",
+                        "surface-dim": "#dcd9d9",
+                        "on-secondary-container": "#485e7e",
+                        "on-surface": "#1b1c1c",
+                        "surface-variant": "#e4e2e1",
+                        "on-primary-fixed": "#001c39",
+                        "tertiary-fixed-dim": "#ffb953",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c1c7d3",
+                        "surface-tint": "#0060ac"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .glass-nav {
+            background: rgba(251, 249, 248, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fbf9f8]/80 dark:bg-slate-900/80 backdrop-blur-xl h-16 flex justify-between items-center px-8">
+<div class="text-xl font-bold text-[#005da7] dark:text-[#2976c7]">School Kit Manager</div>
+<div class="flex items-center space-x-6">
+<div class="hidden md:flex items-center space-x-6">
+<button class="text-[#005da7] dark:text-[#2976c7] font-bold border-b-2 border-[#005da7] py-1 px-2 transition-all duration-200 active:scale-[0.98]">Admission</button>
+<button class="text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 py-1 px-2 rounded-lg transition-all duration-200 active:scale-[0.98]">Inventory</button>
+<button class="text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 py-1 px-2 rounded-lg transition-all duration-200 active:scale-[0.98]">Reports</button>
+</div>
+<div class="flex items-center space-x-4 ml-4">
+<button class="p-2 text-on-surface-variant hover:bg-slate-100/50 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-slate-100/50 rounded-full">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="User profile avatar" class="w-8 h-8 rounded-full border border-outline-variant" data-alt="Professional portrait of a school administrator in a bright office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBl5lB8i-2Q7BXyffQ27B9HlFxJMNurzf97hGC8MHxBe4tWBmwB1IbcOOmdFJNdMEnJ_a__wFBGzs6Yp8ythXI4Wck_C1mhyea6Y9QUZSZvgYN0PwFrNPRXO8rs6_y9TIAZn8-TLR8ltu5TJHSY01LEvgejgjmm8li7lCqcwHOViAl0kbl7Gdt0aHkZDiglOILZ_RaHVF2SXdRZP_RgG-6uvGpCzC8bqNhbZx9-1qGPsoqUtks0bWXJ-LNZzyO8obyk7dqWFIbulm0"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-[#f6f3f2] dark:bg-slate-950 flex flex-col p-6 space-y-4 pt-20">
+<div class="mb-8 px-2">
+<h1 class="text-2xl font-black text-[#1b1c1c] dark:text-white">Academica</h1>
+<p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mt-1">Admin Portal</p>
+</div>
+<nav class="flex-grow space-y-2">
+<a class="flex items-center space-x-3 p-3 text-slate-500 dark:text-slate-400 hover:bg-[#fbf9f8] dark:hover:bg-slate-900 rounded-xl transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 p-3 bg-white dark:bg-slate-800 text-[#005da7] dark:text-[#2976c7] rounded-xl shadow-sm translate-x-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person_add</span>
+<span class="font-bold">Admission</span>
+</a>
+<a class="flex items-center space-x-3 p-3 text-slate-500 dark:text-slate-400 hover:bg-[#fbf9f8] dark:hover:bg-slate-900 rounded-xl transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium">Staff</span>
+</a>
+</nav>
+<div class="pt-6 border-t border-outline-variant/20 space-y-2">
+<a class="flex items-center space-x-3 p-3 text-slate-500 dark:text-slate-400 hover:bg-[#fbf9f8] dark:hover:bg-slate-900 rounded-xl transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-medium">Help</span>
+</a>
+<a class="flex items-center space-x-3 p-3 text-slate-500 dark:text-slate-400 hover:bg-[#fbf9f8] dark:hover:bg-slate-900 rounded-xl transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-medium">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pl-64 pt-24 pb-12 px-8 min-h-screen">
+<div class="max-w-4xl mx-auto">
+<!-- Header Section -->
+<div class="mb-10 text-center">
+<h2 class="text-4xl font-extrabold tracking-tight text-on-surface mb-2">Student Admission</h2>
+<p class="text-on-surface-variant font-medium">Please fill in the academic details accurately to proceed with the kit allocation.</p>
+</div>
+<!-- Stepper Component -->
+<div class="mb-12">
+<div class="flex items-center justify-between relative px-2">
+<!-- Stepper Line -->
+<div class="absolute top-5 left-0 w-full h-1 bg-surface-container-highest -z-10 rounded-full">
+<div class="h-full bg-primary rounded-full transition-all duration-500" style="width: 25%;"></div>
+</div>
+<!-- Steps -->
+<div class="flex flex-col items-center group">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-lg ring-4 ring-white transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="mt-2 text-xs font-bold text-primary">Personal</span>
+</div>
+<div class="flex flex-col items-center group">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm ring-4 ring-white transition-transform group-hover:scale-110">2</div>
+<span class="mt-2 text-xs font-bold text-primary">Academic</span>
+</div>
+<div class="flex flex-col items-center group opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-110">3</div>
+<span class="mt-2 text-xs font-medium">Parents</span>
+</div>
+<div class="flex flex-col items-center group opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-110">4</div>
+<span class="mt-2 text-xs font-medium">Address</span>
+</div>
+<div class="flex flex-col items-center group opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-110">5</div>
+<span class="mt-2 text-xs font-medium">Documents</span>
+</div>
+<div class="flex flex-col items-center group opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-110">6</div>
+<span class="mt-2 text-xs font-medium">Kit Selection</span>
+</div>
+<div class="flex flex-col items-center group opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-110">7</div>
+<span class="mt-2 text-xs font-medium">Review</span>
+</div>
+</div>
+</div>
+<!-- Form Card: Academic Information -->
+<div class="bg-surface-container-lowest rounded-[2rem] p-8 md:p-12 shadow-[0px_12px_32px_rgba(27,28,28,0.04)] border border-outline-variant/10">
+<div class="flex items-center space-x-4 mb-10">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">school</span>
+</div>
+<div>
+<h3 class="text-2xl font-bold text-on-surface">Academic Information</h3>
+<p class="text-on-surface-variant text-sm">Step 2 of 7</p>
+</div>
+</div>
+<form class="space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Class Applied For -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-on-surface-variant ml-1">Class Applied For*</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-high border-none rounded-xl px-4 py-4 text-on-surface appearance-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all">
+<option disabled="" selected="" value="">Select class</option>
+<option>Nursery</option>
+<option>LKG</option>
+<option>UKG</option>
+<option>1st Grade</option>
+<option>2nd Grade</option>
+<option>3rd Grade</option>
+<option>4th Grade</option>
+<option>5th Grade</option>
+<option>6th Grade</option>
+<option>7th Grade</option>
+<option>8th Grade</option>
+<option>9th Grade</option>
+<option>10th Grade</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Medium of Instruction -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-on-surface-variant ml-1">Medium of Instruction</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-high border-none rounded-xl px-4 py-4 text-on-surface appearance-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all">
+<option disabled="" selected="" value="">Select medium</option>
+<option>English</option>
+<option>Hindi</option>
+<option>Telugu</option>
+<option>Tamil</option>
+<option>Kannada</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Previous Class/Grade -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-on-surface-variant ml-1">Previous Class/Grade</label>
+<input class="w-full bg-surface-container-high border-none rounded-xl px-4 py-4 text-on-surface focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all placeholder:text-outline/50" placeholder="e.g. 5th Grade" type="text"/>
+</div>
+<!-- Previous School Final Grade/Percentage -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-on-surface-variant ml-1">Final Grade / Percentage</label>
+<input class="w-full bg-surface-container-high border-none rounded-xl px-4 py-4 text-on-surface focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all placeholder:text-outline/50" placeholder="e.g. 92% or A+" type="text"/>
+</div>
+<!-- Section Preference -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-on-surface-variant ml-1">Section Preference</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-high border-none rounded-xl px-4 py-4 text-on-surface appearance-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all">
+<option disabled="" selected="" value="">Select section</option>
+<option>Section A</option>
+<option>Section B</option>
+<option>Section C</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<!-- Transfer Certificate Number -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-on-surface-variant ml-1">Transfer Certificate Number</label>
+<input class="w-full bg-surface-container-high border-none rounded-xl px-4 py-4 text-on-surface focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all placeholder:text-outline/50" placeholder="Enter TC Number" type="text"/>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-between pt-10 mt-6 border-t border-outline-variant/10">
+<button class="flex items-center space-x-2 px-8 py-4 rounded-xl font-bold text-on-surface bg-surface-container hover:bg-surface-container-highest transition-all duration-200 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+<span>Back</span>
+</button>
+<button class="flex items-center space-x-2 px-10 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-primary to-primary-container shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all duration-200 active:scale-95" type="submit">
+<span>Next Step</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Contextual Info / Help Card -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="p-6 rounded-2xl bg-tertiary-fixed text-on-tertiary-fixed flex items-start space-x-4">
+<span class="material-symbols-outlined text-tertiary">info</span>
+<p class="text-xs font-medium leading-relaxed">Ensure all data matches the student's previous transfer certificate to avoid admission delays.</p>
+</div>
+<div class="p-6 rounded-2xl bg-secondary-fixed text-on-secondary-fixed flex items-start space-x-4">
+<span class="material-symbols-outlined text-secondary">verified_user</span>
+<p class="text-xs font-medium leading-relaxed">All submitted information is encrypted and handled according to the school data privacy policy.</p>
+</div>
+<div class="p-6 rounded-2xl bg-primary-fixed text-on-primary-fixed flex items-start space-x-4">
+<span class="material-symbols-outlined text-primary">support_agent</span>
+<p class="text-xs font-medium leading-relaxed">Need help? Contact the registrar office at ext. 402 for assistance with academic records.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<div class="md:hidden fixed bottom-0 left-0 w-full bg-[#fbf9f8]/80 backdrop-blur-xl h-16 flex items-center justify-around z-50 px-4">
+<button class="flex flex-col items-center space-y-1 text-slate-500">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold">Dash</span>
+</button>
+<button class="flex flex-col items-center space-y-1 text-[#005da7]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person_add</span>
+<span class="text-[10px] font-bold">Apply</span>
+</button>
+<button class="flex flex-col items-center space-y-1 text-slate-500">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-[10px] font-bold">Kits</span>
+</button>
+<button class="flex flex-col items-center space-y-1 text-slate-500">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-bold">Profile</span>
+</button>
+</div>
+</body></html>

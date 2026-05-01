@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guardian Information - Step 3</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#e4e2e1",
+                    "primary-fixed-dim": "#a4c9ff",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#303030",
+                    "on-tertiary-fixed": "#291800",
+                    "tertiary": "#7f5300",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#d4e3ff",
+                    "secondary-container": "#c1d9fe",
+                    "outline": "#717783",
+                    "on-tertiary-fixed-variant": "#633f00",
+                    "primary-container": "#2976c7",
+                    "surface-container-low": "#f6f3f2",
+                    "secondary-fixed-dim": "#b1c8ed",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#ffddb4",
+                    "primary": "#005da7",
+                    "surface-container": "#f0eded",
+                    "on-secondary-fixed-variant": "#314867",
+                    "on-secondary": "#ffffff",
+                    "background": "#fbf9f8",
+                    "surface-bright": "#fbf9f8",
+                    "on-secondary-fixed": "#001c39",
+                    "on-surface-variant": "#414751",
+                    "on-primary-container": "#fdfcff",
+                    "on-background": "#1b1c1c",
+                    "secondary-fixed": "#d4e3ff",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#eae8e7",
+                    "on-primary-fixed-variant": "#004883",
+                    "inverse-on-surface": "#f3f0f0",
+                    "error": "#ba1a1a",
+                    "secondary": "#496080",
+                    "inverse-primary": "#a4c9ff",
+                    "on-tertiary-container": "#fffbff",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#a06900",
+                    "surface": "#fbf9f8",
+                    "surface-dim": "#dcd9d9",
+                    "on-secondary-container": "#485e7e",
+                    "on-surface": "#1b1c1c",
+                    "surface-variant": "#e4e2e1",
+                    "on-primary-fixed": "#001c39",
+                    "tertiary-fixed-dim": "#ffb953",
+                    "surface-container-lowest": "#ffffff",
+                    "outline-variant": "#c1c7d3",
+                    "surface-tint": "#0060ac"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-[#fbf9f8]/80 dark:bg-slate-900/80 backdrop-blur-xl fixed top-0 w-full z-50">
+<div class="flex justify-between items-center w-full px-8 h-16">
+<div class="text-xl font-bold text-[#005da7] dark:text-[#2976c7]">School Kit Manager</div>
+<div class="flex items-center space-gap-6">
+<div class="relative mr-6">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="bg-surface-container-highest/50 border-none rounded-full pl-10 pr-4 py-1.5 text-sm focus:ring-2 focus:ring-primary w-64" placeholder="Search kits..." type="text"/>
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 rounded-full hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors">
+<span class="material-symbols-outlined text-slate-600">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors">
+<span class="material-symbols-outlined text-slate-600">settings</span>
+</button>
+<img alt="User profile avatar" class="w-8 h-8 rounded-full ml-2" data-alt="Close-up professional portrait of a school administrator in a bright modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzXWyJfXrH6DpgsZL9w2v7m0h2JPSZ1f0YkRFrOu1GkWyh45OAPGUBN79dV88u8ViigBmrxeu0uv8bQehOiOmqLHqpJLxWuf3HzH9LkVMiUBxYVkEgi0MfYxF1Sjj-InUi-MW7sEDoD5bFiEty_tGyxGTndqL9f0lqCOQjL5Ar7nzJmU9OSlLEWM8dyKKPxADUq4km_qykyCF-PpAiKM8bKivWkfO5GorO1TdogwKT6NgA4sxl6P0cu0q_GtIsykU6L7-FKvFZyvg"/>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-[#f6f3f2] dark:bg-slate-950 flex flex-col p-6 space-y-4 pt-24 shadow-[0px_12px_32px_rgba(27,28,28,0.06)]">
+<div class="mb-8 px-2">
+<div class="text-2xl font-black text-[#1b1c1c] dark:text-white mb-0.5">Academica</div>
+<div class="text-xs text-slate-500 font-medium uppercase tracking-wider">Admin Portal</div>
+</div>
+<nav class="flex-grow space-y-2">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#1b1c1c] dark:hover:text-white hover:bg-[#fbf9f8] dark:hover:bg-slate-900 transition-all rounded-xl group" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 bg-white dark:bg-slate-800 text-[#005da7] dark:text-[#2976c7] rounded-xl shadow-sm translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-3">person_add</span>
+<span class="font-semibold">Admission</span>
+</a>
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-[#1b1c1c] dark:hover:text-white hover:bg-[#fbf9f8] dark:hover:bg-slate-900 transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined mr-3">group</span>
+<span class="font-medium">Staff</span>
+</a>
+</nav>
+<div class="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-2">
+<a class="flex items-center px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-[#1b1c1c] dark:hover:text-white transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined mr-3">help</span>
+<span class="text-sm">Help</span>
+</a>
+<a class="flex items-center px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-[#1b1c1c] dark:hover:text-white transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined mr-3">logout</span>
+<span class="text-sm">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 pt-24 pb-12 px-12 min-h-screen">
+<div class="max-w-4xl mx-auto">
+<!-- Header Section -->
+<div class="mb-10 text-center">
+<h1 class="text-4xl font-extrabold text-on-surface mb-2 tracking-tight">Student Admission</h1>
+<p class="text-on-surface-variant">Complete the enrollment process by providing accurate student details.</p>
+</div>
+<!-- Horizontal Stepper -->
+<div class="mb-12 relative">
+<div class="absolute top-5 left-0 w-full h-1 bg-surface-container-highest -z-10 rounded-full">
+<div class="h-full bg-primary rounded-full" style="width: 33.33%;"></div>
+</div>
+<div class="flex justify-between items-start">
+<!-- Step 1 -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mb-2 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[10px] uppercase tracking-widest font-bold text-primary">Personal</span>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold mb-2 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<span class="text-[10px] uppercase tracking-widest font-bold text-primary">Address</span>
+</div>
+<!-- Step 3 (Active) -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center font-bold mb-2 ring-4 ring-primary-fixed">
+                            3
+                        </div>
+<span class="text-[10px] uppercase tracking-widest font-bold text-primary">Guardian</span>
+</div>
+<!-- Step 4 -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-outline flex items-center justify-center font-bold mb-2">
+                            4
+                        </div>
+<span class="text-[10px] uppercase tracking-widest font-bold text-outline">Academic</span>
+</div>
+<!-- Step 5 -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-outline flex items-center justify-center font-bold mb-2">
+                            5
+                        </div>
+<span class="text-[10px] uppercase tracking-widest font-bold text-outline">Medical</span>
+</div>
+<!-- Step 6 -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-outline flex items-center justify-center font-bold mb-2">
+                            6
+                        </div>
+<span class="text-[10px] uppercase tracking-widest font-bold text-outline">Documents</span>
+</div>
+<!-- Step 7 -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-outline flex items-center justify-center font-bold mb-2">
+                            7
+                        </div>
+<span class="text-[10px] uppercase tracking-widest font-bold text-outline">Review</span>
+</div>
+</div>
+</div>
+<!-- Form Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0px_12px_32px_rgba(27,28,28,0.06)] p-10">
+<form action="#" method="POST">
+<!-- Section 1: Father's Information -->
+<div class="mb-12">
+<div class="flex items-center mb-6">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3">
+<span class="material-symbols-outlined text-primary text-xl">person</span>
+</div>
+<h2 class="text-xl font-bold text-on-surface">Father's Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Name*</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="Enter father's full name" type="text"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Occupation</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="e.g. Engineer, Business" type="text"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Phone*</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Email</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="father@example.com" type="email"/>
+</div>
+</div>
+</div>
+<!-- Section 2: Mother's Information -->
+<div class="mb-12">
+<div class="flex items-center mb-6">
+<div class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center mr-3">
+<span class="material-symbols-outlined text-secondary text-xl">person_2</span>
+</div>
+<h2 class="text-xl font-bold text-on-surface">Mother's Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Name*</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="Enter mother's full name" type="text"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Occupation</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="e.g. Doctor, Teacher" type="text"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Phone*</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Email</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="mother@example.com" type="email"/>
+</div>
+</div>
+</div>
+<!-- Section 3: Income Details -->
+<div class="mb-12">
+<div class="flex items-center mb-6">
+<div class="w-8 h-8 rounded-lg bg-tertiary/10 flex items-center justify-center mr-3">
+<span class="material-symbols-outlined text-tertiary text-xl">payments</span>
+</div>
+<h2 class="text-xl font-bold text-on-surface">Income Details</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Parents Annual Income</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="Actual income amount" type="number"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Parents Annual Income (in lakhs)*</label>
+<select class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all appearance-none">
+<option disabled="" selected="" value="">Select income bracket</option>
+<option value="1">&lt; 1 lakh</option>
+<option value="2">1 - 3 lakhs</option>
+<option value="3">3 - 5 lakhs</option>
+<option value="4">5 - 7 lakhs</option>
+<option value="5">7 - 9 lakhs</option>
+<option value="6">&gt; 9 lakhs</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Section 4: Emergency Contact -->
+<div class="mb-12">
+<div class="flex items-center mb-6">
+<div class="w-8 h-8 rounded-lg bg-error/10 flex items-center justify-center mr-3">
+<span class="material-symbols-outlined text-error text-xl">emergency</span>
+</div>
+<h2 class="text-xl font-bold text-on-surface">Emergency Contact</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Name</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="Full name" type="text"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Phone</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="Primary contact" type="tel"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant px-1">Relationship</label>
+<input class="w-full bg-surface-container-high/40 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary transition-all" placeholder="e.g. Uncle, Neighbor" type="text"/>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-between pt-8 border-t border-surface-container-highest">
+<button class="flex items-center px-8 py-3.5 rounded-xl border border-outline-variant text-on-surface font-semibold hover:bg-surface-container transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined mr-2">arrow_back</span>
+                            Back
+                        </button>
+<button class="flex items-center px-10 py-3.5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold shadow-lg shadow-primary/20 hover:shadow-xl transition-all active:scale-98" type="submit">
+                            Next
+                            <span class="material-symbols-outlined ml-2">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Contextual Help Card (Asymmetric Layout) -->
+<div class="mt-8 flex gap-6">
+<div class="flex-1 bg-primary/5 rounded-xl p-6 border border-primary/10 flex items-start">
+<span class="material-symbols-outlined text-primary mr-4 mt-1">info</span>
+<div>
+<p class="text-sm font-semibold text-primary mb-1">Privacy Guarantee</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">All guardian information is encrypted and only accessible by authorized school administrative personnel for communication purposes.</p>
+</div>
+</div>
+<div class="flex-none w-48 bg-tertiary/5 rounded-xl p-6 border border-tertiary/10 flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-tertiary mb-2">support_agent</span>
+<p class="text-[10px] uppercase font-bold text-tertiary tracking-wider mb-1">Need Help?</p>
+<a class="text-xs font-bold text-on-surface hover:underline" href="#">Contact Registry</a>
+</div>
+</div>
+</div>
+</main>
+</body></html>

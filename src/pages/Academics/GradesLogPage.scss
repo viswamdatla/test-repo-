@@ -1,0 +1,50 @@
+/* Grades list: ScholarFlow-style roster (extends sm-roster-* from StudentManagementFlow) */
+
+.grades-log-page {
+  .grades-log-student-row {
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+      outline-offset: -2px;
+    }
+  }
+
+  .grades-log-name {
+    cursor: pointer;
+  }
+}
+
+.gl-pill-records {
+  &--ok {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+  }
+
+  &--pending {
+    background: var(--tertiary-fixed);
+    color: var(--on-tertiary-fixed);
+  }
+
+  &--muted {
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+  }
+}
+
+.gl-pill-result {
+  &--pass {
+    background: color-mix(in srgb, #059669 14%, var(--surface-container-lowest));
+    color: #047857;
+  }
+
+  &--risk {
+    background: var(--error-container);
+    color: var(--on-error-container);
+  }
+
+  &--muted {
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+  }
+}

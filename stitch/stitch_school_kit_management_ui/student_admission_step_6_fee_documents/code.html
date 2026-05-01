@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admission Form - Fee &amp; Documents | Academica</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#e4e2e1",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#303030",
+                        "on-tertiary-fixed": "#291800",
+                        "tertiary": "#7f5300",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#d4e3ff",
+                        "secondary-container": "#c1d9fe",
+                        "outline": "#717783",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "primary-container": "#2976c7",
+                        "surface-container-low": "#f6f3f2",
+                        "secondary-fixed-dim": "#b1c8ed",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffddb4",
+                        "primary": "#005da7",
+                        "surface-container": "#f0eded",
+                        "on-secondary-fixed-variant": "#314867",
+                        "on-secondary": "#ffffff",
+                        "background": "#fbf9f8",
+                        "surface-bright": "#fbf9f8",
+                        "on-secondary-fixed": "#001c39",
+                        "on-surface-variant": "#414751",
+                        "on-primary-container": "#fdfcff",
+                        "on-background": "#1b1c1c",
+                        "secondary-fixed": "#d4e3ff",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#eae8e7",
+                        "on-primary-fixed-variant": "#004883",
+                        "inverse-on-surface": "#f3f0f0",
+                        "error": "#ba1a1a",
+                        "secondary": "#496080",
+                        "inverse-primary": "#a4c9ff",
+                        "on-tertiary-container": "#fffbff",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#a06900",
+                        "surface": "#fbf9f8",
+                        "surface-dim": "#dcd9d9",
+                        "on-secondary-container": "#485e7e",
+                        "on-surface": "#1b1c1c",
+                        "surface-variant": "#e4e2e1",
+                        "on-primary-fixed": "#001c39",
+                        "tertiary-fixed-dim": "#ffb953",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c1c7d3",
+                        "surface-tint": "#0060ac"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-[#f6f3f2] dark:bg-slate-950 flex flex-col p-6 space-y-4 shadow-[0px_12px_32px_rgba(27,28,28,0.06)]">
+<div class="mb-8 px-2">
+<h1 class="text-2xl font-black text-[#1b1c1c] dark:text-white">Academica</h1>
+<p class="text-sm text-slate-500 font-medium tracking-tight">Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-[#fbf9f8] transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 p-3 bg-white text-[#005da7] rounded-xl shadow-sm translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+<span class="font-medium">Admission</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-[#fbf9f8] transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-medium">Staff</span>
+</a>
+</nav>
+<div class="pt-6 border-t border-surface-container-highest space-y-2">
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-[#fbf9f8] transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-medium">Help</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-slate-500 hover:bg-[#fbf9f8] transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-medium">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen">
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 left-64 h-16 z-50 bg-[#fbf9f8]/80 backdrop-blur-xl flex justify-between items-center px-8">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold text-[#005da7]">School Kit Manager</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative flex items-center bg-surface-container-low px-4 py-2 rounded-full w-64">
+<span class="material-symbols-outlined text-slate-400 text-lg mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full p-0" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-600 hover:bg-slate-100/50 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-slate-100/50 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="Close up portrait of a professional man in a bright office setting, soft corporate lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPPHBJAhG3QVK2n8nByl-xzUDCB2Z8TIg-F-6YBL-Gq2NgG8wdA8BYuIbmz3BdQ3yqiNc0_p8Xg6H3wTcZtsy1bkNSJ-C71NZ6pVyx0OnPMvchilCy66keIArOOnGSzAaGVsxzqNpE7RF5g_rE9Zv2oJM37LfjUDgZGrVfm7K2CGTPVp34INUH-wTK2Ugqv1pDtrFU1VkJ1ZI6YjBtqfYPjXGN-En6Vok7GZvTFHE5fQL5OIUaqNeAfvreJXLxo8rKi167yobnVS4"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Admission Workflow Section -->
+<section class="pt-24 pb-12 px-12 max-w-6xl mx-auto">
+<!-- Horizontal Stepper -->
+<div class="mb-12">
+<div class="flex items-center justify-between w-full">
+<!-- Steps -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold ring-4 ring-primary/10">1</div>
+<span class="text-[10px] uppercase tracking-wider font-bold text-primary">Student</span>
+</div>
+<div class="flex-1 h-[2px] mx-4 bg-primary-container/30"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold">2</div>
+<span class="text-[10px] uppercase tracking-wider font-bold text-primary">Parents</span>
+</div>
+<div class="flex-1 h-[2px] mx-4 bg-primary-container/30"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold">3</div>
+<span class="text-[10px] uppercase tracking-wider font-bold text-primary">Academic</span>
+</div>
+<div class="flex-1 h-[2px] mx-4 bg-primary-container/30"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold">4</div>
+<span class="text-[10px] uppercase tracking-wider font-bold text-primary">Health</span>
+</div>
+<div class="flex-1 h-[2px] mx-4 bg-primary-container/30"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-bold">5</div>
+<span class="text-[10px] uppercase tracking-wider font-bold text-primary">Address</span>
+</div>
+<div class="flex-1 h-[2px] mx-4 bg-primary/20"></div>
+<!-- ACTIVE STEP -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-black shadow-lg shadow-primary/20 ring-4 ring-white">6</div>
+<span class="text-[10px] uppercase tracking-widest font-black text-primary">Fees</span>
+</div>
+<div class="flex-1 h-[2px] mx-4 bg-surface-container-highest"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest text-outline flex items-center justify-center text-xs font-bold">7</div>
+<span class="text-[10px] uppercase tracking-wider font-bold text-outline">Confirm</span>
+</div>
+</div>
+</div>
+<!-- Form Content -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Main Form Card -->
+<div class="lg:col-span-8 space-y-8">
+<!-- Section 1: Fee Plan -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+<h3 class="text-xl font-bold">Fee Plan Selection</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<label class="relative flex flex-col p-4 border-2 border-primary-container/20 rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group">
+<input checked="" class="absolute top-4 right-4 text-primary focus:ring-primary h-4 w-4" name="fee_plan" type="radio"/>
+<span class="text-xs font-bold text-outline uppercase mb-1">Standard</span>
+<span class="text-lg font-bold mb-2">Tuition Only</span>
+<span class="text-2xl font-black text-primary">₹50k</span>
+</label>
+<label class="relative flex flex-col p-4 border-2 border-primary-container/20 rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group">
+<input class="absolute top-4 right-4 text-primary focus:ring-primary h-4 w-4" name="fee_plan" type="radio"/>
+<span class="text-xs font-bold text-outline uppercase mb-1">Commute</span>
+<span class="text-lg font-bold mb-2">Tuition + Transport</span>
+<span class="text-2xl font-black text-primary">₹65k</span>
+</label>
+<label class="relative flex flex-col p-4 border-2 border-primary-container/20 rounded-xl cursor-pointer hover:bg-surface-container-low transition-all group">
+<input class="absolute top-4 right-4 text-primary focus:ring-primary h-4 w-4" name="fee_plan" type="radio"/>
+<span class="text-xs font-bold text-outline uppercase mb-1">Residential</span>
+<span class="text-lg font-bold mb-2">Tuition + Hostel</span>
+<span class="text-2xl font-black text-primary">₹120k</span>
+</label>
+</div>
+</div>
+<!-- Section 2: Document Checklist -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="cloud_upload">cloud_upload</span>
+<h3 class="text-xl font-bold">Document Checklist</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-on-surface-variant ml-1">Birth Certificate*</label>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl border border-dashed border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer">
+<span class="text-sm text-outline group-hover:text-primary transition-colors">Select file...</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="attach_file">attach_file</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-on-surface-variant ml-1">Report Card*</label>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl border border-dashed border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer">
+<span class="text-sm text-outline group-hover:text-primary transition-colors">Select file...</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="attach_file">attach_file</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-on-surface-variant ml-1">Address Proof*</label>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl border border-dashed border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer">
+<span class="text-sm text-outline group-hover:text-primary transition-colors">Select file...</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="attach_file">attach_file</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-on-surface-variant ml-1">Transfer Certificate (TC)</label>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl border border-dashed border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer">
+<span class="text-sm text-outline group-hover:text-primary transition-colors">Select file...</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="attach_file">attach_file</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-on-surface-variant ml-1">Student Photos (3)*</label>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl border border-dashed border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer">
+<span class="text-sm text-outline group-hover:text-primary transition-colors">Select files...</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="add_photo_alternate">add_photo_alternate</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-on-surface-variant ml-1">Medical Certificate</label>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl border border-dashed border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer">
+<span class="text-sm text-outline group-hover:text-primary transition-colors">Select file...</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="attach_file">attach_file</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Payment Details -->
+<div class="lg:col-span-4 space-y-8">
+<!-- Payment Information -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-primary-fixed">
+<h3 class="text-xl font-bold mb-6">Payment Info</h3>
+<div class="space-y-6">
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-on-surface-variant ml-1">Initial Payment Amount (₹)*</label>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-3 text-sm focus:ring-0 focus:border-b-2 focus:border-primary transition-all" type="number" value="5000"/>
+</div>
+<div class="flex items-center justify-between py-2">
+<div class="flex flex-col">
+<span class="text-sm font-bold">Apply Discount</span>
+<span class="text-[10px] text-outline">Scholarship or sibling discount</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="pt-4 space-y-3 border-t border-surface-container">
+<div class="flex justify-between text-sm">
+<span class="text-outline">Initial Amount</span>
+<span class="font-bold">₹5,000</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-outline">Processing Fee</span>
+<span class="font-bold">₹0</span>
+</div>
+<div class="flex justify-between text-lg pt-3 border-t border-dashed border-surface-container">
+<span class="font-black">Total Due</span>
+<span class="font-black text-primary">₹5,000</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment Method -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<h3 class="text-xl font-bold mb-4">Payment Method*</h3>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex flex-col items-center justify-center p-4 rounded-xl border border-surface-container hover:bg-primary/5 hover:border-primary transition-all gap-2 group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="payments">payments</span>
+<span class="text-[10px] font-bold uppercase tracking-tight">Cash</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-primary bg-primary/5 gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="credit_card">credit_card</span>
+<span class="text-[10px] font-bold uppercase tracking-tight text-primary">Card</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl border border-surface-container hover:bg-primary/5 hover:border-primary transition-all gap-2 group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="language">language</span>
+<span class="text-[10px] font-bold uppercase tracking-tight">Online</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl border border-surface-container hover:bg-primary/5 hover:border-primary transition-all gap-2 group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary" data-icon="account_balance">account_balance</span>
+<span class="text-[10px] font-bold uppercase tracking-tight">Bank</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-12 flex justify-between items-center">
+<button class="flex items-center gap-2 px-8 py-3 rounded-xl border-2 border-outline-variant text-on-surface-variant font-bold hover:bg-surface-container transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_back">arrow_back</span>
+                    Back
+                </button>
+<button class="flex items-center gap-2 px-12 py-3 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-black shadow-lg shadow-primary/30 hover:opacity-90 transition-all active:scale-95">
+                    Next Step
+                    <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</section>
+</main>
+</body></html>

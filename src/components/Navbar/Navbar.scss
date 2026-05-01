@@ -1,0 +1,158 @@
+.navbar {
+  width: 100%;
+  height: 64px; /* h-16 */
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: rgba(250, 250, 249, 0.8); /* bg-stone-50/80 */
+  backdrop-filter: blur(24px); /* backdrop-blur-xl */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px; /* px-8 */
+  box-shadow: 0px 12px 32px rgba(27, 28, 28, 0.04);
+  
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px; /* gap-4 */
+
+    .menu-btn {
+      display: none;
+      padding: 8px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--on-surface);
+      
+      &:hover {
+        background-color: #f5f5f4; /* bg-stone-100 */
+      }
+
+      @media (max-width: 768px) {
+        display: block; /* md:hidden */
+      }
+    }
+
+    .nav-title {
+      font-size: 20px; /* text-xl */
+      font-weight: 700; /* font-bold */
+      letter-spacing: -0.025em; /* tracking-tight */
+      color: var(--on-surface);
+    }
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px; /* gap-4 */
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background-color: var(--surface-container-low);
+      border-radius: 9999px;
+      border: 1px solid rgba(193, 199, 211, 0.1); /* border-outline-variant/10 */
+      
+      @media (max-width: 768px) {
+        display: none; /* hidden md:flex */
+      }
+
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #22c55e; /* bg-green-500 */
+        /* animate-pulse CSS would go here if needed, but not necessary for static representation */
+      }
+
+      .status-text {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--on-surface-variant);
+      }
+    }
+
+    .icon-btn {
+      padding: 8px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: transform 0.1s;
+      
+      .material-symbols-outlined {
+        color: #78716c; /* text-stone-500 */
+      }
+
+      &:hover {
+        background-color: #f5f5f4; /* bg-stone-100 */
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+
+    .profile-section {
+      display: flex;
+      align-items: center;
+      gap: 12px; /* gap-3 */
+      padding-left: 16px; /* pl-4 */
+      border-left: 1px solid rgba(193, 199, 211, 0.3); /* border-outline-variant/30 */
+
+      .profile-info {
+        text-align: right;
+
+        @media (max-width: 640px) {
+          display: none; /* hidden sm:block */
+        }
+
+        .profile-name {
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--on-surface);
+        }
+
+        .profile-role {
+          font-size: 12px;
+          color: var(--on-surface-variant);
+        }
+      }
+
+      .profile-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-container);
+        color: var(--on-primary-container);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px transparent; /* ring-2 ring-surface */
+      }
+    }
+  }
+}
+
+body.dark {
+  .navbar {
+    background-color: rgba(12, 10, 9, 0.8); /* dark:bg-stone-950/80 */
+
+    .nav-left .menu-btn:hover {
+      background-color: #292524; /* dark:hover:bg-stone-800 */
+    }
+
+    .nav-right {
+      .icon-btn {
+        .material-symbols-outlined { color: #a8a29e; /* dark:text-stone-400 */ }
+        &:hover { background-color: #292524; /* dark:hover:bg-stone-800 */ }
+      }
+    }
+  }
+}

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Admission - Address Information</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#e4e2e1",
+                    "primary-fixed-dim": "#a4c9ff",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#303030",
+                    "on-tertiary-fixed": "#291800",
+                    "tertiary": "#7f5300",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#d4e3ff",
+                    "secondary-container": "#c1d9fe",
+                    "outline": "#717783",
+                    "on-tertiary-fixed-variant": "#633f00",
+                    "primary-container": "#2976c7",
+                    "surface-container-low": "#f6f3f2",
+                    "secondary-fixed-dim": "#b1c8ed",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#ffddb4",
+                    "primary": "#005da7",
+                    "surface-container": "#f0eded",
+                    "on-secondary-fixed-variant": "#314867",
+                    "on-secondary": "#ffffff",
+                    "background": "#fbf9f8",
+                    "surface-bright": "#fbf9f8",
+                    "on-secondary-fixed": "#001c39",
+                    "on-surface-variant": "#414751",
+                    "on-primary-container": "#fdfcff",
+                    "on-background": "#1b1c1c",
+                    "secondary-fixed": "#d4e3ff",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#eae8e7",
+                    "on-primary-fixed-variant": "#004883",
+                    "inverse-on-surface": "#f3f0f0",
+                    "error": "#ba1a1a",
+                    "secondary": "#496080",
+                    "inverse-primary": "#a4c9ff",
+                    "on-tertiary-container": "#fffbff",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#a06900",
+                    "surface": "#fbf9f8",
+                    "surface-dim": "#dcd9d9",
+                    "on-secondary-container": "#485e7e",
+                    "on-surface": "#1b1c1c",
+                    "surface-variant": "#e4e2e1",
+                    "on-primary-fixed": "#001c39",
+                    "tertiary-fixed-dim": "#ffb953",
+                    "surface-container-lowest": "#ffffff",
+                    "outline-variant": "#c1c7d3",
+                    "surface-tint": "#0060ac"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- TopAppBar Shell (Execution from JSON) -->
+<nav class="fixed top-0 w-full z-50 bg-[#fbf9f8]/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-between items-center px-8 h-16">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-[#005da7] dark:text-[#2976c7]">School Kit Manager</span>
+<div class="hidden md:flex gap-6">
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors px-3 py-1 rounded-lg" href="#">Inventory</a>
+<a class="text-[#005da7] dark:text-[#2976c7] font-bold border-b-2 border-[#005da7] px-3 py-1" href="#">Admission</a>
+<a class="text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors px-3 py-1 rounded-lg" href="#">Staff</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-100/50 rounded-full transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-slate-100/50 rounded-full transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="User profile avatar" data-alt="Close-up portrait of a professional male administrator in a clean office setting, soft daylighting, high-end editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8vrHmtb6jfSvTnUrTia-FwnqcBkDOdbeDBMzvtjA-G3Pzp0daUzmDI6xelBsyStV9V8VC0Jlcz4_hfokgdGmxOarZVYW7dV2u_Gv8-9tg3RKMIIZxGHeQlv4ouEoMLHBMiCCxKeVhPT3_4sHaAj6fkE6u6KKc6pZHLaZw2-SjRpgwpOVAmtk7TLTyT1lubRprDN94LzTzovqhlcDJahwrXAZ1XA7PAVn6pjPkOslsWzZDN22mZuDoeBH-m1k9GK3HkU_7_xSaMWE"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar Shell (Execution from JSON) -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-[#f6f3f2] dark:bg-slate-950 flex flex-col p-6 space-y-4 shadow-[0px_12px_32px_rgba(27,28,28,0.06)] pt-24">
+<div class="mb-8 px-2">
+<h2 class="text-2xl font-black text-[#1b1c1c] dark:text-white">Academica</h2>
+<p class="text-xs text-slate-500 font-medium tracking-wider uppercase">Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-[#fbf9f8] dark:hover:bg-slate-900 transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-[#005da7] dark:text-[#2976c7] rounded-xl shadow-sm translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+<span class="font-bold">Admission</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-[#fbf9f8] dark:hover:bg-slate-900 transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-medium">Staff</span>
+</a>
+</nav>
+<div class="pt-6 border-t border-surface-container-highest flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-[#1b1c1c] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-sm">Help</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-error transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-sm">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 min-h-screen bg-surface">
+<div class="max-w-5xl mx-auto px-10 py-12">
+<!-- Header Section -->
+<header class="mb-10">
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface mb-2">Student Admission</h1>
+<p class="text-on-surface-variant">Step 4 of 7: Address Information</p>
+</header>
+<!-- Stepper (Asymmetric Editorial Style) -->
+<div class="mb-12 relative">
+<div class="flex justify-between items-center">
+<!-- Step Items -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Personal</span>
+</div>
+<div class="flex-1 h-1 bg-primary mx-4 rounded-full opacity-20"></div>
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Parental</span>
+</div>
+<div class="flex-1 h-1 bg-primary mx-4 rounded-full opacity-20"></div>
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Academic</span>
+</div>
+<div class="flex-1 h-1 bg-primary mx-4 rounded-full opacity-100"></div>
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full bg-white border-4 border-primary flex items-center justify-center text-primary font-black shadow-xl -mt-1">
+                            04
+                        </div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary">Address</span>
+</div>
+<div class="flex-1 h-1 bg-surface-container-highest mx-4 rounded-full"></div>
+<div class="flex flex-col items-center gap-2 opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant font-bold">
+                            05
+                        </div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Medical</span>
+</div>
+<div class="flex-1 h-1 bg-surface-container-highest mx-4 rounded-full"></div>
+<div class="flex flex-col items-center gap-2 opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant font-bold">
+                            06
+                        </div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Documents</span>
+</div>
+<div class="flex-1 h-1 bg-surface-container-highest mx-4 rounded-full"></div>
+<div class="flex flex-col items-center gap-2 opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant font-bold">
+                            07
+                        </div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Review</span>
+</div>
+</div>
+</div>
+<!-- Form Card -->
+<div class="bg-surface-container-lowest rounded-[2rem] p-10 shadow-[0px_12px_32px_rgba(27,28,28,0.06)] border border-surface-container-highest/20">
+<form class="space-y-12">
+<!-- Present Address Section -->
+<section>
+<div class="flex items-center gap-4 mb-8">
+<div class="w-1.5 h-8 bg-primary rounded-full"></div>
+<h3 class="text-xl font-bold text-on-surface">Present Address</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="md:col-span-2">
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Address Line *</label>
+<textarea class="w-full bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20 transition-all p-4 text-on-surface placeholder-on-surface-variant/40" placeholder="Street name, building number, locality..." rows="3"></textarea>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">City *</label>
+<input class="w-full h-14 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20 transition-all px-4 text-on-surface" placeholder="e.g. Hyderabad" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">State *</label>
+<div class="relative">
+<select class="w-full h-14 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20 transition-all px-4 text-on-surface appearance-none">
+<option disabled="" selected="" value="">Select State</option>
+<option>Andhra Pradesh</option>
+<option>Telangana</option>
+<option>Karnataka</option>
+<option>Tamil Nadu</option>
+<option>Maharashtra</option>
+<option>Delhi</option>
+<option>Other</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-4 text-on-surface-variant pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">PIN Code *</label>
+<input class="w-full h-14 bg-surface-container-low border-none rounded-xl focus:ring-2 focus:ring-primary/20 transition-all px-4 text-on-surface" placeholder="6-digit PIN code" type="text"/>
+</div>
+</div>
+</section>
+<!-- Divider with Checkbox -->
+<div class="pt-6 border-t border-surface-container-highest flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-1.5 h-8 bg-tertiary rounded-full"></div>
+<h3 class="text-xl font-bold text-on-surface">Permanent Address</h3>
+</div>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer h-6 w-6 rounded-lg border-2 border-outline-variant text-primary focus:ring-offset-0 focus:ring-primary bg-transparent transition-all" type="checkbox"/>
+<span class="material-symbols-outlined absolute opacity-0 peer-checked:opacity-100 text-white pointer-events-none left-0 right-0 text-center scale-75" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-sm font-semibold text-on-surface-variant group-hover:text-primary transition-colors">Same as present address</span>
+</label>
+</div>
+<!-- Permanent Address Section (Subtle Fade/Disabled styling for demo) -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8 opacity-60">
+<div class="md:col-span-2">
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Address Line</label>
+<textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 text-on-surface" placeholder="Permanent residence details..." rows="3"></textarea>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">City</label>
+<input class="w-full h-14 bg-surface-container-low border-none rounded-xl px-4 text-on-surface" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">State</label>
+<div class="relative">
+<select class="w-full h-14 bg-surface-container-low border-none rounded-xl px-4 text-on-surface appearance-none">
+<option disabled="" selected="" value="">Select State</option>
+<option>Andhra Pradesh</option>
+<option>Telangana</option>
+<option>Karnataka</option>
+<option>Tamil Nadu</option>
+<option>Maharashtra</option>
+<option>Delhi</option>
+<option>Other</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-4 text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">PIN Code</label>
+<input class="w-full h-14 bg-surface-container-low border-none rounded-xl px-4 text-on-surface" type="text"/>
+</div>
+</section>
+<!-- Actions -->
+<div class="flex justify-between items-center pt-10 border-t border-surface-container-highest">
+<button class="group flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform" data-icon="arrow_back">arrow_back</span>
+                            Back
+                        </button>
+<button class="flex items-center gap-3 px-12 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-primary to-primary-container shadow-xl shadow-primary/20 hover:scale-[0.98] transition-all" type="submit">
+                            Next Step
+                            <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Contextual Info (Bento Style Sidebar Glimpse) -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-primary-fixed p-6 rounded-2xl flex items-start gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<div>
+<h4 class="font-bold text-on-primary-fixed mb-1">Mandatory Fields</h4>
+<p class="text-xs text-on-primary-fixed-variant leading-relaxed">Fields marked with an asterisk (*) are required for document verification during the kit allocation process.</p>
+</div>
+</div>
+<div class="bg-secondary-container p-6 rounded-2xl flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="distance">distance</span>
+<div>
+<h4 class="font-bold text-on-secondary-container mb-1">Hostel Eligibility</h4>
+<p class="text-xs text-on-secondary-container leading-relaxed">Students residing beyond 50km of the campus are automatically shortlisted for hostel priority.</p>
+</div>
+</div>
+<div class="bg-tertiary-fixed p-6 rounded-2xl flex items-start gap-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="contact_support">contact_support</span>
+<div>
+<h4 class="font-bold text-on-tertiary-fixed mb-1">Need Help?</h4>
+<p class="text-xs text-on-tertiary-fixed-variant leading-relaxed">Contact admin support for queries regarding inter-state address verification and ZIP codes.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

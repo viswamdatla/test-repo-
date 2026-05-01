@@ -1,0 +1,199 @@
+/* Shared programme tiles: Student Management + Attendance + Grades */
+
+.sm-nav-tile-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.sm-nav-tile-grid.cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sm-nav-tile-grid.cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sm-nav-tile-grid.cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .sm-nav-tile-grid.cols-3,
+  .sm-nav-tile-grid.cols-4,
+  .sm-nav-tile-grid.cols-5 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sm-nav-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 128px;
+  padding: 16px 12px 14px;
+  border-radius: 16px;
+  border: 2px solid var(--sm-tile-border);
+  background: var(--sm-tile-bg);
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+button.sm-nav-tile {
+  font: inherit;
+  cursor: pointer;
+  appearance: none;
+  width: 100%;
+}
+
+a.sm-nav-tile {
+  text-decoration: none;
+  color: inherit;
+}
+
+.sm-nav-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.09);
+  border-color: var(--sm-tile-border-hover);
+}
+
+.sm-nav-tile:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent), 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.sm-nav-tile.is-active {
+  border-color: var(--sm-tile-border-hover);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.sm-nav-tile__icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.sm-nav-tile__icon {
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--sm-tile-icon);
+}
+
+.sm-nav-tile__title {
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--sm-tile-title);
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.sm-nav-tile__caption {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sm-tile-caption);
+  line-height: 1.35;
+}
+
+.sm-nav-tile--blue {
+  --sm-tile-bg: #e8f4fc;
+  --sm-tile-border: #8ec5f0;
+  --sm-tile-border-hover: #3b82f6;
+  --sm-tile-title: #1e40af;
+  --sm-tile-caption: #64748b;
+  --sm-tile-icon: #2563eb;
+}
+
+.sm-nav-tile--amber {
+  --sm-tile-bg: #fffbeb;
+  --sm-tile-border: #f5d088;
+  --sm-tile-border-hover: #f59e0b;
+  --sm-tile-title: #b45309;
+  --sm-tile-caption: #a16207;
+  --sm-tile-icon: #d97706;
+}
+
+.sm-nav-tile--green {
+  --sm-tile-bg: #ecfdf3;
+  --sm-tile-border: #86cfa0;
+  --sm-tile-border-hover: #22c55e;
+  --sm-tile-title: #166534;
+  --sm-tile-caption: #3f6212;
+  --sm-tile-icon: #16a34a;
+}
+
+.sm-nav-tile--violet {
+  --sm-tile-bg: #f5f3ff;
+  --sm-tile-border: #c4b5fd;
+  --sm-tile-border-hover: #8b5cf6;
+  --sm-tile-title: #5b21b6;
+  --sm-tile-caption: #6d28d9;
+  --sm-tile-icon: #7c3aed;
+}
+
+.sm-nav-tile--teal {
+  --sm-tile-bg: #f0fdfa;
+  --sm-tile-border: #5eead4;
+  --sm-tile-border-hover: #14b8a6;
+  --sm-tile-title: #0f766e;
+  --sm-tile-caption: #115e59;
+  --sm-tile-icon: #0d9488;
+}
+
+body.dark .sm-nav-tile__icon-wrap {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+body.dark .sm-nav-tile--blue {
+  --sm-tile-bg: rgba(30, 58, 138, 0.35);
+  --sm-tile-border: rgba(96, 165, 250, 0.45);
+  --sm-tile-border-hover: #60a5fa;
+  --sm-tile-title: #e2e8f0;
+  --sm-tile-caption: #94a3b8;
+  --sm-tile-icon: #93c5fd;
+}
+
+body.dark .sm-nav-tile--amber {
+  --sm-tile-bg: rgba(120, 53, 15, 0.35);
+  --sm-tile-border: rgba(251, 191, 36, 0.45);
+  --sm-tile-border-hover: #fbbf24;
+  --sm-tile-title: #fef3c7;
+  --sm-tile-caption: #fcd34d;
+  --sm-tile-icon: #fbbf24;
+}
+
+body.dark .sm-nav-tile--green {
+  --sm-tile-bg: rgba(20, 83, 45, 0.35);
+  --sm-tile-border: rgba(74, 222, 128, 0.45);
+  --sm-tile-border-hover: #4ade80;
+  --sm-tile-title: #dcfce7;
+  --sm-tile-caption: #86efac;
+  --sm-tile-icon: #4ade80;
+}
+
+body.dark .sm-nav-tile--violet {
+  --sm-tile-bg: rgba(76, 29, 149, 0.35);
+  --sm-tile-border: rgba(196, 181, 253, 0.45);
+  --sm-tile-border-hover: #c4b5fd;
+  --sm-tile-title: #ede9fe;
+  --sm-tile-caption: #c4b5fd;
+  --sm-tile-icon: #c4b5fd;
+}
+
+body.dark .sm-nav-tile--teal {
+  --sm-tile-bg: rgba(17, 94, 89, 0.35);
+  --sm-tile-border: rgba(45, 212, 191, 0.45);
+  --sm-tile-border-hover: #2dd4bf;
+  --sm-tile-title: #ccfbf1;
+  --sm-tile-caption: #5eead4;
+  --sm-tile-icon: #2dd4bf;
+}

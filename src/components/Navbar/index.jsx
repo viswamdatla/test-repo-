@@ -1,9 +1,22 @@
 import React, { useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../theme/AppThemeProvider';
+import { EmployeesTopTabs } from '../../pages/Employees/EmployeesTopTabs';
+import { FinancialTopTabs } from '../../pages/FinancialServices/FinancialTopTabs';
+import { AcademicsTopTabs } from '../../pages/Academics/AcademicsTopTabs';
 import './Navbar.scss';
 
 export const Navbar = ({ title }) => {
   const { isDark, toggleTheme } = useContext(ThemeContext);
+  const { pathname } = useLocation();
+  const showEmployeesTabs =
+    pathname.startsWith('/employees') && !pathname.startsWith('/employees/teachers/onboarding');
+  const showFinancialTabs = pathname.startsWith('/financial-services');
+  const isAcademicsSectionRoster = pathname.startsWith('/academics/student-management/section/');
+  const showAcademicsTabs = pathname.startsWith('/academics') && !isAcademicsSectionRoster;
+  const showCenterTitle =
+    isAcademicsSectionRoster ||
+    (!showEmployeesTabs && !showFinancialTabs && !showAcademicsTabs);
 
   return (
     <header className="navbar">
@@ -11,7 +24,14 @@ export const Navbar = ({ title }) => {
         <button className="menu-btn">
           <span className="material-symbols-outlined">menu</span>
         </button>
-        <h2 className="nav-title">{title}</h2>
+        <div
+          className={`nav-title-block${showEmployeesTabs || showFinancialTabs || showAcademicsTabs || isAcademicsSectionRoster ? ' nav-title-block--section-tabs' : ''}`}
+        >
+          {showCenterTitle ? <h2 className="nav-title">{title}</h2> : null}
+          {showEmployeesTabs ? <EmployeesTopTabs /> : null}
+          {showFinancialTabs ? <FinancialTopTabs /> : null}
+          {showAcademicsTabs ? <AcademicsTopTabs /> : null}
+        </div>
       </div>
       
       <div className="nav-right">

@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import '../Employees/EmployeesDirectory.scss';
 import './FinancialServices.scss';
 import './FeeManagement.scss';
 import './OtherExpenses.scss';
@@ -71,6 +73,45 @@ export const FeeManagement = () => {
     return { total, approved, pending, outstanding, collectedRate };
   }, [items]);
 
+  const feeKpis = [
+    {
+      icon: 'account_balance_wallet',
+      label: 'Total Fees',
+      value: `$${totals.total.toFixed(2)}`,
+      badge: 'Total',
+      accentClass: 'emp-dashboard-kpi-card--primary',
+      iconClass: 'emp-dashboard-kpi-icon--primary',
+      badgeClass: 'emp-dashboard-kpi-badge--neutral',
+    },
+    {
+      icon: 'task_alt',
+      label: 'Collected',
+      value: `$${totals.approved.toFixed(2)}`,
+      badge: `${totals.collectedRate}%`,
+      accentClass: 'emp-dashboard-kpi-card--secondary',
+      iconClass: 'emp-dashboard-kpi-icon--secondary',
+      badgeClass: 'emp-dashboard-kpi-badge--green',
+    },
+    {
+      icon: 'schedule',
+      label: 'Pending',
+      value: `$${totals.pending.toFixed(2)}`,
+      badge: 'Pending',
+      accentClass: 'emp-dashboard-kpi-card--tertiary',
+      iconClass: 'emp-dashboard-kpi-icon--tertiary',
+      badgeClass: 'emp-dashboard-kpi-badge--neutral',
+    },
+    {
+      icon: 'report_problem',
+      label: 'Outstanding',
+      value: `$${totals.outstanding.toFixed(2)}`,
+      badge: 'Needs action',
+      accentClass: 'emp-dashboard-kpi-card--primary-container',
+      iconClass: 'emp-dashboard-kpi-icon--primary-container',
+      badgeClass: 'emp-dashboard-kpi-badge--red',
+    },
+  ];
+
   const statusMeta = {
     Approved: { label: 'Approved', pillClass: 'pill-approved' },
     Pending: { label: 'Pending', pillClass: 'pill-pending' },
@@ -79,70 +120,53 @@ export const FeeManagement = () => {
 
   return (
     <div className="financial-services-page">
-      <div className="financial-services-card">
-        <h1>Fee Management</h1>
-        <p>Manage fee structures, payments, dues, and collection workflows.</p>
-      </div>
-
-      <section className="fee-kpi-grid">
-        <div className="fee-kpi-card">
-          <div className="fee-kpi-top">
-            <span className="material-symbols-outlined">account_balance_wallet</span>
-            <span className="fee-kpi-badge">Total</span>
-          </div>
-          <div className="fee-kpi-value">${totals.total.toFixed(2)}</div>
-          <div className="fee-kpi-label">Fees tracked</div>
+      <header className="emp-directory-hero">
+        <div className="emp-directory-hero__text">
+          <h1 className="emp-directory-hero__title">Fee Management</h1>
+          <p className="emp-directory-hero__subtitle">Manage fee structures, payments, dues, and collection workflows.</p>
         </div>
+        <Link className="emp-directory-cta" to="/admission">
+          <span className="material-symbols-outlined" aria-hidden>
+            add
+          </span>
+          <span>New Fee Record</span>
+        </Link>
+      </header>
 
-        <div className="fee-kpi-card">
-          <div className="fee-kpi-top">
-            <span className="material-symbols-outlined">task_alt</span>
-            <span className="fee-kpi-badge badge-green">Collected</span>
+      <section className="emp-dashboard-kpis" aria-label="Fee management metrics">
+        {feeKpis.map((tile) => (
+          <div key={tile.label} className={`emp-dashboard-kpi-card ${tile.accentClass}`}>
+            <div className="emp-dashboard-kpi-card__head">
+              <span className={`material-symbols-outlined emp-dashboard-kpi-icon ${tile.iconClass}`}>{tile.icon}</span>
+              <span className={`emp-dashboard-kpi-badge ${tile.badgeClass}`}>{tile.badge}</span>
+            </div>
+            <h3 className="emp-dashboard-kpi-label">{tile.label}</h3>
+            <p className="emp-dashboard-kpi-value">{tile.value}</p>
           </div>
-          <div className="fee-kpi-value">${totals.approved.toFixed(2)}</div>
-          <div className="fee-kpi-label">{totals.collectedRate}% collected</div>
-        </div>
-
-        <div className="fee-kpi-card">
-          <div className="fee-kpi-top">
-            <span className="material-symbols-outlined">schedule</span>
-            <span className="fee-kpi-badge badge-amber">Pending</span>
-          </div>
-          <div className="fee-kpi-value">${totals.pending.toFixed(2)}</div>
-          <div className="fee-kpi-label">Awaiting approvals</div>
-        </div>
-
-        <div className="fee-kpi-card">
-          <div className="fee-kpi-top">
-            <span className="material-symbols-outlined">report_problem</span>
-            <span className="fee-kpi-badge badge-red">Outstanding</span>
-          </div>
-          <div className="fee-kpi-value">${totals.outstanding.toFixed(2)}</div>
-          <div className="fee-kpi-label">Needs action</div>
-        </div>
+        ))}
       </section>
 
-      <section className="oe-log">
-        <div className="oe-log-actions">
-          <div className="oe-search-filter">
-            <div className="oe-search">
-              <span className="material-symbols-outlined">search</span>
-              <input
-                value={searchQuery}
-                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                placeholder="Search fees..."
-                aria-label="Search fees"
-              />
+      <section className="emp-table-wrap emp-table-panel">
+        <div className="emp-table-toolbar">
+          <div className="emp-table-toolbar__row emp-table-toolbar__row--controls">
+            <div className="emp-toolbar-search emp-toolbar-search--in-panel">
+              <div className="emp-top-search emp-top-search--toolbar">
+                <span className="material-symbols-outlined" aria-hidden>
+                  search
+                </span>
+                <input
+                  value={searchQuery}
+                  onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                  placeholder="Search fees..."
+                  aria-label="Search fees"
+                />
+              </div>
             </div>
 
             <div className="oe-filter-wrap">
-              <button
-                className="oe-filter-btn"
-                type="button"
-                onClick={() => setIsFilterOpen((v) => !v)}
-              >
+              <button className="oe-filter-btn" type="button" onClick={() => setIsFilterOpen((v) => !v)}>
                 <span className="material-symbols-outlined">filter_list</span>
-                Filters
+                <span>Filters</span>
               </button>
 
               {isFilterOpen && (

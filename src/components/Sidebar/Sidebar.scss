@@ -85,7 +85,7 @@
     }
 
     /* Keep right-edge spacing consistent with dropdown items that show carets. */
-    .nav-link:not(.employee-toggle):not(.financial-toggle):not(.academics-toggle)::after {
+    .nav-link:not(.academics-toggle)::after {
       content: '';
       width: 18px;
       height: 18px;
@@ -125,72 +125,6 @@
         border-left: 3px solid #1d4ed8;
         padding-left: 13px;
         opacity: 0.9;
-      }
-    }
-
-    .financial-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-top: 4px;
-
-      .financial-toggle {
-        width: 100%;
-        background: transparent;
-        cursor: pointer;
-        justify-content: flex-start;
-        position: relative;
-
-        .financial-caret {
-          margin-left: auto;
-          font-size: 18px;
-          opacity: 0.8;
-          transition: transform 0.15s ease;
-
-          &.open {
-            transform: rotate(180deg);
-          }
-        }
-      }
-
-      .financial-submenu {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        padding-left: 12px;
-      }
-    }
-
-    .employee-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-top: 4px;
-
-      .employee-toggle {
-        width: 100%;
-        background: transparent;
-        cursor: pointer;
-        justify-content: flex-start;
-        position: relative;
-
-        .employee-caret {
-          margin-left: auto;
-          font-size: 18px;
-          opacity: 0.8;
-          transition: transform 0.15s ease;
-
-          &.open {
-            transform: rotate(180deg);
-          }
-        }
-      }
-
-      .employee-submenu {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        padding-left: 12px;
       }
     }
 
@@ -298,39 +232,6 @@ body.dark {
         }
       }
 
-      .financial-group {
-        .submenu-link {
-          color: #a8a29e;
-
-          &:hover {
-            background-color: rgba(41, 37, 36, 0.5);
-            color: #f5f5f4;
-          }
-
-          &.active {
-            color: #60a5fa;
-            background-color: #292524;
-            border-left-color: #60a5fa;
-          }
-        }
-      }
-
-      .employee-group {
-        .submenu-link {
-          color: #a8a29e;
-
-          &:hover {
-            background-color: rgba(41, 37, 36, 0.5);
-            color: #f5f5f4;
-          }
-
-          &.active {
-            color: #60a5fa;
-            background-color: #292524;
-            border-left-color: #60a5fa;
-          }
-        }
-      }
     }
   }
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
-  STAFF_DIRECTORY_DEPARTMENTS,
+  TEACHER_DEPARTMENTS,
   fetchEmployeesData,
   selectEmployeesSectionItems,
   selectEmployeesSectionUi,
@@ -39,6 +39,8 @@ const statusDisplay = (status) => {
   return { dot: 'is-inactive', label: status };
 };
 
+const teacherRoleKeywords = ['teacher', 'lecturer', 'faculty'];
+
 export const TeachersStaffDirectory = () => {
   const section = 'teachers';
   const navigate = useNavigate();
@@ -62,21 +64,26 @@ export const TeachersStaffDirectory = () => {
     return () => clearInterval(id);
   }, []);
 
+  const teacherItems = useMemo(
+    () => items.filter((it) => teacherRoleKeywords.some((keyword) => String(it.role || '').toLowerCase().includes(keyword))),
+    [items]
+  );
+
   const totalDepartments = useMemo(() => {
-    const u = new Set(items.map((it) => it.directoryDepartment).filter(Boolean));
-    return u.size || STAFF_DIRECTORY_DEPARTMENTS.length;
-  }, [items]);
+    const u = new Set(teacherItems.map((it) => it.department).filter(Boolean));
+    return u.size || TEACHER_DEPARTMENTS.length;
+  }, [teacherItems]);
 
   const filteredItems = useMemo(() => {
     const q = ui.searchQuery.trim().toLowerCase();
-    return items.filter((it) => {
+    return teacherItems.filter((it) => {
       if (ui.statusFilter !== 'all' && it.status !== ui.statusFilter) return false;
-      if (ui.departmentFilter !== 'all' && it.directoryDepartment !== ui.departmentFilter) return false;
+      if (ui.departmentFilter !== 'all' && it.department !== ui.departmentFilter) return false;
       if (!q) return true;
-      const text = `${it.name} ${it.empId} ${it.role} ${it.directoryDepartment ?? ''} ${it.email} ${it.department ?? ''}`.toLowerCase();
+      const text = `${it.name} ${it.empId} ${it.role} ${it.department ?? ''} ${it.email} ${it.category ?? ''}`.toLowerCase();
       return text.includes(q);
     });
-  }, [items, ui.searchQuery, ui.statusFilter, ui.departmentFilter]);
+  }, [teacherItems, ui.searchQuery, ui.statusFilter, ui.departmentFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filteredItems.length / ui.pageSize));
   const startIndex = (ui.page - 1) * ui.pageSize;
@@ -110,16 +117,16 @@ export const TeachersStaffDirectory = () => {
   };
 
   const exportCsv = () => {
-    const headers = ['Name', 'Staff ID', 'Role', 'Department', 'Email', 'Phone', 'Status'];
+    const headers = ['Name', 'Teacher ID', 'Role', 'Department', 'Email', 'Phone', 'Status'];
     const rows = filteredItems.map((it) =>
-      [it.name, it.empId, it.role, it.directoryDepartment ?? it.department, it.email, it.phone, it.status].map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')
+      [it.name, it.empId, it.role, it.department, it.email, it.phone, it.status].map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')
     );
     const csv = [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'staff-directory.csv';
+    a.download = 'teachers-directory.csv';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -135,19 +142,19 @@ export const TeachersStaffDirectory = () => {
           <input
             type="search"
             className="sd-search-input"
-            placeholder="Search staff by name, ID or department..."
+            placeholder="Search teachers by name, ID or department..."
             value={ui.searchQuery}
             onChange={(e) => dispatch(setSectionSearchQuery({ section, value: e.target.value }))}
-            aria-label="Search staff"
+            aria-label="Search teachers"
           />
         </div>
       </div>
 
       <header className="sd-head">
         <div>
-          <h1 className="sd-title">Staff Directory</h1>
+          <h1 className="sd-title">Teachers</h1>
           <div className="sd-meta">
-            <span className="sd-count-pill">{items.length} Staff Members</span>
+            <span className="sd-count-pill">{teacherItems.length} Teachers</span>
             <span className="sd-sync">
               <span className="material-symbols-outlined">update</span>
               Last synced {syncLabel}
@@ -165,7 +172,7 @@ export const TeachersStaffDirectory = () => {
             onClick={() => navigate('/employees/teachers/onboarding')}
           >
             <span className="material-symbols-outlined">person_add</span>
-            Add New Staff
+            Add New Teacher
           </button>
         </div>
       </header>
@@ -181,7 +188,7 @@ export const TeachersStaffDirectory = () => {
               onChange={(e) => dispatch(setSectionDepartmentFilter({ section, value: e.target.value }))}
             >
               <option value="all">All Departments</option>
-              {STAFF_DIRECTORY_DEPARTMENTS.map((d) => (
+              {TEACHER_DEPARTMENTS.map((d) => (
                 <option key={d} value={d}>
                   {d}
                 </option>
@@ -225,7 +232,7 @@ export const TeachersStaffDirectory = () => {
           <table className="sd-table">
             <thead>
               <tr>
-                <th>Staff Member</th>
+                <th>Teacher</th>
                 <th>Role</th>
                 <th>Department</th>
                 <th>Contact Info</th>
@@ -237,7 +244,7 @@ export const TeachersStaffDirectory = () => {
               {pageItems.length === 0 && (
                 <tr>
                   <td colSpan={6} className="sd-empty-row">
-                    No staff match these filters.
+                    No teachers match these filters.
                   </td>
                 </tr>
               )}
@@ -260,8 +267,8 @@ export const TeachersStaffDirectory = () => {
                       <p className="sd-role-sub">{sub}</p>
                     </td>
                     <td>
-                      <span className={`sd-dept-pill ${deptPillClass(it.directoryDepartment)}`}>
-                        {it.directoryDepartment ?? it.department}
+                      <span className={`sd-dept-pill ${deptPillClass(it.department)}`}>
+                        {it.department}
                       </span>
                     </td>
                     <td>
@@ -361,7 +368,7 @@ export const TeachersStaffDirectory = () => {
         <div className="sd-insight sd-insight--chart">
           <div className="sd-chart-head">
             <div>
-              <h3 className="sd-insight-title">Staff Attendance</h3>
+              <h3 className="sd-insight-title">Teacher Attendance</h3>
               <p className="sd-chart-sub">Last 30 Days Average</p>
             </div>
             <span className="sd-chart-badge">+2.4%</span>
@@ -381,7 +388,7 @@ export const TeachersStaffDirectory = () => {
       <button
         type="button"
         className="sd-fab"
-        aria-label="Add new staff"
+        aria-label="Add new teacher"
         onClick={() => navigate('/employees/teachers/onboarding')}
       >
         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -389,7 +396,7 @@ export const TeachersStaffDirectory = () => {
         </span>
       </button>
 
-      {loadStatus === 'loading' && <p className="sd-loading">Loading directory…</p>}
+      {loadStatus === 'loading' && <p className="sd-loading">Loading teachers…</p>}
     </div>
   );
 };

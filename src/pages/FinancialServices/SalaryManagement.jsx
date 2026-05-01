@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { Link } from 'react-router-dom';
+import '../Employees/EmployeesDirectory.scss';
 import './FinancialServices.scss';
 import './SalaryManagement.scss';
 import './OtherExpenses.scss';
@@ -71,6 +73,45 @@ export const SalaryManagement = () => {
     return { total, approved, pending, rejected, processedRate };
   }, [items]);
 
+  const salaryKpis = [
+    {
+      icon: 'payments',
+      label: 'Total Payroll',
+      value: `$${totals.total.toFixed(2)}`,
+      badge: 'Total',
+      accentClass: 'emp-dashboard-kpi-card--primary',
+      iconClass: 'emp-dashboard-kpi-icon--primary',
+      badgeClass: 'emp-dashboard-kpi-badge--neutral',
+    },
+    {
+      icon: 'verified',
+      label: 'Processed',
+      value: `$${totals.approved.toFixed(2)}`,
+      badge: `${totals.processedRate}%`,
+      accentClass: 'emp-dashboard-kpi-card--secondary',
+      iconClass: 'emp-dashboard-kpi-icon--secondary',
+      badgeClass: 'emp-dashboard-kpi-badge--green',
+    },
+    {
+      icon: 'pending_actions',
+      label: 'Pending',
+      value: `$${totals.pending.toFixed(2)}`,
+      badge: 'Pending',
+      accentClass: 'emp-dashboard-kpi-card--tertiary',
+      iconClass: 'emp-dashboard-kpi-icon--tertiary',
+      badgeClass: 'emp-dashboard-kpi-badge--neutral',
+    },
+    {
+      icon: 'error',
+      label: 'Rejected',
+      value: `$${totals.rejected.toFixed(2)}`,
+      badge: 'Needs correction',
+      accentClass: 'emp-dashboard-kpi-card--primary-container',
+      iconClass: 'emp-dashboard-kpi-icon--primary-container',
+      badgeClass: 'emp-dashboard-kpi-badge--red',
+    },
+  ];
+
   const statusMeta = {
     Approved: { label: 'Approved', pillClass: 'pill-approved' },
     Pending: { label: 'Pending', pillClass: 'pill-pending' },
@@ -79,60 +120,47 @@ export const SalaryManagement = () => {
 
   return (
     <div className="financial-services-page">
-      <div className="financial-services-card">
-        <h1>Salary Management</h1>
-        <p>Manage payroll components, salary approvals, and disbursement cycles.</p>
-      </div>
-
-      <section className="salary-kpi-grid">
-        <div className="salary-kpi-card">
-          <div className="salary-kpi-top">
-            <span className="material-symbols-outlined">payments</span>
-            <span className="salary-kpi-badge badge-blue">Total</span>
-          </div>
-          <div className="salary-kpi-value">${totals.total.toFixed(2)}</div>
-          <div className="salary-kpi-label">Across departments</div>
+      <header className="emp-directory-hero">
+        <div className="emp-directory-hero__text">
+          <h1 className="emp-directory-hero__title">Salary Management</h1>
+          <p className="emp-directory-hero__subtitle">Manage payroll components, salary approvals, and disbursement cycles.</p>
         </div>
+        <Link className="emp-directory-cta" to="/admission">
+          <span className="material-symbols-outlined" aria-hidden>
+            add
+          </span>
+          <span>New Payroll Record</span>
+        </Link>
+      </header>
 
-        <div className="salary-kpi-card">
-          <div className="salary-kpi-top">
-            <span className="material-symbols-outlined">verified</span>
-            <span className="salary-kpi-badge badge-green">Processed</span>
+      <section className="emp-dashboard-kpis" aria-label="Salary management metrics">
+        {salaryKpis.map((tile) => (
+          <div key={tile.label} className={`emp-dashboard-kpi-card ${tile.accentClass}`}>
+            <div className="emp-dashboard-kpi-card__head">
+              <span className={`material-symbols-outlined emp-dashboard-kpi-icon ${tile.iconClass}`}>{tile.icon}</span>
+              <span className={`emp-dashboard-kpi-badge ${tile.badgeClass}`}>{tile.badge}</span>
+            </div>
+            <h3 className="emp-dashboard-kpi-label">{tile.label}</h3>
+            <p className="emp-dashboard-kpi-value">{tile.value}</p>
           </div>
-          <div className="salary-kpi-value">${totals.approved.toFixed(2)}</div>
-          <div className="salary-kpi-label">{totals.processedRate}% processed</div>
-        </div>
-
-        <div className="salary-kpi-card">
-          <div className="salary-kpi-top">
-            <span className="material-symbols-outlined">pending_actions</span>
-            <span className="salary-kpi-badge badge-amber">Pending</span>
-          </div>
-          <div className="salary-kpi-value">${totals.pending.toFixed(2)}</div>
-          <div className="salary-kpi-label">Awaiting payroll sign-off</div>
-        </div>
-
-        <div className="salary-kpi-card">
-          <div className="salary-kpi-top">
-            <span className="material-symbols-outlined">error</span>
-            <span className="salary-kpi-badge badge-red">Rejected</span>
-          </div>
-          <div className="salary-kpi-value">${totals.rejected.toFixed(2)}</div>
-          <div className="salary-kpi-label">Needs correction</div>
-        </div>
+        ))}
       </section>
 
-      <section className="oe-log">
-        <div className="oe-log-actions">
-          <div className="oe-search-filter">
-            <div className="oe-search">
-              <span className="material-symbols-outlined">search</span>
-              <input
-                value={searchQuery}
-                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                placeholder="Search salaries..."
-                aria-label="Search salaries"
-              />
+      <section className="emp-table-wrap emp-table-panel">
+        <div className="emp-table-toolbar">
+          <div className="emp-table-toolbar__row emp-table-toolbar__row--controls">
+            <div className="emp-toolbar-search emp-toolbar-search--in-panel">
+              <div className="emp-top-search emp-top-search--toolbar">
+                <span className="material-symbols-outlined" aria-hidden>
+                  search
+                </span>
+                <input
+                  value={searchQuery}
+                  onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                  placeholder="Search salaries..."
+                  aria-label="Search salaries"
+                />
+              </div>
             </div>
 
             <div className="oe-filter-wrap">
@@ -142,7 +170,7 @@ export const SalaryManagement = () => {
                 onClick={() => setIsFilterOpen((v) => !v)}
               >
                 <span className="material-symbols-outlined">filter_list</span>
-                Filters
+                <span>Filters</span>
               </button>
 
               {isFilterOpen && (

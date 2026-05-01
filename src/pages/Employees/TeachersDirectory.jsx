@@ -1,9 +1,12 @@
 import React from 'react';
 import { usePageTitle } from '../../hooks/usePageTitle';
-import { TeachersStaffDirectory } from './TeachersStaffDirectory';
+import { EmployeesDirectoryView } from './EmployeesDirectoryView';
+import './EmployeesDirectory.scss';
 
 export const TeachersDirectory = () => {
-  usePageTitle('Staff Directory');
+  usePageTitle('Employees');
 
-  return <TeachersStaffDirectory />;
+  return (
+    <EmployeesDirectoryView section="teachers" />
+  );
 };

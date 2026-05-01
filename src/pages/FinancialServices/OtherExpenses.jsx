@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { Link } from 'react-router-dom';
+import '../Employees/EmployeesDirectory.scss';
+import './FinancialServices.scss';
 import './OtherExpenses.scss';
 import {
   fetchOtherExpenses,
@@ -70,107 +73,101 @@ export const OtherExpenses = () => {
     setIsFilterOpen(false);
   };
 
-  return (
-    <div className="other-expenses-page">
-      <div className="oe-breadcrumbs">
-        <span>Financial Services</span>
-        <span className="sep">›</span>
-        <span className="current">Other expenses</span>
-      </div>
+  const totals = useMemo(() => {
+    const total = items.reduce((sum, x) => sum + x.amount, 0);
+    const approved = items.filter((x) => x.status === 'Approved').reduce((sum, x) => sum + x.amount, 0);
+    const pending = items.filter((x) => x.status === 'Pending').reduce((sum, x) => sum + x.amount, 0);
+    const rejected = items.filter((x) => x.status === 'Rejected').reduce((sum, x) => sum + x.amount, 0);
+    return { total, approved, pending, rejected };
+  }, [items]);
 
-      <div className="oe-header">
-        <div>
-          <h1 className="oe-title">Institutional Expenses</h1>
-          <p className="oe-subtitle">
-            Comprehensive tracking of infrastructure, supplies, and maintenance overhead for the
-            current academic session.
+  const expenseKpis = [
+    {
+      icon: 'account_balance_wallet',
+      label: 'Total Expenses',
+      value: `$${totals.total.toFixed(2)}`,
+      badge: 'Current period',
+      accentClass: 'emp-dashboard-kpi-card--primary',
+      iconClass: 'emp-dashboard-kpi-icon--primary',
+      badgeClass: 'emp-dashboard-kpi-badge--neutral',
+    },
+    {
+      icon: 'task_alt',
+      label: 'Approved',
+      value: `$${totals.approved.toFixed(2)}`,
+      badge: 'Approved',
+      accentClass: 'emp-dashboard-kpi-card--secondary',
+      iconClass: 'emp-dashboard-kpi-icon--secondary',
+      badgeClass: 'emp-dashboard-kpi-badge--green',
+    },
+    {
+      icon: 'schedule',
+      label: 'Pending',
+      value: `$${totals.pending.toFixed(2)}`,
+      badge: 'Pending',
+      accentClass: 'emp-dashboard-kpi-card--tertiary',
+      iconClass: 'emp-dashboard-kpi-icon--tertiary',
+      badgeClass: 'emp-dashboard-kpi-badge--neutral',
+    },
+    {
+      icon: 'report_problem',
+      label: 'Rejected',
+      value: `$${totals.rejected.toFixed(2)}`,
+      badge: 'Needs review',
+      accentClass: 'emp-dashboard-kpi-card--primary-container',
+      iconClass: 'emp-dashboard-kpi-icon--primary-container',
+      badgeClass: 'emp-dashboard-kpi-badge--red',
+    },
+  ];
+
+  return (
+    <div className="financial-services-page">
+      <header className="emp-directory-hero">
+        <div className="emp-directory-hero__text">
+          <h1 className="emp-directory-hero__title">Other Expenses</h1>
+          <p className="emp-directory-hero__subtitle">
+            Comprehensive tracking of infrastructure, supplies, and maintenance overhead for the current academic session.
           </p>
         </div>
+        <Link className="emp-directory-cta" to="/admission">
+          <span className="material-symbols-outlined" aria-hidden>
+            add
+          </span>
+          <span>Record New Expense</span>
+        </Link>
+      </header>
 
-        <button className="oe-record-btn bg-gradient-primary" type="button">
-          <span className="material-symbols-outlined">add_circle</span>
-          Record New Expense
-        </button>
-      </div>
-
-      <section className="oe-cards">
-        <div className="oe-card oe-card-infra">
-          <div className="oe-card-top">
-            <span className="material-symbols-outlined oe-card-icon">build</span>
-          </div>
-          <h2 className="oe-card-name">Infrastructure</h2>
-          <p className="oe-card-desc">Major expansions and structural improvements.</p>
-          <div className="oe-card-amount">$42,850.00</div>
-          <div className="oe-card-foot">
-            <span className="oe-card-foot-muted">12% from last quarter</span>
-          </div>
-        </div>
-
-        <div className="oe-card oe-card-supplies">
-          <div className="oe-card-top">
-            <span className="material-symbols-outlined oe-card-icon">description</span>
-          </div>
-          <h2 className="oe-card-name">Supplies</h2>
-          <p className="oe-card-desc">Classroom materials &amp; office stationery.</p>
-          <div className="oe-card-amount">$18,240.50</div>
-          <div className="oe-progress-meta">
-            <div className="meta-row">
-              <span className="meta-label">BUDGET</span>
-              <span className="meta-value">$28.0k</span>
+      <section className="emp-dashboard-kpis" aria-label="Other expenses metrics">
+        {expenseKpis.map((tile) => (
+          <div key={tile.label} className={`emp-dashboard-kpi-card ${tile.accentClass}`}>
+            <div className="emp-dashboard-kpi-card__head">
+              <span className={`material-symbols-outlined emp-dashboard-kpi-icon ${tile.iconClass}`}>{tile.icon}</span>
+              <span className={`emp-dashboard-kpi-badge ${tile.badgeClass}`}>{tile.badge}</span>
             </div>
-            <div className="meta-row">
-              <span className="meta-label">REMAINING</span>
-              <span className="meta-value">$9.8k</span>
-            </div>
+            <h3 className="emp-dashboard-kpi-label">{tile.label}</h3>
+            <p className="emp-dashboard-kpi-value">{tile.value}</p>
           </div>
-          <div className="oe-progress">
-            <div className="oe-progress-fill" style={{ width: '65%' }} />
-          </div>
-        </div>
-
-        <div className="oe-card oe-card-maint">
-          <div className="oe-card-top oe-card-top-row">
-            <span className="material-symbols-outlined oe-card-icon">construction</span>
-            <span className="oe-urgent">3 URGENT REPAIRS</span>
-          </div>
-
-          <h2 className="oe-card-name">Maintenance</h2>
-          <p className="oe-card-desc">Routine cleaning, repairs &amp; facility upkeep</p>
-
-          <div className="oe-maint-list">
-            <div className="oe-maint-item">
-              <div className="left">
-                <span className="material-symbols-outlined">build</span>
-                <span>HVAC Servicing</span>
-              </div>
-              <div className="right">$1,200</div>
-            </div>
-            <div className="oe-maint-item">
-              <div className="left">
-                <span className="material-symbols-outlined">tune</span>
-                <span>Panel Upgrade</span>
-              </div>
-              <div className="right">$850</div>
-            </div>
-          </div>
-        </div>
+        ))}
       </section>
 
-      <section className="oe-log">
-        <div className="oe-log-actions">
-          <button className="oe-generate-btn" type="button">
-            Generate Statement
-          </button>
-
-          <div className="oe-search-filter">
-            <div className="oe-search">
-              <span className="material-symbols-outlined">search</span>
-              <input
-                value={searchQuery}
-                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                placeholder="Search expenses..."
-                aria-label="Search expenses"
-              />
+      <section className="emp-table-wrap emp-table-panel">
+        <div className="emp-table-toolbar">
+          <div className="emp-table-toolbar__row emp-table-toolbar__row--controls">
+            <button className="oe-generate-btn" type="button">
+              Generate Statement
+            </button>
+            <div className="emp-toolbar-search emp-toolbar-search--in-panel">
+              <div className="emp-top-search emp-top-search--toolbar">
+                <span className="material-symbols-outlined" aria-hidden>
+                  search
+                </span>
+                <input
+                  value={searchQuery}
+                  onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                  placeholder="Search expenses..."
+                  aria-label="Search expenses"
+                />
+              </div>
             </div>
 
             <div className="oe-filter-wrap">
@@ -180,7 +177,7 @@ export const OtherExpenses = () => {
                 onClick={() => setIsFilterOpen((v) => !v)}
               >
                 <span className="material-symbols-outlined">filter_list</span>
-                Filters
+                <span>Filters</span>
               </button>
 
               {isFilterOpen && (

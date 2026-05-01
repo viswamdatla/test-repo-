@@ -1,0 +1,38 @@
+.academics-top-tabs {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.academics-top-tab {
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: 'Manrope', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #7d7770;
+  transition: color 0.14s ease;
+
+  &:hover {
+    color: #595551;
+  }
+}
+
+.academics-top-tab.active {
+  color: var(--primary);
+}
+
+@media (max-width: 1100px) {
+  .academics-top-tab {
+    font-size: 14px;
+  }
+}

@@ -16,6 +16,54 @@
     display: flex;
     align-items: center;
     gap: 16px; /* gap-4 */
+    flex: 1;
+    min-width: 0;
+
+    .nav-title-block {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      min-width: 0;
+      flex: 1;
+
+      .nav-title {
+        flex-shrink: 0;
+      }
+
+      &--section-tabs {
+        flex-wrap: nowrap;
+        align-items: center;
+      }
+    }
+
+    .nav-title-block--section-tabs .employees-top-tabs,
+    .nav-title-block--section-tabs .financial-top-tabs,
+    .nav-title-block--section-tabs .academics-top-tabs {
+      margin-bottom: 0;
+      padding: 0;
+      border-bottom: none;
+      gap: 18px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .nav-title-block--section-tabs .employees-top-tab,
+    .nav-title-block--section-tabs .financial-top-tab,
+    .nav-title-block--section-tabs .academics-top-tab {
+      padding-bottom: 0;
+      border-bottom: none;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 1100px) {
+      .nav-title-block--section-tabs .employees-top-tab,
+      .nav-title-block--section-tabs .financial-top-tab,
+      .nav-title-block--section-tabs .academics-top-tab {
+        font-size: 14px;
+      }
+    }
 
     .menu-btn {
       display: none;
@@ -40,6 +88,7 @@
       font-weight: 700; /* font-bold */
       letter-spacing: -0.025em; /* tracking-tight */
       color: var(--on-surface);
+      margin: 0;
     }
   }
 

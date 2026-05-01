@@ -8,7 +8,9 @@ export const PageLayout = () => {
   const [navTitle, setNavTitle] = useState('Dashboard');
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const hideAdmissionFab = pathname.includes('/employees/teachers/onboarding');
+  const hideAdmissionFab =
+    pathname.includes('/employees/teachers/onboarding') ||
+    pathname.includes('/academics/student-management/section/');
 
   return (
     <div className="page-layout">

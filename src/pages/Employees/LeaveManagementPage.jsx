@@ -6,6 +6,7 @@ import {
   LEAVE_TABLE_FILTER_HEADINGS,
   buildLeaveApplications,
   filterLeaves,
+  filterLeavesByDateRange,
   leaveCounts,
 } from '../../data/leaveManagementMock';
 import './LeaveManagementPage.scss';
@@ -36,9 +37,12 @@ function downloadCsv(filename, rows) {
   a.download = filename;
   a.rel = 'noopener';
   document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  // Delay revocation to avoid browsers cancelling the download.
+  requestAnimationFrame(() => {
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  });
 }
 
 function StatusBadge({ status }) {
@@ -74,11 +78,18 @@ export const LeaveManagementPage = () => {
   const counts = useMemo(() => leaveCounts(leaveApplications, todayISO), [leaveApplications, todayISO]);
 
   const [activeFilter, setActiveFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const tableSectionRef = useRef(null);
 
-  const filteredRows = useMemo(
+  const kpiFilteredRows = useMemo(
     () => filterLeaves(leaveApplications, activeFilter, todayISO),
     [leaveApplications, activeFilter, todayISO],
+  );
+
+  const filteredRows = useMemo(
+    () => filterLeavesByDateRange(kpiFilteredRows, dateFrom, dateTo),
+    [kpiFilteredRows, dateFrom, dateTo],
   );
 
   const selectKpi = (filterId) => {
@@ -91,30 +102,44 @@ export const LeaveManagementPage = () => {
   const tableHeading = LEAVE_TABLE_FILTER_HEADINGS[activeFilter] ?? 'Leave requests';
   const footerHint = useMemo(() => {
     const n = filteredRows.length;
+    const df = dateFrom.trim();
+    const dt = dateTo.trim();
+    let dateSuffix = '';
+    if (df || dt) {
+      const fromBit = df ? ` from ${df}` : '';
+      const toBit = dt ? ` to ${dt}` : '';
+      dateSuffix = ` Filtered by leave dates${fromBit}${toBit}.`;
+    }
+
     if (activeFilter === 'all') {
-      return `Showing all ${n} application${n === 1 ? '' : 's'} in the current academic window.`;
+      return `Showing all ${n} application${n === 1 ? '' : 's'} in the current academic window.${dateSuffix}`;
     }
     if (activeFilter === 'pending') {
-      return `Showing ${n} pending application${n === 1 ? '' : 's'} that need a decision.`;
+      return `Showing ${n} pending application${n === 1 ? '' : 's'} that need a decision.${dateSuffix}`;
     }
     if (activeFilter === 'approved_today') {
-      return n === 0
-        ? 'No applications were approved today yet.'
-        : `Showing ${n} application${n === 1 ? '' : 's'} approved today (${todayISO}).`;
+      if (n === 0) {
+        return `No applications were approved today yet.${dateSuffix}`;
+      }
+      return `Showing ${n} application${n === 1 ? '' : 's'} approved today (${todayISO}).${dateSuffix}`;
     }
     if (activeFilter === 'rejected_today') {
-      return n === 0
-        ? 'No applications were rejected today.'
-        : `Showing ${n} application${n === 1 ? '' : 's'} rejected today (${todayISO}).`;
+      if (n === 0) {
+        return `No applications were rejected today.${dateSuffix}`;
+      }
+      return `Showing ${n} application${n === 1 ? '' : 's'} rejected today (${todayISO}).${dateSuffix}`;
     }
-    return '';
-  }, [activeFilter, filteredRows.length, todayISO]);
+    return dateSuffix.trim();
+  }, [activeFilter, filteredRows.length, todayISO, dateFrom, dateTo]);
 
   const handleExportReport = useCallback(() => {
     const safeFilter = activeFilter.replace(/[^a-z0-9-_]/gi, '');
-    const filename = `leave-report-${safeFilter}-${todayISO}.csv`;
+    const df = dateFrom.trim();
+    const dt = dateTo.trim();
+    const dateSuffix = df || dt ? `-${(df || 'start')}-${(dt || 'end')}` : '';
+    const filename = `leave-report-${safeFilter}${dateSuffix}-${todayISO}.csv`;
     downloadCsv(filename, filteredRows);
-  }, [activeFilter, filteredRows, todayISO]);
+  }, [activeFilter, filteredRows, todayISO, dateFrom, dateTo]);
 
   return (
     <div className="leave-mgmt-page">
@@ -166,10 +191,40 @@ export const LeaveManagementPage = () => {
             {tableHeading}
             <span className="leave-table-card__count"> ({filteredRows.length})</span>
           </h2>
-          <button type="button" className="leave-filter-chip">
-            <span className="material-symbols-outlined">filter_list</span>
-            Filter
-          </button>
+          <div className="leave-date-filter">
+            <label className="leave-date-filter__field">
+              <span className="leave-date-filter__hint">From</span>
+              <input
+                type="date"
+                className="leave-date-filter__input"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                aria-label="Leave start from date"
+              />
+            </label>
+            <label className="leave-date-filter__field">
+              <span className="leave-date-filter__hint">To</span>
+              <input
+                type="date"
+                className="leave-date-filter__input"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                aria-label="Leave end to date"
+              />
+            </label>
+            {(dateFrom || dateTo) && (
+              <button
+                type="button"
+                className="leave-date-filter__clear"
+                onClick={() => {
+                  setDateFrom('');
+                  setDateTo('');
+                }}
+              >
+                <span>Clear dates</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="leave-table-scroll">
@@ -190,7 +245,9 @@ export const LeaveManagementPage = () => {
                 <tr>
                   <td colSpan={5} className="leave-table-empty">
                     <p className="leave-table-empty__title">No applications in this view</p>
-                    <p className="leave-table-empty__text">Try another summary tile or check back later.</p>
+                    <p className="leave-table-empty__text">
+                      Try another summary tile, adjust the leave date range, or check back later.
+                    </p>
                   </td>
                 </tr>
               ) : (

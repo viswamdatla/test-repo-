@@ -4,13 +4,11 @@ import { Link } from 'react-router-dom';
 import '../../styles/DataTable.scss';
 import {
   OPERATIONAL_DEPARTMENTS,
-  TEACHER_CATEGORIES,
   TEACHER_DEPARTMENTS,
   fetchEmployeesData,
   selectEmployeesSectionItems,
   selectEmployeesSectionUi,
   selectEmployeesStatus,
-  setSectionCategoryFilter,
   setSectionDepartmentFilter,
   setSectionPage,
   setSectionSearchQuery,
@@ -449,6 +447,22 @@ export const EmployeesDirectoryView = ({ section }) => {
                 );
               })}
             </div>
+          </div>
+
+          <div className="emp-table-toolbar__row emp-table-toolbar__row--controls">
+            <div className="emp-toolbar-search emp-toolbar-search--in-panel">
+              <div className="emp-top-search emp-top-search--toolbar">
+                <span className="material-symbols-outlined" aria-hidden>
+                  search
+                </span>
+                <input
+                  value={ui.searchQuery}
+                  onChange={(e) => dispatch(setSectionSearchQuery({ section, value: e.target.value }))}
+                  placeholder={searchPlaceholder}
+                  aria-label="Search employees"
+                />
+              </div>
+            </div>
             <div className="oe-filter-wrap emp-advanced-filters-wrap">
               <button className="emp-advanced-filters-btn" type="button" onClick={() => setIsFilterOpen((v) => !v)}>
                 <span className="material-symbols-outlined" aria-hidden>
@@ -474,42 +488,6 @@ export const EmployeesDirectoryView = ({ section }) => {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="emp-table-toolbar__row emp-table-toolbar__row--controls">
-            <div className="emp-toolbar-search emp-toolbar-search--in-panel">
-              <div className="emp-top-search emp-top-search--toolbar">
-                <span className="material-symbols-outlined" aria-hidden>
-                  search
-                </span>
-                <input
-                  value={ui.searchQuery}
-                  onChange={(e) => dispatch(setSectionSearchQuery({ section, value: e.target.value }))}
-                  placeholder={searchPlaceholder}
-                  aria-label="Search employees"
-                />
-              </div>
-            </div>
-            {section === 'teachers' && (
-              <div className="emp-toolbar-filters-fields emp-toolbar-filters-fields--inline">
-                <div className="emp-filter-field">
-                  <label htmlFor="emp-teacher-category">Category</label>
-                  <select
-                    id="emp-teacher-category"
-                    className="emp-filter-select"
-                    value={ui.categoryFilter}
-                    onChange={(e) => dispatch(setSectionCategoryFilter({ section, value: e.target.value }))}
-                  >
-                    <option value="all">All categories</option>
-                    {TEACHER_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

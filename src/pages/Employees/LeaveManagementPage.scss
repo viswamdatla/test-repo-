@@ -270,26 +270,78 @@ body.dark .leave-kpi-meta--ok {
   line-height: 1.5;
 }
 
-.leave-filter-chip {
+.leave-date-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $spacing-sm $spacing-md;
+}
+
+.leave-date-filter__label {
   display: inline-flex;
   align-items: center;
-  gap: $spacing-sm;
-  padding: 10px $spacing-md;
-  border-radius: 12px;
-  border: none;
-  background: var(--surface-container-low);
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--on-surface-variant);
+  margin-right: 4px;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+    color: var(--primary);
+  }
+}
+
+.leave-date-filter__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.leave-date-filter__hint {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+.leave-date-filter__input {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(193, 199, 211, 0.55);
+  background: var(--surface-container-lowest);
   color: var(--on-surface);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
+  min-width: 150px;
 
-  .material-symbols-outlined {
-    font-size: 20px;
+  &:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 0;
   }
+}
+
+.leave-date-filter__clear {
+  margin: 0;
+  align-self: center;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 
   &:hover {
-    background: var(--surface-container-high);
+    color: var(--primary-container);
   }
 }
 

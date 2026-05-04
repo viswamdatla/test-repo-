@@ -1,27 +1,31 @@
 /* Teacher onboarding — matches ScholarKit / School Kit Manager reference layouts */
 .tow {
-  --tow-primary: #005da7;
-  --tow-primary-container: #2976c7;
-  --tow-surface: #fbf9f8;
-  --tow-surface-low: #f6f3f2;
-  --tow-surface-high: #e4e2e1;
-  --tow-on-surface: #1b1c1c;
-  --tow-on-variant: #414751;
-  --tow-outline: #c1c7d3;
-  --tow-error: #ba1a1a;
-  --tow-secondary-container: #c1d9fe;
-  --tow-on-secondary-container: #485e7e;
+  // Map onboarding tokens to the app design system
+  --tow-primary: var(--primary);
+  --tow-primary-container: var(--primary-container);
+  --tow-surface: var(--surface);
+  --tow-surface-low: var(--surface-container-low);
+  --tow-surface-high: var(--surface-container-high);
+  --tow-on-surface: var(--on-surface);
+  --tow-on-variant: var(--on-surface-variant);
+  --tow-outline: var(--outline-variant);
+  --tow-error: var(--error);
+  --tow-secondary-container: var(--secondary-container);
+  --tow-on-secondary-container: var(--on-secondary-container);
   --tow-sidebar: 288px;
 
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: inherit;
   color: var(--tow-on-surface);
-  background: var(--tow-surface);
-  min-height: calc(100vh - 64px);
-  margin: 0 -32px;
-  padding-bottom: 120px;
+  background: transparent;
+  min-height: 0;
+  margin: 0;
+  padding: 32px clamp(16px, 3vw, 40px) 120px;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
 
   @media (max-width: 768px) {
-    margin: 0 -16px;
+    padding: 24px 16px 100px;
   }
 
   h1,
@@ -41,6 +45,9 @@
 }
 
 .tow-topbar {
+  // App already provides the global Navbar; hide the legacy wizard topbar
+  display: none;
+
   position: sticky;
   top: 0;
   z-index: 30;
@@ -112,11 +119,12 @@
 
 .tow-layout {
   display: flex;
-  min-height: calc(100vh - 128px);
+  min-height: 0;
 }
 
 .tow-sidebar {
-  display: none;
+  // Hide the legacy wizard sidebar to match the app layout
+  display: none !important;
   width: var(--tow-sidebar);
   flex-shrink: 0;
   background: var(--tow-surface-low);
@@ -127,8 +135,7 @@
   min-height: calc(100vh - 128px);
 
   @media (min-width: 768px) {
-    display: flex;
-    flex-direction: column;
+    display: none;
   }
 
   &__title {
@@ -818,7 +825,7 @@
   right: 0;
   z-index: 40;
   padding: 16px 32px;
-  background: var(--tow-surface-low);
+  background: var(--surface-container-low);
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
@@ -826,7 +833,7 @@
   border-top: 1px solid rgba(0, 0, 0, 0.04);
 
   @media (min-width: 768px) {
-    left: 288px;
+    left: 0;
   }
 }
 

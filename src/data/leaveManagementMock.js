@@ -53,6 +53,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 12 – Oct 15 (4 Days)',
       status: 'pending',
       decisionDate: null,
+      rangeStart: '2025-10-12',
+      rangeEnd: '2025-10-15',
     },
     {
       id: '2',
@@ -64,6 +66,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 10 (1 Day)',
       status: 'pending',
       decisionDate: null,
+      rangeStart: '2025-10-10',
+      rangeEnd: '2025-10-10',
     },
     {
       id: '3',
@@ -75,6 +79,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 15 – Oct 16 (2 Days)',
       status: 'approved',
       decisionDate: todayISO,
+      rangeStart: '2025-10-15',
+      rangeEnd: '2025-10-16',
     },
     {
       id: '4',
@@ -86,6 +92,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 11 (1 Day)',
       status: 'rejected',
       decisionDate: todayISO,
+      rangeStart: '2025-10-11',
+      rangeEnd: '2025-10-11',
     },
     {
       id: '5',
@@ -97,6 +105,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Nov 1 – Nov 3 (3 Days)',
       status: 'pending',
       decisionDate: null,
+      rangeStart: '2025-11-01',
+      rangeEnd: '2025-11-03',
     },
     {
       id: '6',
@@ -108,6 +118,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 20 (1 Day)',
       status: 'pending',
       decisionDate: null,
+      rangeStart: '2025-10-20',
+      rangeEnd: '2025-10-20',
     },
     {
       id: '7',
@@ -119,6 +131,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Dec 20 – Jan 2 (10 Days)',
       status: 'pending',
       decisionDate: null,
+      rangeStart: '2025-12-20',
+      rangeEnd: '2026-01-02',
     },
     {
       id: '8',
@@ -130,6 +144,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 8 – Oct 9 (2 Days)',
       status: 'approved',
       decisionDate: todayISO,
+      rangeStart: '2025-10-08',
+      rangeEnd: '2025-10-09',
     },
     {
       id: '9',
@@ -141,6 +157,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 14 (1 Day)',
       status: 'approved',
       decisionDate: todayISO,
+      rangeStart: '2025-10-14',
+      rangeEnd: '2025-10-14',
     },
     {
       id: '10',
@@ -152,6 +170,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 17 – Oct 18 (2 Days)',
       status: 'rejected',
       decisionDate: todayISO,
+      rangeStart: '2025-10-17',
+      rangeEnd: '2025-10-18',
     },
     {
       id: '11',
@@ -163,6 +183,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 22 (1 Day)',
       status: 'pending',
       decisionDate: null,
+      rangeStart: '2025-10-22',
+      rangeEnd: '2025-10-22',
     },
     {
       id: '12',
@@ -174,6 +196,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 5 – Oct 6 (2 Days)',
       status: 'approved',
       decisionDate: past,
+      rangeStart: '2025-10-05',
+      rangeEnd: '2025-10-06',
     },
     {
       id: '13',
@@ -185,6 +209,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Sep 28 – Sep 30 (3 Days)',
       status: 'approved',
       decisionDate: past2,
+      rangeStart: '2025-09-28',
+      rangeEnd: '2025-09-30',
     },
     {
       id: '14',
@@ -196,6 +222,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 19 (1 Day)',
       status: 'rejected',
       decisionDate: past,
+      rangeStart: '2025-10-19',
+      rangeEnd: '2025-10-19',
     },
     {
       id: '15',
@@ -207,6 +235,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 25 – Oct 27 (3 Days)',
       status: 'pending',
       decisionDate: null,
+      rangeStart: '2025-10-25',
+      rangeEnd: '2025-10-27',
     },
     {
       id: '16',
@@ -218,6 +248,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 7 (1 Day)',
       status: 'approved',
       decisionDate: todayISO,
+      rangeStart: '2025-10-07',
+      rangeEnd: '2025-10-07',
     },
     {
       id: '17',
@@ -229,6 +261,8 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 21 – Oct 23 (3 Days)',
       status: 'approved',
       decisionDate: todayISO,
+      rangeStart: '2025-10-21',
+      rangeEnd: '2025-10-23',
     },
     {
       id: '18',
@@ -240,8 +274,48 @@ export function buildLeaveApplications(todayISO) {
       duration: 'Oct 3 – Oct 4 (2 Days)',
       status: 'pending',
       decisionDate: null,
+      rangeStart: '2025-10-03',
+      rangeEnd: '2025-10-04',
     },
   ];
+}
+
+function dayStartMs(iso) {
+  if (!iso || typeof iso !== 'string') return null;
+  const t = Date.parse(`${iso}T12:00:00`);
+  return Number.isNaN(t) ? null : t;
+}
+
+/**
+ * Keep rows whose leave range overlaps the selected filter range (inclusive).
+ * If only `fromISO` is set: leave must end on or after that day.
+ * If only `toISO` is set: leave must start on or before that day.
+ */
+export function filterLeavesByDateRange(rows, fromISO, toISO) {
+  const fromRaw = fromISO?.trim() ?? '';
+  const toRaw = toISO?.trim() ?? '';
+  if (!fromRaw && !toRaw) return rows;
+
+  let fromMs = fromRaw ? dayStartMs(fromRaw) : null;
+  let toMs = toRaw ? dayStartMs(toRaw) : null;
+  if (fromRaw && fromMs === null) return rows;
+  if (toRaw && toMs === null) return rows;
+
+  if (fromMs != null && toMs != null && fromMs > toMs) {
+    const swap = fromMs;
+    fromMs = toMs;
+    toMs = swap;
+  }
+
+  const filterStart = fromMs ?? -Infinity;
+  const filterEnd = toMs ?? Infinity;
+
+  return rows.filter((r) => {
+    const rs = dayStartMs(r.rangeStart);
+    const re = dayStartMs(r.rangeEnd);
+    if (rs == null || re == null) return true;
+    return rs <= filterEnd && re >= filterStart;
+  });
 }
 
 export function filterLeaves(rows, filterId, todayISO) {

@@ -431,10 +431,16 @@ body.dark .emp-directory-cta {
 
 .emp-pill-strip {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
   min-width: 0;
   flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .emp-filter-pill {
@@ -445,6 +451,8 @@ body.dark .emp-directory-cta {
   font-weight: 600;
   padding: 8px 16px;
   border-radius: 9999px;
+  white-space: nowrap;
+  flex-shrink: 0;
   color: var(--on-surface-variant);
   background: transparent;
   transition: background 0.15s ease, color 0.15s ease;
@@ -517,6 +525,11 @@ body.dark .emp-directory-cta {
   .emp-table-toolbar__row--pills {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .emp-pill-strip {
+    flex-wrap: wrap;
+    overflow-x: visible;
   }
 
   .emp-advanced-filters-wrap {

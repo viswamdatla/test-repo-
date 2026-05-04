@@ -50,9 +50,11 @@
   box-shadow: 0 1px 0 rgba(27, 28, 28, 0.06);
 
   &__inner {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 24px;
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0 clamp(16px, 3vw, 40px);
+    box-sizing: border-box;
     height: 64px;
     display: flex;
     align-items: center;
@@ -480,9 +482,11 @@
 
 /* —— Steps 2–4: horizontal stepper —— */
 .tow-stepper-h {
-  max-width: 1024px;
-  margin: 0 auto 48px;
-  padding: 0 8px;
+  max-width: none;
+  width: 100%;
+  margin: 0 0 48px;
+  padding: 0 clamp(8px, 2vw, 24px);
+  box-sizing: border-box;
   overflow-x: auto;
 
   &__row {
@@ -552,8 +556,10 @@
 }
 
 .tow-pro-grid {
-  max-width: 1024px;
-  margin: 0 auto;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
   display: grid;
   gap: 32px;
 
@@ -849,9 +855,11 @@
 
 /* Documents step */
 .tow-doc-head {
-  max-width: 1024px;
-  margin: 0 auto 32px;
-  padding: 0 8px;
+  max-width: none;
+  width: 100%;
+  margin: 0 0 32px;
+  padding: 0 clamp(8px, 2vw, 24px);
+  box-sizing: border-box;
 
   h1 {
     font-size: 1.75rem;
@@ -866,8 +874,10 @@
 }
 
 .tow-stepper-grid {
-  max-width: 1024px;
-  margin: 0 auto 40px;
+  max-width: none;
+  width: 100%;
+  margin: 0 0 40px;
+  box-sizing: border-box;
   display: grid;
   gap: 16px;
 
@@ -926,8 +936,10 @@
 }
 
 .tow-doc-grid {
-  max-width: 1024px;
-  margin: 0 auto;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
   display: grid;
   gap: 24px;
 
@@ -1015,8 +1027,10 @@
 }
 
 .tow-doc-alert {
-  max-width: 1024px;
-  margin: 32px auto 0;
+  max-width: none;
+  width: 100%;
+  margin: 32px 0 0;
+  box-sizing: border-box;
   padding: 20px 24px;
   border-radius: 12px;
   background: rgba(255, 221, 180, 0.25);
@@ -1035,8 +1049,10 @@
 
 /* Review */
 .tow-review-hero {
-  max-width: 1024px;
-  margin: 0 auto 48px;
+  max-width: none;
+  width: 100%;
+  margin: 0 0 48px;
+  box-sizing: border-box;
 
   h1 {
     font-size: 2.25rem;
@@ -1051,8 +1067,10 @@
 }
 
 .tow-review-grid {
-  max-width: 1024px;
-  margin: 0 auto;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
   display: grid;
   gap: 24px;
 
@@ -1162,8 +1180,10 @@
 }
 
 .tow-review-confirm {
-  max-width: 1024px;
-  margin: 40px auto 0;
+  max-width: none;
+  width: 100%;
+  margin: 40px 0 0;
+  box-sizing: border-box;
   padding: 32px;
   border-radius: 12px;
   background: rgba(0, 93, 167, 0.06);

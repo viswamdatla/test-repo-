@@ -256,7 +256,7 @@ export const StudentManagementStudentListPage = () => {
   );
   const selectedCount = selectedStudents.length;
 
-  usePageTitle(section && classLevel ? `${classLevel} ${section} — Students` : 'Student Management');
+  usePageTitle(section && classLevel ? `${classLevel} ${section} — Students` : 'Student Dashboard');
 
   const exportExcel = () => {
     const rows = roster.map((s) => ({

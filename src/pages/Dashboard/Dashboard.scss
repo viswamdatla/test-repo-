@@ -1,8 +1,9 @@
 .dashboard-container {
-  padding: 32px; /* p-8 */
+  padding: 32px clamp(16px, 3vw, 40px); /* p-8 */
   width: 100%;
-  max-width: 1280px; /* max-w-7xl */
-  margin: 0 auto; /* mx-auto */
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 32px; /* space-y-8 */
@@ -112,11 +113,21 @@
         .fin-header {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
+          gap: 16px;
           margin-bottom: 32px;
 
           h3 { font-size: 20px; font-weight: 700; }
           p { font-size: 14px; color: var(--on-surface-variant); }
+
+          .fin-header-links {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
+          }
+
           .report-link {
             font-size: 14px;
             font-weight: 700;

@@ -14,7 +14,7 @@ const kpiCards = [
   },
   {
     icon: 'event_available',
-    label: 'Attendance Rate',
+    label: 'Total Teachers',
     value: '96.8%',
     badge: 'Stable',
     accentClass: 'emp-dashboard-kpi-card--tertiary',
@@ -23,7 +23,7 @@ const kpiCards = [
   },
   {
     icon: 'history_edu',
-    label: 'Certifications Due',
+    label: 'Total Administration',
     value: '42',
     badge: '12 New',
     accentClass: 'emp-dashboard-kpi-card--secondary',
@@ -32,7 +32,7 @@ const kpiCards = [
   },
   {
     icon: 'pending_actions',
-    label: 'Open Requests',
+    label: 'Total Operational Staff',
     value: '18',
     badge: 'Critical',
     accentClass: 'emp-dashboard-kpi-card--primary-container',

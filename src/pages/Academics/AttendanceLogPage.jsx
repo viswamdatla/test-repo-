@@ -554,7 +554,7 @@ export const AttendanceLogPage = () => {
       <div className="att-mark">
         <button
           type="button"
-          className="att-mark-back sm-back"
+          className="att-nav-back att-mark-back"
           onClick={() => setMarkMode(false)}
         >
           <span className="material-symbols-outlined">arrow_back</span>
@@ -625,7 +625,6 @@ export const AttendanceLogPage = () => {
                         setSelectedDay(d);
                       }}
                     />
-                    <span className="material-symbols-outlined att-mark-cal-ic">calendar_today</span>
                   </div>
                 </div>
               </div>
@@ -831,16 +830,15 @@ export const AttendanceLogPage = () => {
 
   return (
     <div className="att-dash">
-      <button
-        type="button"
-        className="att-dash-back sm-back"
-        onClick={() => navigate(`${wizardBase}/${classSlug}`)}
-      >
-        <span className="material-symbols-outlined">arrow_back</span>
-        Sections
-      </button>
-
-      <header className="att-dash-topbar">
+      <div className="att-dash-toolbar">
+        <button
+          type="button"
+          className="att-nav-back"
+          onClick={() => navigate(`${wizardBase}/${classSlug}`)}
+        >
+          <span className="material-symbols-outlined">arrow_back</span>
+          Sections
+        </button>
         <div className="att-dash-search-wrap">
           <span className="material-symbols-outlined att-dash-search-ic">search</span>
           <input
@@ -852,7 +850,7 @@ export const AttendanceLogPage = () => {
             aria-label="Search attendance"
           />
         </div>
-      </header>
+      </div>
 
       <div className="att-dash-head">
         <div>

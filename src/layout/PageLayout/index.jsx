@@ -8,15 +8,20 @@ export const PageLayout = () => {
   const [navTitle, setNavTitle] = useState('Dashboard');
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const isCollectFeeFullscreen = pathname.includes('/financial-services/collect-fee');
   const hideAdmissionFab =
     pathname.includes('/employees/teachers/onboarding') ||
-    pathname.includes('/academics/student-management/section/');
+    pathname.includes('/academics/student-management/section/') ||
+    pathname.includes('/academics/time-table/section/') ||
+    pathname.includes('/financial-services/collect-fee') ||
+    /^\/academics\/attendance\/[^/]+\/[^/]+/.test(pathname) ||
+    /^\/academics\/grades\/[^/]+\/[^/]+/.test(pathname);
 
   return (
-    <div className="page-layout">
-      <Sidebar />
-      <main className="main-content">
-        <Navbar title={navTitle} />
+    <div className={`page-layout${isCollectFeeFullscreen ? ' page-layout--collect-fee-fullscreen' : ''}`}>
+      {!isCollectFeeFullscreen && <Sidebar />}
+      <main className={`main-content${isCollectFeeFullscreen ? ' main-content--collect-fee-fullscreen' : ''}`}>
+        {!isCollectFeeFullscreen && <Navbar title={navTitle} />}
         <Outlet context={{ setNavTitle }} />
       </main>
       

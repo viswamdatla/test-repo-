@@ -1,0 +1,235 @@
+$tt-gap: 16px;
+$tt-radius: 12px;
+
+.sec-tt-page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 24px clamp(16px, 2.5vw, 40px) 48px;
+}
+
+.sec-tt-crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  a {
+    color: var(--primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .material-symbols-outlined {
+    font-size: 14px;
+  }
+
+  .current {
+    color: var(--on-surface);
+  }
+}
+
+.sec-tt-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: $tt-gap;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.sec-tt-eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.sec-tt-title {
+  margin: 6px 0 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(24px, 2.8vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--on-surface);
+}
+
+.sec-tt-sub {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.sec-tt-year {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.sec-tt-legend {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  border-radius: $tt-radius;
+  background: rgba(0, 93, 167, 0.06);
+  border: 1px solid rgba(0, 93, 167, 0.12);
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.45;
+
+  .material-symbols-outlined {
+    font-size: 22px;
+    color: var(--primary);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.sec-tt-table-wrap {
+  border-radius: $tt-radius;
+  background: var(--surface-container-lowest);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  overflow: hidden;
+}
+
+.sec-tt-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sec-tt-grid {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.sec-tt-th {
+  padding: 12px 10px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  background: rgba(248, 250, 252, 0.95);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+  border-left: 1px solid rgba(226, 232, 240, 0.7);
+
+  &--corner {
+    text-align: left;
+    padding-left: 14px;
+    width: 88px;
+    border-left: none;
+  }
+}
+
+.sec-tt-td {
+  padding: 8px;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  border-left: 1px solid rgba(226, 232, 240, 0.7);
+  background: var(--surface-container-lowest);
+
+  &:first-child {
+    border-left: none;
+    background: rgba(248, 250, 252, 0.6);
+  }
+}
+
+.sec-tt-td--period {
+  width: 88px;
+  text-align: left;
+  padding: 10px 12px;
+}
+
+.sec-tt-period-num {
+  display: block;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--on-surface);
+  font-family: 'Manrope', sans-serif;
+}
+
+.sec-tt-period-meta {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.sec-tt-cell {
+  border-radius: 10px;
+  min-height: 72px;
+  padding: 10px 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.sec-tt-cell--subject {
+  background: rgba(0, 93, 167, 0.07);
+  border: 1px solid rgba(0, 93, 167, 0.14);
+}
+
+.sec-tt-cell--break {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  color: #64748b;
+  font-weight: 700;
+  font-size: 12px;
+  min-height: 56px;
+
+  .material-symbols-outlined {
+    font-size: 20px;
+    color: #94a3b8;
+  }
+}
+
+.sec-tt-subject-code {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+}
+
+.sec-tt-subject-name {
+  font-weight: 700;
+  color: var(--on-surface);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.sec-tt-subject-room {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}

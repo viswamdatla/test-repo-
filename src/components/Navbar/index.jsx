@@ -12,7 +12,11 @@ export const Navbar = ({ title }) => {
   const showEmployeesTabs =
     pathname.startsWith('/employees') && !pathname.startsWith('/employees/teachers/onboarding');
   const showFinancialTabs = pathname.startsWith('/financial-services');
-  const isAcademicsSectionRoster = pathname.startsWith('/academics/student-management/section/');
+  const isAcademicsSectionRoster =
+    pathname.startsWith('/academics/student-management/section/') ||
+    pathname.startsWith('/academics/time-table/section/') ||
+    /^\/academics\/attendance\/[^/]+\/[^/]+/.test(pathname) ||
+    /^\/academics\/grades\/[^/]+\/[^/]+/.test(pathname);
   const showAcademicsTabs = pathname.startsWith('/academics') && !isAcademicsSectionRoster;
   const showCenterTitle =
     isAcademicsSectionRoster ||

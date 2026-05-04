@@ -3,8 +3,8 @@ import { NavLink } from 'react-router-dom';
 import './AcademicsTopTabs.scss';
 
 const tabs = [
-  { to: '/', end: true, label: 'Dashboard' },
-  { to: '/academics/student-management', label: 'Student Management' },
+  { to: '/academics/student-management', end: true, label: 'Student Dashboard' },
+  { to: '/academics/time-table', label: 'Time Table' },
   { to: '/academics/attendance', label: 'Attendance' },
   { to: '/academics/grades', label: 'Grades' },
 ];

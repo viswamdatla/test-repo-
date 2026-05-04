@@ -1,8 +1,9 @@
 .um-page {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 24px 28px 48px;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 24px clamp(16px, 3vw, 40px) 48px;
   display: flex;
   flex-direction: column;
   gap: 28px;

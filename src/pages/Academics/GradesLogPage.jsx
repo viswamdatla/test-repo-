@@ -298,7 +298,7 @@ export const GradesLogPage = () => {
   return (
     <div className="sm-roster-page grades-log-page">
       <div className="sm-roster-toolbar-top">
-        <button type="button" className="sm-back" onClick={() => navigate(`${wizardBase}/${classSlug}`)}>
+        <button type="button" className="att-nav-back" onClick={() => navigate(`${wizardBase}/${classSlug}`)}>
           <span className="material-symbols-outlined">arrow_back</span>
           Sections
         </button>

@@ -1,17 +1,25 @@
 /* Section attendance dashboard (reference: School Kit / My Attendance) */
 
 .att-dash {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 48px;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0 clamp(16px, 3vw, 40px) 48px;
 }
 
-.att-dash-back {
-  margin-bottom: 16px;
+.att-dash-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
 }
 
-.att-dash-topbar {
-  margin-bottom: 28px;
+.att-dash-toolbar .att-dash-search-wrap {
+  flex: 1 1 220px;
+  max-width: min(520px, 100%);
+  min-width: 0;
 }
 
 .att-dash-search-wrap {
@@ -853,8 +861,7 @@
 }
 
 @media print {
-  .att-dash-back,
-  .att-dash-topbar,
+  .att-dash-toolbar,
   .att-dash-head-actions,
   .att-dash-cal-nav {
     display: none !important;
@@ -867,13 +874,15 @@
 
 /* —— Mark Attendance (EduCurate-style) —— */
 .att-mark {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 0 48px;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0 clamp(16px, 3vw, 40px) 48px;
 }
 
-.att-mark-back {
-  margin-bottom: 16px;
+.att-mark .att-nav-back.att-mark-back {
+  margin-bottom: 14px;
 }
 
 .att-mark-appbar {
@@ -1061,21 +1070,7 @@
 }
 
 .att-mark-date-wrap {
-  position: relative;
-
-  .att-mark-cal-ic {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: var(--outline);
-    pointer-events: none;
-  }
-
-  .att-mark-input-date {
-    padding-right: 40px;
-  }
+  width: 100%;
 }
 
 .att-mark-filters-divider {

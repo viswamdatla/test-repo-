@@ -1,8 +1,9 @@
 .fin-overview-page {
-  padding: 32px;
+  padding: 32px clamp(16px, 3vw, 40px);
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -54,6 +55,10 @@
   color: var(--on-primary);
   background: linear-gradient(to right, var(--primary), var(--primary-container));
   box-shadow: 0 10px 24px rgba(0, 93, 167, 0.2);
+
+  &:hover {
+    color: var(--on-primary);
+  }
 }
 
 .fin-summary-grid {
@@ -193,9 +198,51 @@
   overflow: hidden;
 }
 
+.fin-table-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(193, 199, 211, 0.14);
+  background: var(--surface-container-low);
+}
+
+.fin-table-section-title {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.fin-table-section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.fin-table-scroll {
+  overflow-x: auto;
+}
+
 .fin-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 880px;
 
   thead {
     background: var(--surface-container-low);
@@ -215,42 +262,12 @@
     padding: 14px 16px;
     border-top: 1px solid rgba(193, 199, 211, 0.14);
     font-weight: 600;
-  }
-
-  .student {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 9999px;
-    background: rgba(0, 93, 167, 0.12);
-    color: var(--primary);
-    display: grid;
-    place-items: center;
-    font-weight: 800;
-  }
-
-  .name {
-    font-weight: 800;
-  }
-
-  .sub {
-    color: var(--on-surface-variant);
-    font-size: 12px;
+    vertical-align: middle;
   }
 
   .num {
     text-align: right;
-  }
-  .paid {
-    color: #166534;
-  }
-  .due {
-    color: #b45309;
+    font-variant-numeric: tabular-nums;
   }
 
   .status {
@@ -259,23 +276,110 @@
     border-radius: 9999px;
     font-size: 11px;
     font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
-  .status.paid {
-    background: rgba(34, 197, 94, 0.1);
+
+  .status--completed {
+    background: rgba(34, 197, 94, 0.12);
+    color: #166534;
   }
-  .status.partial {
-    background: rgba(37, 99, 235, 0.1);
+
+  .status--pending {
+    background: rgba(127, 83, 0, 0.14);
+    color: var(--tertiary);
   }
-  .status.overdue {
+
+  .status--failed {
     background: rgba(186, 26, 26, 0.12);
+    color: var(--error);
+  }
+
+  body.dark .status--completed {
+    color: #4ade80;
+  }
+
+  body.dark .status--pending {
+    color: var(--tertiary-fixed);
   }
 
   .action {
     text-align: center;
+    width: 56px;
   }
+
   .action button {
     border: 0;
     background: transparent;
     color: var(--on-surface-variant);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+
+    &:hover {
+      color: var(--primary);
+    }
   }
+}
+
+.fin-txn-date {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.fin-txn-time {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+}
+
+.fin-txn-title {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.fin-txn-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+}
+
+.fin-txn-cat {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 800;
+  background: rgba(0, 93, 167, 0.1);
+  color: var(--primary);
+}
+
+.fin-txn-ref {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--on-surface-variant);
+}
+
+.fin-txn-amount {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.fin-txn-amount--in {
+  color: #166534;
+}
+
+.fin-txn-amount--out {
+  color: #b45309;
+}
+
+body.dark .fin-txn-amount--in {
+  color: #4ade80;
+}
+
+body.dark .fin-txn-amount--out {
+  color: var(--tertiary-fixed-dim);
 }

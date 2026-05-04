@@ -1,13 +1,15 @@
-// Spacing scale — matches section rhythm used by KPI stats + table card stack
+// Spacing scale — shared with Leave Management + Collect fee flows
+$spacing-sm: 12px;
 $spacing-md: 16px;
 $spacing-lg: 20px;
-$spacing-xl: 24px; // gap under page title card (matches Financial Services → KPI grid)
+$spacing-xl: 24px;
 
 .employees-page {
-  padding: 32px;
+  padding: 32px clamp(16px, 3vw, 40px);
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 // Hero row — matches Staff Directory mock (title + subtitle + primary CTA)
@@ -42,25 +44,29 @@ $spacing-xl: 24px; // gap under page title card (matches Financial Services → 
 .emp-directory-cta {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: $spacing-sm;
   flex-shrink: 0;
-  padding: 12px 22px;
+  padding: $spacing-sm $spacing-lg;
   border-radius: 12px;
   font-family: 'Manrope', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--on-primary);
   text-decoration: none;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-container) 100%);
-  box-shadow: 0 10px 28px rgba(0, 93, 167, 0.22);
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  background: linear-gradient(to right, var(--primary), var(--primary-container));
+  box-shadow: 0 8px 20px rgba(0, 93, 167, 0.2);
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.12s ease,
+    opacity 0.15s ease;
 
   .material-symbols-outlined {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   &:hover {
-    box-shadow: 0 14px 36px rgba(0, 93, 167, 0.28);
+    box-shadow: 0 10px 26px rgba(0, 93, 167, 0.26);
     color: var(--on-primary);
   }
 
@@ -70,14 +76,14 @@ $spacing-xl: 24px; // gap under page title card (matches Financial Services → 
 }
 
 body.dark .emp-directory-cta {
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .emp-dashboard-kpis {
   display: grid;
   grid-template-columns: 1fr;
   gap: $spacing-xl;
-  margin-bottom: 40px;
+  margin-bottom: calc(#{$spacing-xl} + #{$spacing-md});
 
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
@@ -106,6 +112,44 @@ body.dark .emp-directory-cta {
   border-bottom: 4px solid transparent;
 }
 
+.emp-dashboard-kpi-card--clickable {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  /* Keep 4px bottom accent from .emp-dashboard-kpi-card--primary|tertiary|secondary */
+  border-top: 1px solid rgba(193, 199, 211, 0.2);
+  border-left: 1px solid rgba(193, 199, 211, 0.2);
+  border-right: 1px solid rgba(193, 199, 211, 0.2);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-top-color: color-mix(in srgb, var(--primary) 22%, rgba(193, 199, 211, 0.2));
+    border-left-color: color-mix(in srgb, var(--primary) 22%, rgba(193, 199, 211, 0.2));
+    border-right-color: color-mix(in srgb, var(--primary) 22%, rgba(193, 199, 211, 0.2));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  &.is-active {
+    border-top-color: color-mix(in srgb, var(--primary) 35%, rgba(193, 199, 211, 0.2));
+    border-left-color: color-mix(in srgb, var(--primary) 35%, rgba(193, 199, 211, 0.2));
+    border-right-color: color-mix(in srgb, var(--primary) 35%, rgba(193, 199, 211, 0.2));
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.04),
+      0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent);
+  }
+}
+
 .emp-dashboard-kpi-card__head {
   display: flex;
   justify-content: space-between;
@@ -127,6 +171,7 @@ body.dark .emp-directory-cta {
 }
 
 .emp-dashboard-kpi-label {
+  display: block;
   color: var(--on-surface-variant);
   font-size: 14px;
   font-weight: 500;
@@ -134,6 +179,7 @@ body.dark .emp-directory-cta {
 }
 
 .emp-dashboard-kpi-value {
+  display: block;
   margin: 4px 0 0;
   font-family: 'Manrope', sans-serif;
   font-size: 1.875rem;
@@ -337,20 +383,34 @@ body.dark .emp-directory-cta {
 
 .emp-table-panel.emp-table-wrap {
   margin-top: 0;
-  border: 1px solid rgba(193, 199, 211, 0.12);
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(27, 28, 28, 0.06);
-  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
   position: relative;
   z-index: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 
 .emp-table-toolbar {
   padding: $spacing-xl;
-  border-bottom: 1px solid var(--surface-container-highest);
-  background: var(--surface-container-lowest);
+  border: 1px solid rgba(193, 199, 211, 0.14);
+  border-radius: 16px;
+  background: var(--surface-container-low);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 2;
+}
+
+.emp-table-data-card {
+  background: var(--surface-container-lowest);
+  border-radius: 16px;
+  border: 1px solid rgba(193, 199, 211, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
 }
 
 .emp-table-toolbar__row {
@@ -506,7 +566,7 @@ body.dark .emp-directory-cta {
   overflow-x: auto;
 }
 
-.emp-table-wrap .oe-pagination {
+.emp-table-data-card .oe-pagination {
   border-top: 1px solid rgba(193, 199, 211, 0.18);
 }
 

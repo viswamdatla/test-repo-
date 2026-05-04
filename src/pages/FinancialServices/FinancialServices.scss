@@ -1,8 +1,9 @@
 .financial-services-page {
-  padding: 32px;
+  padding: 32px clamp(16px, 3vw, 40px);
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .financial-services-card {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -23,22 +23,50 @@ export const FeeManagement = () => {
   const items = useSelector(selectFeesItems);
   const loadStatus = useSelector((s) => s.fees.loadStatus);
 
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterBarRef = useRef(null);
+  const [isDateMenuOpen, setIsDateMenuOpen] = useState(false);
+  const [isClassMenuOpen, setIsClassMenuOpen] = useState(false);
+  const [periodPreset, setPeriodPreset] = useState('oct2023');
+  const [classKey, setClassKey] = useState('all');
+
+  const periodPresets = useMemo(
+    () => [
+      { id: 'oct2023', label: 'Oct 1 - Oct 31, 2023', match: (period) => period === 'Oct 2023' || period.startsWith('Oct') },
+      { id: 'sep2023', label: 'Sep 1 - Sep 30, 2023', match: (period) => period === 'Sep 2023' || period.startsWith('Sep') },
+      { id: 'all', label: 'All dates', match: () => true },
+    ],
+    [],
+  );
+
+  const classOptions = useMemo(
+    () => [
+      { value: 'all', label: 'All' },
+      { value: 'g10', label: 'Grade 10-A' },
+      { value: 'g8', label: 'Grade 8-C' },
+      { value: 'g12', label: 'Grade 12-B' },
+    ],
+    [],
+  );
+
+  const activePeriodLabel = periodPresets.find((p) => p.id === periodPreset)?.label ?? 'All dates';
+  const activeClassLabel = classOptions.find((c) => c.value === classKey)?.label ?? 'All';
 
   useEffect(() => {
     dispatch(fetchFees());
   }, [dispatch]);
 
   const filteredFees = useMemo(() => {
+    const preset = periodPresets.find((p) => p.id === periodPreset);
     const q = searchQuery.trim().toLowerCase();
     return items.filter((it) => {
       const statusOk = statusFilter === 'all' ? true : it.status === statusFilter;
       if (!statusOk) return false;
+      if (preset && !preset.match(it.period)) return false;
       if (!q) return true;
       const haystack = `${it.period} ${it.feeType} ${it.department ?? ''} ${it.status}`.toLowerCase();
       return haystack.includes(q);
     });
-  }, [items, searchQuery, statusFilter]);
+  }, [items, searchQuery, statusFilter, periodPreset, periodPresets]);
 
   const pageCount = Math.max(1, Math.ceil(filteredFees.length / pageSize));
 
@@ -61,8 +89,31 @@ export const FeeManagement = () => {
 
   const handleSelectStatus = (nextStatus) => {
     dispatch(setStatusFilter(nextStatus));
-    setIsFilterOpen(false);
+    setIsClassMenuOpen(false);
   };
+
+  const handleSelectPeriod = (id) => {
+    setPeriodPreset(id);
+    setIsDateMenuOpen(false);
+    dispatch(setPage(1));
+  };
+
+  const handleSelectClass = (value) => {
+    setClassKey(value);
+    setIsClassMenuOpen(false);
+  };
+
+  useEffect(() => {
+    if (!isDateMenuOpen && !isClassMenuOpen) return;
+    const close = (e) => {
+      if (filterBarRef.current && !filterBarRef.current.contains(e.target)) {
+        setIsDateMenuOpen(false);
+        setIsClassMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [isDateMenuOpen, isClassMenuOpen]);
 
   const totals = useMemo(() => {
     const total = items.reduce((sum, x) => sum + x.amount, 0);
@@ -125,7 +176,7 @@ export const FeeManagement = () => {
           <h1 className="emp-directory-hero__title">Fee Management</h1>
           <p className="emp-directory-hero__subtitle">Manage fee structures, payments, dues, and collection workflows.</p>
         </div>
-        <Link className="emp-directory-cta" to="/admission">
+        <Link className="emp-directory-cta" to="/financial-services/collect-fee">
           <span className="material-symbols-outlined" aria-hidden>
             add
           </span>
@@ -147,47 +198,111 @@ export const FeeManagement = () => {
       </section>
 
       <section className="emp-table-wrap emp-table-panel">
-        <div className="emp-table-toolbar">
-          <div className="emp-table-toolbar__row emp-table-toolbar__row--controls">
-            <div className="emp-toolbar-search emp-toolbar-search--in-panel">
-              <div className="emp-top-search emp-top-search--toolbar">
-                <span className="material-symbols-outlined" aria-hidden>
-                  search
-                </span>
-                <input
-                  value={searchQuery}
-                  onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                  placeholder="Search fees..."
-                  aria-label="Search fees"
-                />
+        <div ref={filterBarRef} className="fee-mgmt-filter-bar">
+          <div className="fee-mgmt-filter-bar__inner">
+            <label className="fee-mgmt-filter-search">
+              <span className="material-symbols-outlined" aria-hidden>
+                search
+              </span>
+              <input
+                value={searchQuery}
+                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                placeholder="Search student by name or roll no..."
+                aria-label="Search students by name or roll number"
+                type="search"
+                autoComplete="off"
+              />
+            </label>
+
+            <div className="fee-mgmt-filter-bar__chips">
+              <div className="fee-mgmt-filter-dropdown">
+                <button
+                  type="button"
+                  className="fee-mgmt-filter-chip"
+                  aria-expanded={isDateMenuOpen}
+                  aria-haspopup="listbox"
+                  aria-label="Date range"
+                  onClick={() => {
+                    setIsClassMenuOpen(false);
+                    setIsDateMenuOpen((o) => !o);
+                  }}
+                >
+                  <span className="material-symbols-outlined fee-mgmt-filter-chip__icon">calendar_month</span>
+                  <span className="fee-mgmt-filter-chip__text">{activePeriodLabel}</span>
+                  <span className="material-symbols-outlined fee-mgmt-filter-chip__caret">expand_more</span>
+                </button>
+                {isDateMenuOpen && (
+                  <div className="fee-mgmt-filter-menu" role="listbox">
+                    {periodPresets.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        role="option"
+                        aria-selected={periodPreset === p.id}
+                        className={`fee-mgmt-filter-menu__opt ${periodPreset === p.id ? 'is-active' : ''}`}
+                        onClick={() => handleSelectPeriod(p.id)}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
 
-            <div className="oe-filter-wrap">
-              <button className="oe-filter-btn" type="button" onClick={() => setIsFilterOpen((v) => !v)}>
-                <span className="material-symbols-outlined">filter_list</span>
-                <span>Filters</span>
-              </button>
-
-              {isFilterOpen && (
-                <div className="oe-filter-menu" role="menu">
-                  {[
-                    { value: 'all', label: 'All statuses' },
-                    { value: 'Approved', label: 'Approved' },
-                    { value: 'Pending', label: 'Pending' },
-                    { value: 'Rejected', label: 'Rejected' },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      className={`oe-filter-opt ${statusFilter === opt.value ? 'active' : ''}`}
-                      onClick={() => handleSelectStatus(opt.value)}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="fee-mgmt-filter-dropdown">
+                <button
+                  type="button"
+                  className="fee-mgmt-filter-chip"
+                  aria-expanded={isClassMenuOpen}
+                  aria-haspopup="listbox"
+                  aria-label="Class and status filters"
+                  onClick={() => {
+                    setIsDateMenuOpen(false);
+                    setIsClassMenuOpen((o) => !o);
+                  }}
+                >
+                  <span className="material-symbols-outlined fee-mgmt-filter-chip__icon">filter_alt</span>
+                  <span className="fee-mgmt-filter-chip__text">
+                    Class: {activeClassLabel}
+                  </span>
+                  <span className="material-symbols-outlined fee-mgmt-filter-chip__caret">expand_more</span>
+                </button>
+                {isClassMenuOpen && (
+                  <div className="fee-mgmt-filter-menu fee-mgmt-filter-menu--wide" role="presentation">
+                    <div className="fee-mgmt-filter-menu__group">
+                      <p className="fee-mgmt-filter-menu__heading">Class</p>
+                      {classOptions.map((c) => (
+                        <button
+                          key={c.value}
+                          type="button"
+                          className={`fee-mgmt-filter-menu__opt ${classKey === c.value ? 'is-active' : ''}`}
+                          onClick={() => handleSelectClass(c.value)}
+                        >
+                          {c.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="fee-mgmt-filter-menu__group">
+                      <p className="fee-mgmt-filter-menu__heading">Status</p>
+                      {[
+                        { value: 'all', label: 'All statuses' },
+                        { value: 'Approved', label: 'Approved' },
+                        { value: 'Pending', label: 'Pending' },
+                        { value: 'Rejected', label: 'Rejected' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={`fee-mgmt-filter-menu__opt ${statusFilter === opt.value ? 'is-active' : ''}`}
+                          onClick={() => handleSelectStatus(opt.value)}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

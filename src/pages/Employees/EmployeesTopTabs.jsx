@@ -7,6 +7,7 @@ const tabs = [
   { to: '/employees/teachers', label: 'Teachers' },
   { to: '/employees/administration', label: 'Administration' },
   { to: '/employees/operational-staff', label: 'Operational Staff' },
+  { to: '/employees/leave-management', label: 'Leaves' },
 ];
 
 export const EmployeesTopTabs = () => {

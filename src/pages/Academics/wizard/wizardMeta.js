@@ -25,7 +25,7 @@ export function getWizardMeta(pathname) {
   }
   return {
     wizardBase: '/academics/student-management',
-    navRootTitle: 'Student Management',
+    navRootTitle: 'Student Dashboard',
     gatewaySubtitle: 'Choose a class, then a section, to view and manage students.',
     stageSubtitle: 'Choose a programme level. Each option opens the class list on the next page.',
     classSubtitle: 'Pick a class to open the sections page.',

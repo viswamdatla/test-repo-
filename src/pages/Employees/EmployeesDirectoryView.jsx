@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import '../../styles/DataTable.scss';
@@ -50,6 +50,7 @@ export const EmployeesDirectoryView = ({ section }) => {
   const ui = useSelector((state) => selectEmployeesSectionUi(state, section));
   const loadStatus = useSelector(selectEmployeesStatus);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const tablePanelRef = useRef(null);
 
   useEffect(() => {
     if (loadStatus === 'idle') dispatch(fetchEmployeesData());
@@ -129,6 +130,7 @@ export const EmployeesDirectoryView = ({ section }) => {
           label: 'Total ops staff',
           value: totals.total,
           hint: `${totals.deptCount} team${totals.deptCount === 1 ? '' : 's'}`,
+          statusMode: 'all',
         },
         {
           icon: 'construction',
@@ -136,6 +138,7 @@ export const EmployeesDirectoryView = ({ section }) => {
           label: 'Active now',
           value: totals.active,
           hint: 'On duty roster',
+          statusMode: 'Active',
         },
         {
           icon: 'admin_panel_settings',
@@ -143,6 +146,7 @@ export const EmployeesDirectoryView = ({ section }) => {
           label: 'On leave',
           value: totals.onLeave,
           hint: totals.inactive ? `${totals.inactive} inactive` : 'Campus coverage',
+          statusMode: 'On Leave',
         },
       ];
     }
@@ -154,6 +158,7 @@ export const EmployeesDirectoryView = ({ section }) => {
           label: 'Total teachers',
           value: totals.total,
           hint: `${totals.deptCount} departments`,
+          statusMode: 'all',
         },
         {
           icon: 'menu_book',
@@ -161,6 +166,7 @@ export const EmployeesDirectoryView = ({ section }) => {
           label: 'Active faculty',
           value: totals.active,
           hint: 'Teaching now',
+          statusMode: 'Active',
         },
         {
           icon: 'event_busy',
@@ -168,6 +174,7 @@ export const EmployeesDirectoryView = ({ section }) => {
           label: 'On leave',
           value: totals.onLeave,
           hint: 'Away from campus',
+          statusMode: 'On Leave',
         },
       ];
     }
@@ -178,6 +185,7 @@ export const EmployeesDirectoryView = ({ section }) => {
         label: 'Total staff',
         value: totals.total,
         hint: `${totals.deptCount} office${totals.deptCount === 1 ? '' : 's'}`,
+        statusMode: 'all',
       },
       {
         icon: 'badge',
@@ -185,6 +193,7 @@ export const EmployeesDirectoryView = ({ section }) => {
         label: 'Active',
         value: totals.active,
         hint: 'Currently employed',
+        statusMode: 'Active',
       },
       {
         icon: 'history_edu',
@@ -192,6 +201,7 @@ export const EmployeesDirectoryView = ({ section }) => {
         label: 'On leave',
         value: totals.onLeave,
         hint: totals.inactive ? `${totals.inactive} inactive` : 'Out of office',
+        statusMode: 'On Leave',
       },
     ];
   }, [section, totals]);
@@ -224,6 +234,14 @@ export const EmployeesDirectoryView = ({ section }) => {
       }),
     [bentoTiles]
   );
+
+  const applyKpiStatusFilter = (statusMode) => {
+    dispatch(setSectionStatusFilter({ section, value: statusMode }));
+    setIsFilterOpen(false);
+    queueMicrotask(() => {
+      tablePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   let searchPlaceholder = 'Search operational staff by name, ID or department...';
   if (section === 'teachers') {
@@ -390,19 +408,28 @@ export const EmployeesDirectoryView = ({ section }) => {
       </header>
 
       <section className="emp-dashboard-kpis emp-dashboard-kpis--three" aria-label="Summary metrics">
-        {dashboardKpis.map((tile) => (
-          <div key={tile.label} className={`emp-dashboard-kpi-card ${tile.accentClass}`}>
-            <div className="emp-dashboard-kpi-card__head">
-              <span className={`material-symbols-outlined emp-dashboard-kpi-icon ${tile.iconClass}`}>{tile.icon}</span>
-              <span className={`emp-dashboard-kpi-badge ${tile.badgeClass}`}>{tile.hint}</span>
-            </div>
-            <h3 className="emp-dashboard-kpi-label">{tile.label}</h3>
-            <p className="emp-dashboard-kpi-value">{tile.value}</p>
-          </div>
-        ))}
+        {dashboardKpis.map((tile) => {
+          const isActive = ui.statusFilter === tile.statusMode;
+          return (
+            <button
+              key={tile.label}
+              type="button"
+              className={`emp-dashboard-kpi-card emp-dashboard-kpi-card--clickable ${tile.accentClass} ${isActive ? 'is-active' : ''}`}
+              aria-pressed={isActive}
+              onClick={() => applyKpiStatusFilter(tile.statusMode)}
+            >
+              <div className="emp-dashboard-kpi-card__head">
+                <span className={`material-symbols-outlined emp-dashboard-kpi-icon ${tile.iconClass}`}>{tile.icon}</span>
+                <span className={`emp-dashboard-kpi-badge ${tile.badgeClass}`}>{tile.hint}</span>
+              </div>
+              <span className="emp-dashboard-kpi-label">{tile.label}</span>
+              <span className="emp-dashboard-kpi-value">{tile.value}</span>
+            </button>
+          );
+        })}
       </section>
 
-      <section className="emp-table-wrap emp-table-panel" aria-label="Employee directory">
+      <section ref={tablePanelRef} className="emp-table-wrap emp-table-panel" aria-label="Employee directory">
         <div className="emp-table-toolbar">
           <div className="emp-table-toolbar__row emp-table-toolbar__row--pills">
             <div className="emp-pill-strip" role="tablist" aria-label="Filter by department">
@@ -486,9 +513,10 @@ export const EmployeesDirectoryView = ({ section }) => {
           </div>
         </div>
 
-        <div className="emp-scroll">{renderTable()}</div>
+        <div className="emp-table-data-card">
+          <div className="emp-scroll">{renderTable()}</div>
 
-        <div className="oe-pagination">
+          <div className="oe-pagination">
           <p className="oe-pagination-text">
             Showing {showingFrom} to {showingTo} of {filteredItems.length} {memberLabelLower}
           </p>
@@ -520,6 +548,7 @@ export const EmployeesDirectoryView = ({ section }) => {
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
+        </div>
         </div>
       </section>
     </div>

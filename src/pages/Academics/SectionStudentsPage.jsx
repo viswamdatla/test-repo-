@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { getSectionContext, getSectionNavTitle } from './classSectionRegistry';
 import './SectionStudentsPage.scss';
@@ -107,7 +107,13 @@ function PaymentPill({ status }) {
 
 export const SectionStudentsPage = () => {
   const { sectionId: sectionIdParam } = useParams();
+  const { pathname } = useLocation();
   const sectionId = sectionIdParam ? decodeURIComponent(sectionIdParam) : '';
+
+  const academicsListBase = pathname.startsWith('/academics/time-table')
+    ? '/academics/time-table'
+    : '/academics/student-management';
+  const parentSectionLabel = academicsListBase.includes('time-table') ? 'Time Table' : 'Student Dashboard';
 
   const ctx = useMemo(() => getSectionContext(sectionId), [sectionId]);
   const navTitle = useMemo(() => getSectionNavTitle(sectionId), [sectionId]);
@@ -185,7 +191,7 @@ export const SectionStudentsPage = () => {
   }, [somePageSelected, allPageSelected]);
 
   if (!ctx) {
-    return <Navigate to="/academics/student-management" replace />;
+    return <Navigate to={academicsListBase} replace />;
   }
 
   const selectedPreview = students.filter((s) => selectedIds.has(s.id)).slice(0, 4);
@@ -193,9 +199,9 @@ export const SectionStudentsPage = () => {
   return (
     <div className="sec-students-page">
       <nav className="sec-students-crumb" aria-label="Breadcrumb">
-        <Link to="/academics/student-management">Academics</Link>
+        <Link to={academicsListBase}>Academics</Link>
         <span className="material-symbols-outlined">chevron_right</span>
-        <Link to="/academics/student-management">Student Management</Link>
+        <Link to={academicsListBase}>{parentSectionLabel}</Link>
         <span className="material-symbols-outlined">chevron_right</span>
         <span className="current">{navTitle}</span>
       </nav>

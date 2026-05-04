@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import dashboardData from '../../data/dashboard.json';
 import './Dashboard.scss';
@@ -59,9 +60,14 @@ export const Dashboard = () => {
                 <h3>Financial Overview</h3>
                 <p>Fee status for Academic Year 2023-24</p>
               </div>
-              <a href="#" className="report-link">
-                Full Report <span className="material-symbols-outlined">arrow_forward</span>
-              </a>
+              <div className="fin-header-links">
+                <Link to="/financial-services" className="report-link">
+                  Full Report <span className="material-symbols-outlined">arrow_forward</span>
+                </Link>
+                <Link to="/financial-services/collect-fee" className="report-link">
+                  Collect fee <span className="material-symbols-outlined">arrow_forward</span>
+                </Link>
+              </div>
             </div>
             
             <div className="fin-content">

@@ -34,7 +34,7 @@ export const AcademicsProvisionPanel = () => {
   return (
     <section className="sm-admin-panel">
       <h3>Superadmin Class & Section Provision</h3>
-      <p>Add or remove classes and sections. Tiles update immediately across Student Management, Attendance, and Grades.</p>
+      <p>Add or remove classes and sections. Tiles update immediately across Student Dashboard, Attendance, and Grades.</p>
 
       <div className="sm-admin-grid">
         <label>

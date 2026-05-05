@@ -111,3 +111,36 @@ html, body, #root {
   background-color: var(--primary-container);
   color: var(--on-primary-container);
 }
+
+html {
+  font-size: clamp(14px, 0.15vw + 13.5px, 16px);
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+@media (max-width: 640px) {
+  body {
+    line-height: 1.5;
+  }
+
+  button,
+  a[role='button'],
+  .leave-btn,
+  .cf-btn,
+  .emp-directory-cta {
+    min-height: 44px;
+  }
+}

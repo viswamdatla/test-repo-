@@ -1234,3 +1234,108 @@
     margin: 2cm;
   }
 }
+
+@media (max-width: 640px) {
+  .cf-flow {
+    padding: 20px 12px 28px;
+  }
+
+  .cf-flow__hero {
+    margin-bottom: 20px;
+  }
+
+  .cf-flow__title {
+    font-size: clamp(1.4rem, 5.5vw, 1.85rem);
+    line-height: 1.2;
+  }
+
+  .cf-flow__subtitle {
+    font-size: 14px;
+  }
+
+  .cf-steps {
+    gap: 8px;
+  }
+
+  .cf-steps__item {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .cf-panel {
+    border-radius: 12px;
+    padding: 16px 14px;
+  }
+
+  .cf-panel__title {
+    font-size: 1.1rem;
+  }
+
+  .cf-actions {
+    justify-content: stretch;
+  }
+
+  .cf-actions .cf-btn {
+    width: 100%;
+  }
+
+  .cf-pay-confirm {
+    padding: 28px 0 20px;
+  }
+
+  .cf-pay-confirm__icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .cf-pay-confirm__icon .material-symbols-outlined {
+    font-size: 46px;
+  }
+
+  .cf-pay-confirm__card-inner {
+    padding: 20px 16px 16px;
+  }
+
+  .cf-pay-confirm__title {
+    font-size: clamp(1.5rem, 6vw, 1.9rem);
+  }
+
+  .cf-pay-confirm__lead {
+    font-size: 14px;
+  }
+
+  .cf-pay-confirm__actions .cf-btn {
+    width: 100%;
+  }
+
+  .cf-print-wrap {
+    padding: 0 0 20px;
+  }
+
+  .cf-receipt-doc {
+    border-radius: 12px;
+    padding: 20px 14px 24px;
+    min-height: auto;
+  }
+
+  .cf-receipt-doc__header {
+    margin-bottom: 24px;
+  }
+
+  .cf-receipt-doc__title-block {
+    text-align: left;
+  }
+
+  .cf-receipt-doc__meta-row {
+    justify-content: flex-start;
+  }
+
+  .cf-receipt-doc__footer {
+    margin-top: 24px;
+    padding-top: 24px;
+  }
+
+  .cf-receipt-doc__summary {
+    max-width: none;
+  }
+}

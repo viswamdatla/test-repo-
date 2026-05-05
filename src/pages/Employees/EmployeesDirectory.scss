@@ -690,3 +690,80 @@ body.dark .emp-directory-cta {
   border-color: rgba(107, 114, 128, 0.25);
 }
 
+@media (max-width: 640px) {
+  .employees-page {
+    padding: 20px 12px 28px;
+  }
+
+  .emp-directory-hero {
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+  }
+
+  .emp-directory-hero__title {
+    font-size: clamp(1.4rem, 5.5vw, 1.85rem);
+    line-height: 1.2;
+  }
+
+  .emp-directory-hero__subtitle {
+    font-size: 14px;
+  }
+
+  .emp-directory-cta {
+    width: 100%;
+  }
+
+  .emp-dashboard-kpis {
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+  }
+
+  .emp-dashboard-kpi-card {
+    padding: $spacing-md;
+  }
+
+  .emp-dashboard-kpi-card__head {
+    margin-bottom: 12px;
+  }
+
+  .emp-dashboard-kpi-badge {
+    font-size: 11px;
+  }
+
+  .emp-dashboard-kpi-value {
+    font-size: 1.5rem;
+  }
+
+  .emp-table-panel.emp-table-wrap {
+    gap: $spacing-md;
+  }
+
+  .emp-table-toolbar {
+    padding: $spacing-md;
+    border-radius: 12px;
+  }
+
+  .emp-pill-strip {
+    gap: 8px;
+  }
+
+  .emp-filter-pill {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .emp-table-data-card {
+    border-radius: 12px;
+  }
+
+  .emp-table {
+    min-width: 620px;
+  }
+
+  .emp-table thead th,
+  .emp-table tbody td {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+

@@ -474,3 +474,79 @@
     }
   }
 }
+
+@media (max-width: 640px) {
+  .dashboard-container {
+    padding: 20px 12px 28px;
+    gap: 20px;
+
+    .stats-grid {
+      gap: 16px;
+
+      .stat-card {
+        padding: 16px;
+
+        .card-header {
+          margin-bottom: 12px;
+        }
+
+        .stat-value {
+          font-size: 1.5rem;
+        }
+
+        .growth-badge {
+          font-size: 11px;
+        }
+      }
+    }
+
+    .middle-grid {
+      gap: 20px;
+
+      .left-col,
+      .right-col {
+        gap: 16px;
+      }
+
+      .left-col .fin-card,
+      .left-col .recent-collections,
+      .right-col .activities-card,
+      .right-col .attendance-card {
+        padding: 16px;
+        border-radius: 12px;
+      }
+
+      .left-col .fin-card .fin-header {
+        margin-bottom: 16px;
+
+        h3 {
+          font-size: 1.1rem;
+        }
+      }
+
+      .left-col .fin-card .fin-content {
+        gap: 24px;
+      }
+
+      .left-col .fin-card .fin-content .chart-container {
+        width: 150px;
+        height: 150px;
+      }
+
+      .left-col .recent-collections h3,
+      .right-col .activities-card h3,
+      .events-section h3 {
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+      }
+    }
+
+    .events-section .events-grid {
+      gap: 16px;
+    }
+
+    .events-section .events-grid .event-card .event-body {
+      padding: 0 14px 16px;
+    }
+  }
+}

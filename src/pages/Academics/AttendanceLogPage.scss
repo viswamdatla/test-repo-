@@ -1623,3 +1623,136 @@
   transform: rotate(12deg);
   pointer-events: none;
 }
+
+@media (max-width: 640px) {
+  .att-dash {
+    padding: 0 12px 28px;
+  }
+
+  .att-dash-head {
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .att-dash-title {
+    font-size: clamp(1.45rem, 6vw, 1.9rem);
+  }
+
+  .att-dash-sub {
+    font-size: 14px;
+  }
+
+  .att-dash-head-actions {
+    width: 100%;
+  }
+
+  .att-dash-btn-secondary,
+  .att-dash-btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .att-dash-layout {
+    gap: 16px;
+  }
+
+  .att-dash-stats {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .att-dash-stat-card,
+  .att-dash-panel,
+  .att-dash-daily,
+  .att-dash-calendar-card,
+  .att-dash-legend-card {
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .att-dash-cal-header,
+  .att-dash-cal-body,
+  .att-dash-cal-legend {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .att-dash-cal-grid {
+    gap: 6px;
+  }
+
+  .att-dash-cal-cell--day {
+    border-radius: 10px;
+    gap: 4px;
+  }
+
+  .att-dash-daily-kpi-value {
+    font-size: 1.35rem;
+  }
+
+  .att-mark {
+    padding: 0 12px 28px;
+  }
+
+  .att-mark-appbar {
+    position: static;
+    backdrop-filter: none;
+    padding: 8px 0 14px;
+    gap: 12px;
+  }
+
+  .att-mark-appbar-right {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .att-mark-search-wrap {
+    width: 100%;
+  }
+
+  .att-mark-avatar {
+    margin-left: 0;
+  }
+
+  .att-mark-grid {
+    gap: 16px;
+  }
+
+  .att-mark-filters,
+  .att-mark-table-card,
+  .att-mark-summary-card,
+  .att-mark-automate {
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .att-mark-filters-row {
+    min-width: 0;
+  }
+
+  .att-mark-field {
+    min-width: 100%;
+  }
+
+  .att-mark-bulk {
+    width: 100%;
+  }
+
+  .att-mark-apply,
+  .att-mark-save,
+  .att-mark-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .att-mark-table-footer,
+  .att-mark-actions {
+    padding-left: 14px;
+    padding-right: 14px;
+    gap: 10px;
+  }
+
+  .att-mark-actions {
+    flex-direction: column;
+  }
+}

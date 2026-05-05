@@ -667,11 +667,107 @@ $sec-radius-lg: 16px;
 
 @media (max-width: 640px) {
   .sec-students-page {
-    padding: 16px 16px 100px;
+    padding: 16px 12px 100px;
+  }
+
+  .sec-students-head {
+    margin-bottom: 20px;
+  }
+
+  .sec-students-title {
+    font-size: clamp(1.4rem, 5.5vw, 1.85rem);
+  }
+
+  .sec-students-year {
+    font-size: 13px;
+  }
+
+  .sec-students-bento {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .sec-students-bento-main,
+  .sec-students-bento-card {
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .sec-students-bento-heading {
+    font-size: 1.25rem;
+  }
+
+  .sec-students-toolbar {
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+
+  .sec-students-search-wrap {
+    max-width: none;
+  }
+
+  .sec-students-filters {
+    gap: 6px;
+  }
+
+  .sec-stu-chip {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
+  .sec-students-filter-divider {
+    display: none;
+  }
+
+  .sec-students-table-wrap {
+    border-radius: 12px;
+  }
+
+  .sec-students-table {
+    min-width: 760px;
+  }
+
+  .sec-students-th,
+  .sec-students-td {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .sec-students-pagination {
+    padding: 14px 12px;
+  }
+
+  .sec-students-page-summary {
+    font-size: 13px;
+    width: 100%;
+  }
+
+  .sec-students-page-btns {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .sec-students-float {
     right: 16px;
     bottom: 16px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .sec-students-float-bubble {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
+  .sec-students-float-text {
+    font-size: 13px;
+  }
+
+  .sec-students-cta {
+    width: 100%;
+    justify-content: center;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
   }
 }

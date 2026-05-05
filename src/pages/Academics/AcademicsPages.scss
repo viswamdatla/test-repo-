@@ -147,3 +147,59 @@ a.academ-tile {
   }
 }
 
+@media (max-width: 640px) {
+  .academics-page {
+    padding: 20px 12px 28px;
+  }
+
+  .academics-card {
+    border-radius: 12px;
+    padding: 16px 14px;
+  }
+
+  .academics-card h1 {
+    font-size: clamp(1.4rem, 5.5vw, 1.85rem);
+    line-height: 1.2;
+  }
+
+  .academics-card p {
+    font-size: 14px;
+  }
+
+  .academ-program-tiles {
+    padding: 12px 12px 4px;
+  }
+
+  .academ-stage-wrap {
+    padding: 12px;
+  }
+
+  .academ-stage-grid,
+  .academ-class-grid,
+  .academ-section-grid {
+    gap: 8px;
+  }
+
+  .academ-class-grid,
+  .academ-section-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .academ-tile {
+    min-height: 44px;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .academ-tiles--large {
+    padding: 14px 12px;
+  }
+
+  .academ-tiles--large .academ-tile {
+    min-height: 64px;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+}
+

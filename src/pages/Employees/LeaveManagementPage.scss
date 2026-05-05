@@ -768,3 +768,78 @@ body.dark .leave-status--approved {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+@media (max-width: 640px) {
+  .leave-mgmt-page {
+    padding: 20px 12px 28px;
+    gap: $spacing-lg;
+  }
+
+  .leave-mgmt-head {
+    gap: $spacing-md;
+  }
+
+  .leave-mgmt-title {
+    font-size: clamp(1.4rem, 5.5vw, 1.85rem);
+    line-height: 1.2;
+  }
+
+  .leave-mgmt-head-actions {
+    width: 100%;
+  }
+
+  .leave-btn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .leave-kpi-grid {
+    gap: $spacing-md;
+  }
+
+  .leave-kpi-card {
+    gap: $spacing-md;
+    padding: $spacing-md;
+  }
+
+  .leave-kpi-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .leave-kpi-icon .material-symbols-outlined {
+    font-size: 26px;
+  }
+
+  .leave-kpi-value {
+    font-size: 1.5rem;
+  }
+
+  .leave-table-card {
+    border-radius: 12px;
+    padding: $spacing-md;
+  }
+
+  .leave-table-card__head {
+    margin-bottom: $spacing-md;
+  }
+
+  .leave-filter-chip {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .leave-table {
+    min-width: 620px;
+  }
+
+  .leave-bottom-grid {
+    gap: $spacing-md;
+  }
+
+  .leave-policy-card,
+  .leave-insights-card {
+    border-radius: 12px;
+    padding: $spacing-md;
+  }
+}

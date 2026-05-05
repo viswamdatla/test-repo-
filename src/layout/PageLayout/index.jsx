@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/Sidebar';
 import { Navbar } from '../../components/Navbar';
@@ -6,7 +6,6 @@ import './PageLayout.scss';
 
 export const PageLayout = () => {
   const [navTitle, setNavTitle] = useState('Dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const isCollectFeeFullscreen = pathname.includes('/financial-services/collect-fee');
@@ -18,27 +17,11 @@ export const PageLayout = () => {
     /^\/academics\/attendance\/[^/]+\/[^/]+/.test(pathname) ||
     /^\/academics\/grades\/[^/]+\/[^/]+/.test(pathname);
 
-  useEffect(() => {
-    setIsSidebarOpen(false);
-  }, [pathname]);
-
   return (
     <div className={`page-layout${isCollectFeeFullscreen ? ' page-layout--collect-fee-fullscreen' : ''}`}>
-      {!isCollectFeeFullscreen && (
-        <>
-          <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-          {isSidebarOpen ? (
-            <button
-              type="button"
-              className="mobile-sidebar-backdrop"
-              aria-label="Close sidebar"
-              onClick={() => setIsSidebarOpen(false)}
-            />
-          ) : null}
-        </>
-      )}
+      {!isCollectFeeFullscreen && <Sidebar />}
       <main className={`main-content${isCollectFeeFullscreen ? ' main-content--collect-fee-fullscreen' : ''}`}>
-        {!isCollectFeeFullscreen && <Navbar title={navTitle} onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />}
+        {!isCollectFeeFullscreen && <Navbar title={navTitle} />}
         <Outlet context={{ setNavTitle }} />
       </main>
       

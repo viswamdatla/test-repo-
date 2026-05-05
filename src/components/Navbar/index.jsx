@@ -6,7 +6,7 @@ import { FinancialTopTabs } from '../../pages/FinancialServices/FinancialTopTabs
 import { AcademicsTopTabs } from '../../pages/Academics/AcademicsTopTabs';
 import './Navbar.scss';
 
-export const Navbar = ({ title, onToggleSidebar }) => {
+export const Navbar = ({ title }) => {
   const { isDark, toggleTheme } = useContext(ThemeContext);
   const { pathname } = useLocation();
   const showEmployeesTabs =
@@ -25,7 +25,7 @@ export const Navbar = ({ title, onToggleSidebar }) => {
   return (
     <header className="navbar">
       <div className="nav-left">
-        <button type="button" className="menu-btn" onClick={onToggleSidebar} aria-label="Toggle sidebar">
+        <button className="menu-btn">
           <span className="material-symbols-outlined">menu</span>
         </button>
         <div

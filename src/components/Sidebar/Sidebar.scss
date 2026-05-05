@@ -10,8 +10,113 @@
   background-color: rgba(250, 250, 249, 0.8); /* bg-stone-50/80 */
   backdrop-filter: blur(24px); /* backdrop-blur-xl */
   padding: 24px 16px;
+  overflow: visible;
+
+  transition: width 0.2s ease, padding 0.2s ease;
+
+  &--collapsed {
+    width: 84px;
+    padding: 24px 12px;
+
+    .sidebar-header {
+      padding: 0;
+      margin-bottom: 24px;
+    }
+
+    .sidebar-brand {
+      h1,
+      p {
+        display: none;
+      }
+    }
+
+    .sidebar-nav {
+      .nav-link {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+        gap: 0;
+      }
+
+      .nav-label {
+        display: none;
+      }
+
+      /* When labels are hidden, don't reserve extra spacing. */
+      .nav-link:not(.academics-toggle)::after {
+        display: none;
+      }
+    }
+
+    .sidebar-footer {
+      padding: 0;
+    }
+
+    .branch-btn__label,
+    .branch-btn__chevron {
+      display: none;
+    }
+
+    .branch-btn {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto;
+      padding: 0;
+      border-radius: 16px;
+      justify-content: center;
+    }
+
+    /* In collapsed mode, open the branch menu to the right */
+    .branch-menu {
+      left: calc(100% + 10px);
+      right: auto;
+      bottom: 12px;
+      width: 190px;
+      max-width: 60vw;
+    }
+
+    /* Tooltip for collapsed icons */
+    .sidebar-nav .nav-link[data-tooltip],
+    .sidebar-footer .branch-btn[data-tooltip] {
+      position: relative;
+    }
+
+    .sidebar-nav .nav-link[data-tooltip]::after,
+    .sidebar-footer .branch-btn[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(28, 25, 23, 0.92);
+      color: #f5f5f4;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.12s ease, transform 0.12s ease;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+      z-index: 120;
+    }
+
+    .sidebar-nav .nav-link[data-tooltip]:hover::after,
+    .sidebar-nav .nav-link[data-tooltip]:focus-visible::after,
+    .sidebar-footer .branch-btn[data-tooltip]:hover::after,
+    .sidebar-footer .branch-btn[data-tooltip]:focus-visible::after {
+      opacity: 1;
+      transform: translateY(-50%) translateX(2px);
+    }
+  }
   
   .sidebar-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 40px;
     padding: 0 16px;
 
@@ -29,11 +134,27 @@
     }
   }
 
+  .sidebar-collapse-toggle {
+    border: none;
+    background: transparent;
+    color: #1e40af;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 12px;
+    line-height: 1;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: rgba(231, 229, 228, 0.3);
+    }
+  }
+
   .sidebar-nav {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    overflow: visible;
 
     .nav-link {
       display: flex;
@@ -165,10 +286,12 @@
   .sidebar-footer {
     margin-top: auto;
     padding: 0 16px;
+    position: relative;
+    overflow: visible;
 
     .branch-btn {
       width: 100%;
-      padding: 12px 16px;
+      padding: 12px 14px;
       border-radius: 12px;
       border: none;
       color: white;
@@ -176,13 +299,63 @@
       font-size: 14px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       gap: 8px;
       cursor: pointer;
       box-shadow: 0 10px 15px -3px rgba(0, 93, 167, 0.2);
       
       .shrink-icon {
         font-size: 18px;
+      }
+
+      .branch-btn__label {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+      }
+
+      .branch-btn__chevron {
+        font-size: 18px;
+        opacity: 0.95;
+      }
+    }
+
+    .branch-menu {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 68px;
+      background-color: rgba(250, 250, 249, 0.95);
+      backdrop-filter: blur(18px);
+      border-radius: 12px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+      padding: 8px;
+      z-index: 70;
+      transform-origin: bottom left;
+
+      .branch-menu__item {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 10px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        text-align: left;
+        font-weight: 700;
+        color: #57534e;
+
+        &:hover {
+          background-color: rgba(231, 229, 228, 0.3);
+          color: #1c1917;
+        }
+
+        &.is-active {
+          background-color: rgba(231, 229, 228, 0.5);
+          color: #1d4ed8;
+          border: 1px solid rgba(113, 119, 131, 0.55);
+        }
       }
     }
   }
@@ -198,6 +371,35 @@ body.dark {
 
     .sidebar-header {
       h1 { color: #93c5fd; /* dark:text-blue-300 */ }
+    }
+
+    .sidebar-collapse-toggle {
+      color: #93c5fd;
+
+      &:hover {
+        background-color: rgba(41, 37, 36, 0.5);
+      }
+    }
+
+    .sidebar-footer {
+      .branch-menu {
+        background-color: rgba(28, 25, 23, 0.95);
+      }
+
+      .branch-menu__item {
+        color: #a8a29e;
+
+        &:hover {
+          background-color: rgba(41, 37, 36, 0.5);
+          color: #f5f5f4;
+        }
+
+        &.is-active {
+          background-color: #292524;
+          color: #60a5fa;
+          border: 1px solid rgba(96, 165, 250, 0.35);
+        }
+      }
     }
 
     .sidebar-nav {

@@ -17,7 +17,10 @@ export const WizardSectionPage = () => {
   const navigate = useNavigate();
   const structure = useSelector(selectAcademicsStructure);
   const students = useSelector((s) => selectAcademicsSectionItems(s, 'students'));
-  const [branch, setBranch] = useState(BRANCHES[0]);
+  const [branch, setBranch] = useState(() => {
+    const stored = sessionStorage.getItem('selectedBranch');
+    return stored && BRANCHES.includes(stored) ? stored : BRANCHES[0];
+  });
   const [quickEnroll, setQuickEnroll] = useState('');
   const stage = slugToStage(stageSlug);
   const allowed = useMemo(() => classesForStageSlug(stageSlug, structure), [stageSlug, structure]);
@@ -54,6 +57,18 @@ export const WizardSectionPage = () => {
     return sections.filter((sec) => sec.toLowerCase().includes(q));
   }, [sections, quickEnroll]);
 
+  // Keep this dropdown in sync with the sidebar picker.
+  useEffect(() => {
+    const handler = (e) => {
+      const next = e?.detail;
+      if (typeof next === 'string' && BRANCHES.includes(next)) {
+        setBranch(next);
+      }
+    };
+    globalThis.addEventListener('branch:change', handler);
+    return () => globalThis.removeEventListener('branch:change', handler);
+  }, []);
+
   usePageTitle(validClass ? `${classLevel} — Sections` : 'Academics');
 
   useEffect(() => {
@@ -72,8 +87,7 @@ export const WizardSectionPage = () => {
     <div className="sm-card sm-order-page">
       <p className="sm-order-breadcrumb">Orders &gt; New Selection &gt; {stage}</p>
       <button type="button" className="sm-back" onClick={() => navigate(`${wizardBase}/${stageSlug}`)}>
-        <span className="material-symbols-outlined">arrow_back</span>
-        Classes
+        <span className="material-symbols-outlined">arrow_back</span> Classes
       </button>
       <div className="sm-order-header">
         <div>
@@ -82,8 +96,16 @@ export const WizardSectionPage = () => {
         </div>
         <div className="sm-order-controls">
           <label>
-            Select Branch
-            <select value={branch} onChange={(e) => setBranch(e.target.value)}>
+            {'Select Branch'}{' '}
+            <select
+              value={branch}
+              onChange={(e) => {
+                const next = e.target.value;
+                setBranch(next);
+                sessionStorage.setItem('selectedBranch', next);
+                globalThis.dispatchEvent(new CustomEvent('branch:change', { detail: next }));
+              }}
+            >
               {BRANCHES.map((b) => (
                 <option key={b} value={b}>
                   {b}
@@ -92,7 +114,7 @@ export const WizardSectionPage = () => {
             </select>
           </label>
           <label>
-            Quick Enroll
+            {'Quick Enroll'}{' '}
             <input
               value={quickEnroll}
               onChange={(e) => setQuickEnroll(e.target.value)}

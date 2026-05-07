@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { PageLayout } from './layout/PageLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Admission } from './pages/Admission';
+import { AdmissionsDirectory } from './pages/AdmissionsDirectory';
 import { FinancialServicesLayout } from './pages/FinancialServices/FinancialServicesLayout';
 import { FinancialServicesOverview } from './pages/FinancialServices/FinancialServicesOverview';
 import { FeeManagement } from './pages/FinancialServices/FeeManagement';
@@ -34,7 +35,8 @@ function App() {
       <Routes>
         <Route path="/" element={<PageLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="admission" element={<Admission />} />
+          <Route path="admission" element={<AdmissionsDirectory />} />
+          <Route path="admission/new" element={<Admission />} />
           <Route path="employees" element={<EmployeesLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<EmployeesDashboard />} />

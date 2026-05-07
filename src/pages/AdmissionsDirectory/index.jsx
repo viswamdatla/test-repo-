@@ -1,22 +1,23 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import './AdmissionsDirectory.scss';
 
 export const AdmissionsDirectory = () => {
-  usePageTitle('Admissions Directory');
+  usePageTitle('Admissions Dashboard');
 
   return (
     <div className="directory-container">
       {/* Page Header */}
       <div className="directory-header">
         <div className="header-text">
-          <h2>Admissions Directory</h2>
-          <p>Manage student enrollments, review current application statuses, and analyze the admission funnel performance.</p>
+          <h2>Admissions Dashboard</h2>
+          <p>Track admissions performance, monitor pipeline health, and start new student applications quickly.</p>
         </div>
-        <button className="btn-new btn-primary">
+        <Link className="btn-new btn-primary" to="/admission/new">
           <span className="material-symbols-outlined">add_circle</span>
-          New Application
-        </button>
+          <span>Add Student</span>
+        </Link>
       </div>
 
       {/* KPI Cards */}
@@ -32,7 +33,7 @@ export const AdmissionsDirectory = () => {
           <h3 className="kpi-value">248</h3>
         </div>
         
-        <div className="kpi-card border-tertiary">
+        <div className="kpi-card">
           <div className="kpi-header">
             <div className="icon-wrapper color-tertiary">
               <span className="material-symbols-outlined">pending_actions</span>

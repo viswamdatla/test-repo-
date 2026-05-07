@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/DataTable.scss';
 import {
   OPERATIONAL_DEPARTMENTS,
@@ -43,6 +43,7 @@ const SECTION_PAGE_HEADER = {
 };
 
 export const EmployeesDirectoryView = ({ section }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const items = useSelector((state) => selectEmployeesSectionItems(state, section));
   const ui = useSelector((state) => selectEmployeesSectionUi(state, section));
@@ -256,6 +257,10 @@ export const EmployeesDirectoryView = ({ section }) => {
       ctaLabel: 'Add Staff Member',
     };
 
+  const openEmployeeDetail = (employee) => {
+    navigate(`/employees/profile/${section}/${employee.id}`);
+  };
+
   const renderTable = () => {
     if (section === 'operational') {
       return (
@@ -271,7 +276,19 @@ export const EmployeesDirectoryView = ({ section }) => {
           </thead>
           <tbody>
             {currentItems.map((it) => (
-              <tr key={it.id}>
+              <tr
+                key={it.id}
+                className="emp-row-clickable"
+                role="button"
+                tabIndex={0}
+                onClick={() => openEmployeeDetail(it)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openEmployeeDetail(it);
+                  }
+                }}
+              >
                 <td>
                   <div className="emp-name">
                     <div className="avatar">{it.name.charAt(0)}</div>
@@ -315,7 +332,19 @@ export const EmployeesDirectoryView = ({ section }) => {
           </thead>
           <tbody>
             {currentItems.map((it) => (
-              <tr key={it.id}>
+              <tr
+                key={it.id}
+                className="emp-row-clickable"
+                role="button"
+                tabIndex={0}
+                onClick={() => openEmployeeDetail(it)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openEmployeeDetail(it);
+                  }
+                }}
+              >
                 <td>
                   <div className="emp-name">
                     <div className="avatar">{it.name.charAt(0)}</div>
@@ -359,7 +388,19 @@ export const EmployeesDirectoryView = ({ section }) => {
         </thead>
         <tbody>
           {currentItems.map((it) => (
-            <tr key={it.id}>
+            <tr
+              key={it.id}
+              className="emp-row-clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => openEmployeeDetail(it)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  openEmployeeDetail(it);
+                }
+              }}
+            >
               <td>
                 <div className="emp-name">
                   <div className="avatar">{it.name.charAt(0)}</div>
@@ -529,6 +570,7 @@ export const EmployeesDirectoryView = ({ section }) => {
         </div>
         </div>
       </section>
+
     </div>
   );
 };

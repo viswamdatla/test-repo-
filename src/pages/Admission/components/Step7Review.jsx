@@ -98,7 +98,9 @@ export const Step7Review = ({ formData, onSubmit, onBack }) => {
                 <dt style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--outline)' }}>Transport Mode</dt>
                 <dd style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className="material-symbols-outlined text-primary text-sm">directions_bus</span>
-                  {formData.transportRequired === 'no' ? 'Not Required' : `School Bus Service (${formData.pickupPoint || 'Zone 1'})`}
+                  {formData.transportRequired === 'no'
+                    ? 'Not Required'
+                    : `School Bus Service (${formData.busRouteNumber || '—'} • ${formData.pickupDropPoint || '—'})`}
                 </dd>
               </div>
             </dl>
@@ -139,14 +141,14 @@ export const Step7Review = ({ formData, onSubmit, onBack }) => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', width: '100%', maxWidth: '600px' }}>
-          <button type="button" onClick={onBack} style={{ flex: 1, padding: '16px 32px', backgroundColor: 'var(--surface-container-highest)', color: 'var(--on-surface)', fontWeight: 700, borderRadius: '12px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+        <div className="form-actions space-between form-actions--review-footer">
+          <button type="button" className="btn-back" onClick={onBack}>
             <span className="material-symbols-outlined text-sm">arrow_back</span>
-            Back
+            <span>Back</span>
           </button>
-          <button type="button" onClick={onSubmit} style={{ flex: 2, padding: '16px 32px', background: 'linear-gradient(to right, var(--primary), var(--primary-container))', color: 'white', fontWeight: 700, borderRadius: '12px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-            Confirm & Submit
-            <span className="material-symbols-outlined">rocket_launch</span>
+          <button type="button" className="btn-next bg-gradient-primary" onClick={onSubmit}>
+            <span>Confirm &amp; Submit</span>
+            <span className="material-symbols-outlined text-sm">rocket_launch</span>
           </button>
         </div>
       </div>

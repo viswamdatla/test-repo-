@@ -78,9 +78,28 @@ export const LeaveManagementPage = () => {
   const counts = useMemo(() => leaveCounts(leaveApplications, todayISO), [leaveApplications, todayISO]);
 
   const [activeFilter, setActiveFilter] = useState('all');
+  const [rangeFilter, setRangeFilter] = useState('1w');
+  const [isRangeMenuOpen, setIsRangeMenuOpen] = useState(false);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const tableSectionRef = useRef(null);
+  const rangeMenuRef = useRef(null);
+
+  const toIsoDate = useCallback((d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }, []);
+
+  const minusDaysIso = useCallback(
+    (baseIso, daysBack) => {
+      const d = new Date(`${baseIso}T00:00:00`);
+      d.setDate(d.getDate() - daysBack);
+      return toIsoDate(d);
+    },
+    [toIsoDate],
+  );
 
   const kpiFilteredRows = useMemo(
     () => filterLeaves(leaveApplications, activeFilter, todayISO),
@@ -97,6 +116,28 @@ export const LeaveManagementPage = () => {
     queueMicrotask(() => {
       tableSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+  };
+
+  const handleRangeChange = (nextRange) => {
+    setRangeFilter(nextRange);
+    setIsRangeMenuOpen(false);
+    if (nextRange === 'custom') {
+      setDateFrom('');
+      setDateTo('');
+      return;
+    }
+    if (nextRange === '1d') {
+      setDateFrom(todayISO);
+      setDateTo(todayISO);
+      return;
+    }
+    if (nextRange === '1w') {
+      setDateFrom(minusDaysIso(todayISO, 6));
+      setDateTo(todayISO);
+      return;
+    }
+    setDateFrom(minusDaysIso(todayISO, 29));
+    setDateTo(todayISO);
   };
 
   const tableHeading = LEAVE_TABLE_FILTER_HEADINGS[activeFilter] ?? 'Leave requests';
@@ -192,27 +233,83 @@ export const LeaveManagementPage = () => {
             <span className="leave-table-card__count"> ({filteredRows.length})</span>
           </h2>
           <div className="leave-date-filter">
-            <label className="leave-date-filter__field">
-              <span className="leave-date-filter__hint">From</span>
-              <input
-                type="date"
-                className="leave-date-filter__input"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                aria-label="Leave start from date"
-              />
+            <label className="leave-date-filter__field leave-date-filter__field--range">
+              <span className="leave-date-filter__hint">Filter</span>
+              <div
+                ref={rangeMenuRef}
+                className="leave-range-select"
+                tabIndex={0}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setIsRangeMenuOpen(false);
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  className={`leave-date-filter__select ${isRangeMenuOpen ? 'is-open' : ''}`}
+                  onClick={() => setIsRangeMenuOpen((v) => !v)}
+                  aria-haspopup="listbox"
+                  aria-expanded={isRangeMenuOpen}
+                >
+                  <span>
+                    {rangeFilter === '1d'
+                      ? '1 Day'
+                      : rangeFilter === '1w'
+                        ? '1 Week'
+                        : rangeFilter === '1m'
+                          ? '1 Month'
+                          : 'Custom'}
+                  </span>
+                </button>
+                {isRangeMenuOpen && (
+                  <div className="leave-range-menu" role="listbox" aria-label="Leave date quick filter">
+                    {[
+                      { id: '1d', label: '1 Day' },
+                      { id: '1w', label: '1 Week' },
+                      { id: '1m', label: '1 Month' },
+                      { id: 'custom', label: 'Custom' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        role="option"
+                        aria-selected={rangeFilter === opt.id}
+                        className={`leave-range-menu__opt ${rangeFilter === opt.id ? 'is-active' : ''}`}
+                        onClick={() => handleRangeChange(opt.id)}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </label>
-            <label className="leave-date-filter__field">
-              <span className="leave-date-filter__hint">To</span>
-              <input
-                type="date"
-                className="leave-date-filter__input"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                aria-label="Leave end to date"
-              />
-            </label>
-            {(dateFrom || dateTo) && (
+            {rangeFilter === 'custom' && (
+              <>
+                <label className="leave-date-filter__field">
+                  <span className="leave-date-filter__hint">From</span>
+                  <input
+                    type="date"
+                    className="leave-date-filter__input"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    aria-label="Leave start from date"
+                  />
+                </label>
+                <label className="leave-date-filter__field">
+                  <span className="leave-date-filter__hint">To</span>
+                  <input
+                    type="date"
+                    className="leave-date-filter__input"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    aria-label="Leave end to date"
+                  />
+                </label>
+              </>
+            )}
+            {(dateFrom || dateTo) && rangeFilter === 'custom' && (
               <button
                 type="button"
                 className="leave-date-filter__clear"

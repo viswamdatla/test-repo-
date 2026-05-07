@@ -8,6 +8,12 @@ export const Step6Documents = ({ formData, updateFormData, onNext, onBack }) => 
 
   const selectedFeePlan = formData.feePlan || 'Standard';
   const selectedPaymentMethod = formData.paymentMethod || 'Card';
+  const initialPaymentAmount = Number(formData.initialPayment ?? 5000) || 0;
+  const admissionFeeAmount = Number(formData.admissionFee ?? 1000) || 0;
+  const enteredDiscountAmount = Number(formData.discountAmount ?? 0) || 0;
+  const subtotalAmount = initialPaymentAmount + admissionFeeAmount;
+  const effectiveDiscountAmount = formData.applyDiscount ? Math.min(enteredDiscountAmount, subtotalAmount) : 0;
+  const totalDueAmount = Math.max(0, subtotalAmount - effectiveDiscountAmount);
 
   return (
     <>
@@ -91,7 +97,24 @@ export const Step6Documents = ({ formData, updateFormData, onNext, onBack }) => 
             
             <div className="form-group">
               <label>Initial Payment Amount (₹)*</label>
-              <input type="number" defaultValue={formData.initialPayment || "5000"} onChange={e => updateFormData({ initialPayment: e.target.value })} style={{ backgroundColor: 'var(--surface-container-highest)', border: 'none', borderBottom: '2px solid var(--primary)', borderRadius: '8px 8px 0 0' }} />
+              <input
+                className="admission-amount-input"
+                type="number"
+                min="0"
+                value={formData.initialPayment ?? '5000'}
+                onChange={(e) => updateFormData({ initialPayment: e.target.value })}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Admission Fee (₹)*</label>
+              <input
+                className="admission-amount-input"
+                type="number"
+                min="0"
+                value={formData.admissionFee ?? '1000'}
+                onChange={(e) => updateFormData({ admissionFee: e.target.value })}
+              />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '24px 0' }}>
@@ -100,23 +123,55 @@ export const Step6Documents = ({ formData, updateFormData, onNext, onBack }) => 
                 <div style={{ fontSize: '10px', color: 'var(--outline)' }}>Scholarship or sibling discount</div>
               </div>
               {/* Toggle switch mock */}
-              <div style={{ width: '44px', height: '24px', backgroundColor: formData.applyDiscount ? 'var(--primary)' : 'var(--surface-container-highest)', borderRadius: '9999px', position: 'relative', cursor: 'pointer' }} onClick={() => updateFormData({ applyDiscount: !formData.applyDiscount })}>
+              <div
+                style={{ width: '44px', height: '24px', backgroundColor: formData.applyDiscount ? 'var(--primary)' : 'var(--surface-container-highest)', borderRadius: '9999px', position: 'relative', cursor: 'pointer' }}
+                onClick={() =>
+                  updateFormData({
+                    applyDiscount: !formData.applyDiscount,
+                    discountAmount: !formData.applyDiscount ? formData.discountAmount ?? '' : '',
+                  })
+                }
+              >
                 <div style={{ position: 'absolute', top: '2px', left: formData.applyDiscount ? '22px' : '2px', width: '20px', height: '20px', backgroundColor: 'white', borderRadius: '50%', transition: 'all 0.2s' }}></div>
               </div>
             </div>
 
+            {formData.applyDiscount && (
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label>Discount Amount (₹)</label>
+                <input
+                  className="admission-amount-input"
+                  type="number"
+                  min="0"
+                  value={formData.discountAmount ?? ''}
+                  onChange={(e) => updateFormData({ discountAmount: e.target.value })}
+                  placeholder="Enter discount amount"
+                />
+              </div>
+            )}
+
             <div style={{ paddingTop: '16px', borderTop: '1px solid var(--surface-container)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                 <span style={{ color: 'var(--outline)' }}>Initial Amount</span>
-                <span style={{ fontWeight: 700 }}>₹{formData.initialPayment || "5000"}</span>
+                <span style={{ fontWeight: 700 }}>₹{initialPaymentAmount}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                <span style={{ color: 'var(--outline)' }}>Admission Fee</span>
+                <span style={{ fontWeight: 700 }}>₹{admissionFeeAmount}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                 <span style={{ color: 'var(--outline)' }}>Processing Fee</span>
                 <span style={{ fontWeight: 700 }}>₹0</span>
               </div>
+              {formData.applyDiscount && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                  <span style={{ color: 'var(--outline)' }}>Discount</span>
+                  <span style={{ fontWeight: 700, color: 'var(--primary)' }}>-₹{effectiveDiscountAmount}</span>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '18px', paddingTop: '12px', borderTop: '1px dashed var(--surface-container)' }}>
                 <span style={{ fontWeight: 900 }}>Total Due</span>
-                <span style={{ fontWeight: 900, color: 'var(--primary)' }}>₹{formData.initialPayment || "5000"}</span>
+                <span style={{ fontWeight: 900, color: 'var(--primary)' }}>₹{totalDueAmount}</span>
               </div>
             </div>
           </div>
@@ -146,13 +201,13 @@ export const Step6Documents = ({ formData, updateFormData, onNext, onBack }) => 
 
         </div>
 
-        <div style={{ gridColumn: 'span 12', display: 'flex', justifyContent: 'space-between', marginTop: '48px' }}>
+        <div className="form-actions space-between" style={{ marginTop: '48px' }}>
           <button type="button" className="btn-back" onClick={onBack}>
             <span className="material-symbols-outlined text-sm">arrow_back</span>
             <span>Back</span>
           </button>
           <button type="submit" className="btn-next bg-gradient-primary">
-            <span>Next Step</span>
+            <span>Next</span>
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
         </div>

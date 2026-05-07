@@ -136,7 +136,7 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
               <span>Back</span>
             </button>
             <button type="submit" className="btn-next bg-gradient-primary">
-              <span>Next Step</span>
+              <span>Next</span>
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </button>
           </div>

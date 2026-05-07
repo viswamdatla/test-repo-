@@ -17,6 +17,7 @@ import { AdministrationDirectory } from './pages/Employees/AdministrationDirecto
 import { OperationalStaffDirectory } from './pages/Employees/OperationalStaffDirectory';
 import { LeaveManagementPage } from './pages/Employees/LeaveManagementPage';
 import { LeaveApplicationPage } from './pages/Employees/LeaveApplicationPage';
+import { EmployeeDetailPage } from './pages/Employees/EmployeeDetailPage';
 import { AcademicsLayout } from './pages/Academics/AcademicsLayout';
 import { AcademicsModernPage } from './pages/Academics/AcademicsModernPage';
 import { AcademicsKeyedOutlet } from './pages/Academics/AcademicsKeyedOutlet';
@@ -43,6 +44,7 @@ function App() {
             <Route path="operational-staff" element={<OperationalStaffDirectory />} />
             <Route path="leave-management" element={<LeaveManagementPage />} />
             <Route path="leave-management/new" element={<LeaveApplicationPage />} />
+            <Route path="profile/:section/:employeeId" element={<EmployeeDetailPage />} />
           </Route>
           <Route path="financial-services" element={<FinancialServicesLayout />}>
             <Route index element={<FinancialServicesOverview />} />

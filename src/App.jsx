@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { PageLayout } from './layout/PageLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Admission } from './pages/Admission';
+import { AdmissionsDirectory } from './pages/AdmissionsDirectory';
 import { FinancialServicesLayout } from './pages/FinancialServices/FinancialServicesLayout';
 import { FinancialServicesOverview } from './pages/FinancialServices/FinancialServicesOverview';
 import { FeeManagement } from './pages/FinancialServices/FeeManagement';
@@ -17,6 +18,7 @@ import { AdministrationDirectory } from './pages/Employees/AdministrationDirecto
 import { OperationalStaffDirectory } from './pages/Employees/OperationalStaffDirectory';
 import { LeaveManagementPage } from './pages/Employees/LeaveManagementPage';
 import { LeaveApplicationPage } from './pages/Employees/LeaveApplicationPage';
+import { EmployeeDetailPage } from './pages/Employees/EmployeeDetailPage';
 import { AcademicsLayout } from './pages/Academics/AcademicsLayout';
 import { AcademicsModernPage } from './pages/Academics/AcademicsModernPage';
 import { AcademicsKeyedOutlet } from './pages/Academics/AcademicsKeyedOutlet';
@@ -33,7 +35,8 @@ function App() {
       <Routes>
         <Route path="/" element={<PageLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="admission" element={<Admission />} />
+          <Route path="admission" element={<AdmissionsDirectory />} />
+          <Route path="admission/new" element={<Admission />} />
           <Route path="employees" element={<EmployeesLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<EmployeesDashboard />} />
@@ -43,6 +46,7 @@ function App() {
             <Route path="operational-staff" element={<OperationalStaffDirectory />} />
             <Route path="leave-management" element={<LeaveManagementPage />} />
             <Route path="leave-management/new" element={<LeaveApplicationPage />} />
+            <Route path="profile/:section/:employeeId" element={<EmployeeDetailPage />} />
           </Route>
           <Route path="financial-services" element={<FinancialServicesLayout />}>
             <Route index element={<FinancialServicesOverview />} />

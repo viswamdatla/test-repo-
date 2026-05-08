@@ -617,6 +617,15 @@ body.dark .emp-directory-cta {
   }
 }
 
+.emp-row-clickable {
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    outline-offset: -2px;
+  }
+}
+
 .emp-name {
   display: flex;
   align-items: center;

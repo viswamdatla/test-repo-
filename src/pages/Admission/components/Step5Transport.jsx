@@ -8,6 +8,16 @@ export const Step5Transport = ({ formData, updateFormData, onNext, onBack }) => 
 
   const isTransportRequired = formData.transportRequired !== 'no';
 
+  const BUS_ROUTES = {
+    'R-101': ['North Gate', 'City Center', 'Lake View', 'Campus Main Gate'],
+    'R-205': ['South Park', 'Market Circle', 'Old Bridge', 'Campus Main Gate'],
+    'R-309': ['East End', 'Tech Hub', 'River Side', 'Campus Main Gate'],
+    'R-412': ['West Plaza', 'Green Meadows', 'Hill Top', 'Campus Main Gate'],
+  };
+
+  const selectedRoute = formData.busRouteNumber || '';
+  const routeStops = selectedRoute ? BUS_ROUTES[selectedRoute] || [] : [];
+
   return (
     <>
       <div className="form-card">
@@ -36,23 +46,44 @@ export const Step5Transport = ({ formData, updateFormData, onNext, onBack }) => 
           {isTransportRequired && (
             <div className="form-row-2">
               <div className="form-group">
-                <label>Pickup Point*</label>
-                <select defaultValue={formData.pickupPoint || ""} required onChange={e => updateFormData({ pickupPoint: e.target.value })}>
-                  <option value="" disabled>Select Pickup Zone</option>
-                  <option value="zone1">Zone 1 - North</option>
-                  <option value="zone2">Zone 2 - South</option>
-                  <option value="zone3">Zone 3 - East</option>
-                  <option value="zone4">Zone 4 - West</option>
+                <label>Bus Route Number*</label>
+                <select
+                  value={selectedRoute}
+                  required
+                  onChange={(e) => {
+                    const nextRoute = e.target.value;
+                    updateFormData({
+                      busRouteNumber: nextRoute,
+                      pickupDropPoint: '',
+                    });
+                  }}
+                >
+                  <option value="" disabled>
+                    Select Bus Route
+                  </option>
+                  {Object.keys(BUS_ROUTES).map((routeNo) => (
+                    <option key={routeNo} value={routeNo}>
+                      {routeNo}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">
-                <label>Drop Point*</label>
-                <select defaultValue={formData.dropPoint || ""} required onChange={e => updateFormData({ dropPoint: e.target.value })}>
-                  <option value="" disabled>Select Drop Zone</option>
-                  <option value="zone1">Zone 1 - North</option>
-                  <option value="zone2">Zone 2 - South</option>
-                  <option value="zone3">Zone 3 - East</option>
-                  <option value="zone4">Zone 4 - West</option>
+                <label>Pickup / Drop Point*</label>
+                <select
+                  value={formData.pickupDropPoint || ''}
+                  required
+                  disabled={!selectedRoute}
+                  onChange={(e) => updateFormData({ pickupDropPoint: e.target.value })}
+                >
+                  <option value="" disabled>
+                    {selectedRoute ? 'Select Stop' : 'Select route first'}
+                  </option>
+                  {routeStops.map((stop) => (
+                    <option key={stop} value={stop}>
+                      {stop}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -72,7 +103,7 @@ export const Step5Transport = ({ formData, updateFormData, onNext, onBack }) => 
               <span>Back</span>
             </button>
             <button type="submit" className="btn-next bg-gradient-primary">
-              <span>Next Step</span>
+              <span>Next</span>
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </button>
           </div>

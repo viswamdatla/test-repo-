@@ -99,41 +99,43 @@ export const Step4Address = ({ formData, updateFormData, onNext, onBack }) => {
             </label>
           </div>
 
-          <div style={{ opacity: sameAsPresent ? 0.6 : 1, pointerEvents: sameAsPresent ? 'none' : 'auto' }}>
-            <div className="form-group full-width">
-              <label style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Address Line</label>
-              <textarea 
-                rows="3" 
-                placeholder="Permanent residence details..." 
-                value={formData.permAddress || ""}
-                onChange={e => updateFormData({ permAddress: e.target.value })}
-              ></textarea>
-            </div>
+          {!sameAsPresent && (
+            <div>
+              <div className="form-group full-width">
+                <label style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Address Line</label>
+                <textarea 
+                  rows="3" 
+                  placeholder="Permanent residence details..." 
+                  value={formData.permAddress || ""}
+                  onChange={e => updateFormData({ permAddress: e.target.value })}
+                ></textarea>
+              </div>
 
-            <div className="form-row-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '24px' }}>
-              <div className="form-group">
-                <label style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>City</label>
-                <input type="text" value={formData.permCity || ""} onChange={e => updateFormData({ permCity: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>State</label>
-                <select value={formData.permState || ""} onChange={e => updateFormData({ permState: e.target.value })}>
-                  <option value="" disabled>Select State</option>
-                  <option>Andhra Pradesh</option>
-                  <option>Telangana</option>
-                  <option>Karnataka</option>
-                  <option>Tamil Nadu</option>
-                  <option>Maharashtra</option>
-                  <option>Delhi</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>PIN Code</label>
-                <input type="text" value={formData.permPin || ""} onChange={e => updateFormData({ permPin: e.target.value })} />
+              <div className="form-row-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '24px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>City</label>
+                  <input type="text" value={formData.permCity || ""} onChange={e => updateFormData({ permCity: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>State</label>
+                  <select value={formData.permState || ""} onChange={e => updateFormData({ permState: e.target.value })}>
+                    <option value="" disabled>Select State</option>
+                    <option>Andhra Pradesh</option>
+                    <option>Telangana</option>
+                    <option>Karnataka</option>
+                    <option>Tamil Nadu</option>
+                    <option>Maharashtra</option>
+                    <option>Delhi</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>PIN Code</label>
+                  <input type="text" value={formData.permPin || ""} onChange={e => updateFormData({ permPin: e.target.value })} />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="form-actions space-between" style={{ marginTop: '40px' }}>
             <button type="button" className="btn-back" onClick={onBack}>
@@ -141,7 +143,7 @@ export const Step4Address = ({ formData, updateFormData, onNext, onBack }) => {
               <span>Back</span>
             </button>
             <button type="submit" className="btn-next bg-gradient-primary">
-              <span>Next Step</span>
+              <span>Next</span>
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </button>
           </div>

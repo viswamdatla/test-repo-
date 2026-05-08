@@ -54,6 +54,38 @@ const fileKind = (file) => {
   return 'File';
 };
 
+const formatIsoDateLabel = (iso) => {
+  if (!iso) return '—';
+  try {
+    return new Date(`${iso}T12:00:00`).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch {
+    return iso;
+  }
+};
+
+const formatGenderLabel = (g) => {
+  if (g === 'male') return 'Male';
+  if (g === 'female') return 'Female';
+  return '—';
+};
+
+const formatWorkHoursRange = (start, end) => {
+  if (!start && !end) return '—';
+  if (start && end) return `${start} – ${end}`;
+  return start || end || '—';
+};
+
+const formatSalaryLabel = (s) => {
+  if (s === '' || s == null) return '—';
+  const n = Number(s);
+  if (Number.isNaN(n)) return String(s);
+  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(n);
+};
+
 export const TeacherOnboardingWizard = ({ onStepChange }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -175,18 +207,8 @@ export const TeacherOnboardingWizard = ({ onStepChange }) => {
     setField({ certificates: draft.certificates.filter((c) => c.id !== id) });
   };
 
-  const joinDateLabel = useMemo(() => {
-    if (!draft.joinDate) return '—';
-    try {
-      return new Date(draft.joinDate + 'T12:00:00').toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return draft.joinDate;
-    }
-  }, [draft.joinDate]);
+  const joinDateLabel = useMemo(() => formatIsoDateLabel(draft.joinDate), [draft.joinDate]);
+  const dobLabel = useMemo(() => formatIsoDateLabel(draft.dateOfBirth), [draft.dateOfBirth]);
 
   const renderHorizontalStepper = (variant = 'default') => (
     <div className={`tow-stepper-h ${variant === 'review' ? 'tow-stepper-h--review' : ''}`}>
@@ -962,13 +984,31 @@ export const TeacherOnboardingWizard = ({ onStepChange }) => {
                     <p>{draft.fullName || '—'}</p>
                   </div>
                 </div>
-                <div className="tow-review-card__field">
-                  <span>Email Address</span>
-                  <p style={{ fontWeight: 500 }}>{draft.email || '—'}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                  <div className="tow-review-card__field">
+                    <span>Employee ID</span>
+                    <p style={{ fontWeight: 500 }}>{draft.employeeId || '—'}</p>
+                  </div>
+                  <div className="tow-review-card__field">
+                    <span>Date of Birth</span>
+                    <p style={{ fontWeight: 500 }}>{dobLabel}</p>
+                  </div>
+                  <div className="tow-review-card__field">
+                    <span>Gender</span>
+                    <p style={{ fontWeight: 500 }}>{formatGenderLabel(draft.gender)}</p>
+                  </div>
+                  <div className="tow-review-card__field">
+                    <span>Phone Number</span>
+                    <p style={{ fontWeight: 500 }}>{draft.phone || '—'}</p>
+                  </div>
+                  <div className="tow-review-card__field" style={{ gridColumn: '1 / -1' }}>
+                    <span>Email Address</span>
+                    <p style={{ fontWeight: 500 }}>{draft.email || '—'}</p>
+                  </div>
                 </div>
                 <div className="tow-review-card__field">
-                  <span>Phone Number</span>
-                  <p style={{ fontWeight: 500 }}>{draft.phone || '—'}</p>
+                  <span>Residential Address</span>
+                  <p style={{ fontWeight: 500, whiteSpace: 'pre-wrap' }}>{draft.address?.trim() || '—'}</p>
                 </div>
               </div>
 
@@ -989,20 +1029,40 @@ export const TeacherOnboardingWizard = ({ onStepChange }) => {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                   <div className="tow-review-card__field">
-                    <span>Employee ID</span>
-                    <p style={{ fontWeight: 500 }}>{draft.employeeId || '—'}</p>
+                    <span>Teacher Level</span>
+                    <p style={{ fontWeight: 500 }}>{draft.teacherLevel || '—'}</p>
                   </div>
                   <div className="tow-review-card__field">
-                    <span>Designation</span>
-                    <p style={{ fontWeight: 500 }}>{draft.designation || '—'}</p>
+                    <span>Experience (Years)</span>
+                    <p style={{ fontWeight: 500 }}>{draft.experienceYears !== '' && draft.experienceYears != null ? draft.experienceYears : '—'}</p>
+                  </div>
+                  <div className="tow-review-card__field">
+                    <span>Qualification</span>
+                    <p style={{ fontWeight: 500 }}>{draft.qualification || '—'}</p>
                   </div>
                   <div className="tow-review-card__field">
                     <span>Department</span>
                     <p style={{ fontWeight: 500 }}>{draft.department || '—'}</p>
                   </div>
                   <div className="tow-review-card__field">
+                    <span>Designation</span>
+                    <p style={{ fontWeight: 500 }}>{draft.designation || '—'}</p>
+                  </div>
+                  <div className="tow-review-card__field">
+                    <span>Salary</span>
+                    <p style={{ fontWeight: 500 }}>{formatSalaryLabel(draft.salary)}</p>
+                  </div>
+                  <div className="tow-review-card__field">
+                    <span>Status</span>
+                    <p style={{ fontWeight: 500 }}>{draft.status || '—'}</p>
+                  </div>
+                  <div className="tow-review-card__field">
                     <span>Join Date</span>
                     <p style={{ fontWeight: 500 }}>{joinDateLabel}</p>
+                  </div>
+                  <div className="tow-review-card__field" style={{ gridColumn: '1 / -1' }}>
+                    <span>Work Hours</span>
+                    <p style={{ fontWeight: 500 }}>{formatWorkHoursRange(draft.workHoursStart, draft.workHoursEnd)}</p>
                   </div>
                 </div>
               </div>
@@ -1022,15 +1082,31 @@ export const TeacherOnboardingWizard = ({ onStepChange }) => {
                     Edit
                   </button>
                 </div>
+                <p style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--tow-on-variant)', margin: '0 0 8px' }}>
+                  Teaching subjects
+                </p>
                 <div className="tow-review-pills">
-                  {draft.subjects.length === 0 && draft.classes.length === 0 && <span>—</span>}
+                  {draft.subjects.length === 0 && <span>—</span>}
                   {draft.subjects.map((s) => (
                     <span key={s}>{s}</span>
                   ))}
+                </div>
+                <p style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--tow-on-variant)', margin: '16px 0 8px' }}>
+                  Classes assigned
+                </p>
+                <div className="tow-review-pills">
+                  {draft.classes.length === 0 && <span>—</span>}
                   {draft.classes.map((c) => (
-                    <span key={c}>
-                      Class {c}
-                    </span>
+                    <span key={c}>Class {c}</span>
+                  ))}
+                </div>
+                <p style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--tow-on-variant)', margin: '16px 0 8px' }}>
+                  Previous schools
+                </p>
+                <div className="tow-review-pills">
+                  {draft.previousSchools.length === 0 && <span>—</span>}
+                  {draft.previousSchools.map((sch) => (
+                    <span key={sch}>{sch}</span>
                   ))}
                 </div>
               </div>
@@ -1051,6 +1127,29 @@ export const TeacherOnboardingWizard = ({ onStepChange }) => {
                   </button>
                 </div>
                 <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: 12,
+                      background: 'var(--tow-surface-low)',
+                      borderRadius: 8,
+                      marginBottom: 8,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <span className="material-symbols-outlined">
+                        {draft.profilePhoto ? 'image' : 'hide_image'}
+                      </span>
+                      <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>
+                        Profile photo{draft.profilePhoto ? `: ${draft.profilePhoto.name}` : ''}
+                      </span>
+                    </div>
+                    <span className="material-symbols-outlined tow-fill" style={{ color: 'var(--tow-primary)', fontSize: 20 }}>
+                      {draft.profilePhoto ? 'verified' : 'pending'}
+                    </span>
+                  </div>
                   {draft.idProof && (
                     <div
                       style={{
@@ -1094,7 +1193,6 @@ export const TeacherOnboardingWizard = ({ onStepChange }) => {
                       </span>
                     </div>
                   ))}
-                  {!draft.idProof && draft.certificates.length === 0 && <p style={{ color: 'var(--tow-on-variant)' }}>—</p>}
                 </div>
               </div>
             </div>

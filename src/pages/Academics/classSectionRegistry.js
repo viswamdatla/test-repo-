@@ -1,5 +1,7 @@
 export const SECTION_LETTERS = ['A', 'B', 'C'];
 
+const SECTION_CODE_PILLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
 function splitCountAcrossSections(total, sectionCount) {
   const base = Math.floor(total / sectionCount);
   const rem = total % sectionCount;
@@ -34,7 +36,49 @@ export const CLASS_CARDS = [
   return { ...row, sections };
 });
 
-const classByCode = new Map(CLASS_CARDS.map((c) => [c.code, c]));
+/** Runtime-added classes (e.g. from Add Class modal) so roster routing can resolve sections */
+let dynamicClassCards = [];
+
+export function appendDynamicClassCard(card) {
+  dynamicClassCards = [...dynamicClassCards, card];
+}
+
+export function getMergedClassCards() {
+  return [...CLASS_CARDS, ...dynamicClassCards];
+}
+
+/**
+ * Build a CLASS_CARDS-shaped entry from the Add Class form.
+ * @param {{ name: string, code: string, sections: number, teacher?: string, description?: string }} form
+ */
+export function createClassCardFromForm(form) {
+  const label = String(form.name || '').trim();
+  const rawCode = String(form.code || '').trim().toUpperCase();
+  const classCode = rawCode.slice(0, 4);
+  const n = Math.min(20, Math.max(1, Number(form.sections) || 1));
+  const pills = SECTION_CODE_PILLS.slice(0, n);
+  const counts = splitCountAcrossSections(0, pills.length);
+  const sections = pills.map((letter, i) => ({
+    id: `${classCode}-${letter}`,
+    pill: letter,
+    title: `Section ${letter}`,
+    count: counts[i],
+  }));
+  return {
+    code: classCode,
+    label,
+    count: 0,
+    sections,
+    ...(form.teacher || form.description
+      ? {
+          meta: {
+            ...(form.teacher ? { teacher: String(form.teacher).trim() } : {}),
+            ...(form.description ? { description: String(form.description).trim() } : {}),
+          },
+        }
+      : {}),
+  };
+}
 
 /**
  * sectionId format: "{classCode}-{letter}" e.g. "06-A", "NUR-A"
@@ -49,7 +93,7 @@ export function parseSectionId(sectionId) {
 }
 
 export function getClassByCode(code) {
-  return classByCode.get(code) ?? null;
+  return getMergedClassCards().find((c) => c.code === code) ?? null;
 }
 
 export function getSectionContext(sectionId) {

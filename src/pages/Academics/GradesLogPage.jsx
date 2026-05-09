@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { usePageTitle } from '../../hooks/usePageTitle';
@@ -16,13 +16,10 @@ import {
   slugToClassLevel,
 } from './studentManagement/studentManagementConfig';
 import {
-  buildCourseRows,
-  computeGpa,
+  buildPerformanceMatrixRow,
   filterSectionGrades,
-  letterToGpaPoints,
-  scoreToLetter,
+  letterGradeTone,
 } from './studentGradesViewModel';
-import './studentManagement/StudentManagementFlow.scss';
 import './GradesLogPage.scss';
 
 const PAGE_SIZE = 8;
@@ -31,9 +28,7 @@ const PASS_PCT = 40;
 
 const GRADE_FILTERS = [
   { id: 'all', label: 'All Students' },
-  { id: 'published', label: 'Published' },
-  { id: 'pending', label: 'Pending' },
-  { id: 'atRisk', label: 'At risk' },
+  { id: 'remedial', label: 'Remedial Focus' },
 ];
 
 const initialsFromName = (name) => {
@@ -46,51 +41,22 @@ const initialsFromName = (name) => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-function RecordsStatusPill({ gradeCount, hasPending, allPublished }) {
-  if (gradeCount === 0) {
-    return (
-      <span className="sm-pill gl-pill-records gl-pill-records--muted">
-        <span className="material-symbols-outlined sm-pill-ic">help</span>
-        No marks yet
-      </span>
-    );
-  }
-  if (hasPending) {
-    return (
-      <span className="sm-pill gl-pill-records gl-pill-records--pending">
-        <span className="material-symbols-outlined sm-pill-ic" style={{ fontVariationSettings: "'FILL' 1" }}>
-          pending
-        </span>
-        Pending review
-      </span>
-    );
-  }
-  if (allPublished) {
-    return (
-      <span className="sm-pill gl-pill-records gl-pill-records--ok">
-        <span className="material-symbols-outlined sm-pill-ic" style={{ fontVariationSettings: "'FILL' 1" }}>
-          check_circle
-        </span>
-        Published
-      </span>
-    );
-  }
-  return (
-    <span className="sm-pill gl-pill-records gl-pill-records--muted">
-      <span className="material-symbols-outlined sm-pill-ic">edit_note</span>
-      In progress
-    </span>
-  );
+function formatCell(v) {
+  if (v == null) return '—';
+  return String(v);
 }
 
-function ResultPill({ avgPct }) {
-  if (avgPct == null) {
-    return <span className="sm-pill sm-pill-plain gl-pill-result gl-pill-result--muted">—</span>;
+function formatIntCell(v) {
+  if (v == null) return '—';
+  return String(v).padStart(2, '0');
+}
+
+function GradeLetterBadge({ letter }) {
+  if (!letter || letter === '—') {
+    return <span className="gbc-grade-pill gbc-grade-pill--muted">—</span>;
   }
-  if (avgPct >= PASS_PCT) {
-    return <span className="sm-pill sm-pill-plain gl-pill-result gl-pill-result--pass">Pass</span>;
-  }
-  return <span className="sm-pill sm-pill-plain gl-pill-result gl-pill-result--risk">At risk</span>;
+  const tone = letterGradeTone(letter);
+  return <span className={`gbc-grade-pill gbc-grade-pill--${tone}`}>{letter}</span>;
 }
 
 export const GradesLogPage = () => {
@@ -102,18 +68,16 @@ export const GradesLogPage = () => {
   const structure = useSelector(selectAcademicsStructure);
   const students = useSelector((s) => selectAcademicsSectionItems(s, 'students'));
   const grades = useSelector((s) => selectAcademicsSectionItems(s, 'grades'));
-  const headCheckboxRef = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [gradeFilter, setGradeFilter] = useState('all');
   const [page, setPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState({});
 
   const allClasses = useMemo(() => flattenAllClassNames(structure), [structure]);
   const classLevel = slugToClassLevel(classSlug, allClasses);
   const stage = useMemo(
     () => (classLevel ? resolveStageForClass(structure, classLevel) : null),
-    [structure, classLevel]
+    [structure, classLevel],
   );
   const sections = useSelector((s) => selectClassSections(s, stage, classLevel));
   const section = sectionFromSlug(sectionSlug, sections);
@@ -135,14 +99,13 @@ export const GradesLogPage = () => {
 
   const sectionGrades = useMemo(
     () => (stage && classLevel && section ? filterSectionGrades(grades, stage, classLevel, section) : []),
-    [grades, stage, classLevel, section]
+    [grades, stage, classLevel, section],
   );
 
-  const roster = useMemo(() => {
-    return students.filter(
-      (s) => s.stage === stage && s.classLevel === classLevel && (s.section || '') === section
-    );
-  }, [students, stage, classLevel, section]);
+  const roster = useMemo(
+    () => students.filter((s) => s.stage === stage && s.classLevel === classLevel && (s.section || '') === section),
+    [students, stage, classLevel, section],
+  );
 
   const gradeRows = useMemo(() => {
     const byName = new Map(roster.map((s) => [s.name, s]));
@@ -152,55 +115,45 @@ export const GradesLogPage = () => {
       .sort((a, b) => a.localeCompare(b))
       .map((name) => {
         const stu = byName.get(name);
-        const sg = sectionGrades.filter((g) => g.student === name);
-        const courseRows = buildCourseRows(sg, 'finalTerm');
-        let avgPct =
-          courseRows.length > 0
-            ? courseRows.reduce((acc, r) => acc + r.totalPct, 0) / courseRows.length
-            : null;
-        if (avgPct == null && sg.length > 0) {
-          avgPct = sg.reduce((acc, g) => acc + Number(g.score), 0) / sg.length;
-        }
-        let gpa = computeGpa(courseRows);
-        if (gpa == null && avgPct != null) {
-          gpa = letterToGpaPoints(scoreToLetter(avgPct));
-        }
-        const gpaDisplay = gpa != null ? gpa.toFixed(2) : '—';
-        const hasPending = sg.some((g) => String(g.status || '').toLowerCase() === 'pending');
-        const allPublished =
-          sg.length > 0 && sg.every((g) => String(g.status || '').toLowerCase() === 'published');
-
+        const matrix = buildPerformanceMatrixRow(name, sectionGrades);
         return {
           id: stu?.id ?? `grade:${name}`,
           name,
           rollNo: stu?.rollNo || stu?.admissionNo || '—',
-          guardian: stu?.guardian || '—',
-          avgPct,
-          gpaDisplay,
-          gradeCount: sg.length,
-          hasPending,
-          allPublished,
+          matrix,
         };
       });
   }, [roster, sectionGrades]);
 
   const rosterStats = useMemo(() => {
-    const total = gradeRows.length;
-    const pendingMarks = gradeRows.filter((r) => r.hasPending).length;
-    const avgs = gradeRows.map((r) => r.avgPct).filter((x) => x != null);
+    const avgs = gradeRows.map((r) => r.matrix.overall).filter((x) => x != null);
     const classAvg = avgs.length ? avgs.reduce((a, b) => a + b, 0) / avgs.length : null;
-    const atRisk = gradeRows.filter((r) => r.avgPct != null && r.avgPct < PASS_PCT).length;
-    return { total, pendingMarks, classAvg, atRisk };
+    const remedial = gradeRows.filter((r) => r.matrix.overall != null && r.matrix.overall < PASS_PCT).length;
+    return { total: gradeRows.length, classAvg, remedial };
   }, [gradeRows]);
+
+  const spotlight = useMemo(() => {
+    const ranked = gradeRows
+      .filter((r) => r.matrix.overall != null)
+      .sort((a, b) => b.matrix.overall - a.matrix.overall || a.name.localeCompare(b.name));
+    return ranked[0] ?? null;
+  }, [gradeRows]);
+
+  const spotlightRankPct = useMemo(() => {
+    if (!spotlight) return null;
+    const scored = gradeRows
+      .filter((r) => r.matrix.overall != null)
+      .sort((a, b) => b.matrix.overall - a.matrix.overall || a.name.localeCompare(b.name));
+    if (scored.length <= 1) return '100.0';
+    const idx = scored.findIndex((r) => r.id === spotlight.id);
+    if (idx < 0) return null;
+    return ((1 - idx / (scored.length - 1)) * 100).toFixed(1);
+  }, [spotlight, gradeRows]);
 
   const tableSource = useMemo(() => {
     let rows = gradeRows;
-    if (gradeFilter === 'published') {
-      rows = rows.filter((r) => r.gradeCount > 0 && !r.hasPending);
-    } else if (gradeFilter === 'pending') {
-      rows = rows.filter((r) => r.hasPending);
-    } else if (gradeFilter === 'atRisk') {
-      rows = rows.filter((r) => r.avgPct != null && r.avgPct < PASS_PCT);
+    if (gradeFilter === 'remedial') {
+      rows = rows.filter((r) => r.matrix.overall != null && r.matrix.overall < PASS_PCT);
     }
     const q = searchQuery.trim().toLowerCase();
     if (q) {
@@ -209,7 +162,7 @@ export const GradesLogPage = () => {
           r.name.toLowerCase().includes(q) ||
           String(r.rollNo || '')
             .toLowerCase()
-            .includes(q)
+            .includes(q),
       );
     }
     return rows;
@@ -226,53 +179,6 @@ export const GradesLogPage = () => {
   useEffect(() => {
     if (page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
-
-  useEffect(() => {
-    setSelectedIds({});
-  }, [gradeFilter, searchQuery, classSlug, sectionSlug]);
-
-  const allPageSelected = pageRows.length > 0 && pageRows.every((r) => selectedIds[r.id]);
-  const somePageSelected = pageRows.some((r) => selectedIds[r.id]);
-
-  useEffect(() => {
-    const el = headCheckboxRef.current;
-    if (el) el.indeterminate = somePageSelected && !allPageSelected;
-  }, [somePageSelected, allPageSelected]);
-
-  const toggleRow = (id) => {
-    setSelectedIds((prev) => {
-      const next = { ...prev };
-      if (next[id]) delete next[id];
-      else next[id] = true;
-      return next;
-    });
-  };
-
-  const toggleSelectAllPage = () => {
-    if (allPageSelected) {
-      setSelectedIds((prev) => {
-        const next = { ...prev };
-        pageRows.forEach((r) => {
-          delete next[r.id];
-        });
-        return next;
-      });
-    } else {
-      setSelectedIds((prev) => {
-        const next = { ...prev };
-        pageRows.forEach((r) => {
-          next[r.id] = true;
-        });
-        return next;
-      });
-    }
-  };
-
-  const selectedStudents = useMemo(
-    () => gradeRows.filter((r) => selectedIds[r.id]),
-    [gradeRows, selectedIds]
-  );
-  const selectedCount = selectedStudents.length;
 
   usePageTitle(section && classLevel ? `${classLevel} ${section} — Grades` : 'Grades');
 
@@ -293,195 +199,257 @@ export const GradesLogPage = () => {
     return out;
   }, [pageCount, safePage]);
 
+  const classAvgDisplay = rosterStats.classAvg != null ? rosterStats.classAvg.toFixed(1) : '—';
+  const barPct =
+    rosterStats.classAvg != null ? Math.min(100, Math.max(0, Number(rosterStats.classAvg))) : 0;
+
+  const spotlightBadges = spotlight
+    ? Math.min(10, Math.max(0, Math.round((spotlight.matrix.overall ?? 0) / 10)))
+    : 0;
+
   if (!stage || !validClass || !section) return null;
 
   return (
-    <div className="sm-roster-page grades-log-page">
-      <div className="sm-roster-toolbar-top">
-        <button type="button" className="att-nav-back" onClick={() => navigate(`${wizardBase}/${classSlug}`)}>
+    <div className="gbc-page">
+      <div className="gbc-toolbar-top">
+        <button type="button" className="gbc-back" onClick={() => navigate(`${wizardBase}/${classSlug}`)}>
           <span className="material-symbols-outlined">arrow_back</span>
           Sections
         </button>
       </div>
 
-      <header className="sm-roster-page-head">
+      <header className="gbc-page-head">
         <div>
-          <h1 className="sm-roster-title">
-            {classLevel} — Section {section}
-          </h1>
-          <p className="sm-roster-year">
-            <span className="material-symbols-outlined sm-roster-year-ic">calendar_month</span>
-            Academic Year {ACADEMIC_YEAR}
+          <nav className="gbc-breadcrumb" aria-label="Breadcrumb">
+            <span>Academics</span>
+            <span className="material-symbols-outlined gbc-breadcrumb__sep">chevron_right</span>
+            <span className="gbc-breadcrumb__current">Gradebook Central</span>
+          </nav>
+          <h1 className="gbc-title">Gradebook Central</h1>
+          <p className="gbc-subtitle">
+            {classLevel} — Section {section} · Academic Year {ACADEMIC_YEAR}
           </p>
+        </div>
+        <div className="gbc-head-actions">
+          <button
+            type="button"
+            className="gbc-btn gbc-btn--primary"
+            onClick={() => window.alert('Notify parents (demo).')}
+          >
+            <span className="material-symbols-outlined">mail</span>
+            Notify Parents
+          </button>
+          <button
+            type="button"
+            className="gbc-btn gbc-btn--outline"
+            onClick={() => window.alert('Export CSV (demo).')}
+          >
+            <span className="material-symbols-outlined">download</span>
+            Export CSV
+          </button>
         </div>
       </header>
 
-      {loadStatus === 'loading' && <p className="sm-loading">Loading grades…</p>}
+      {loadStatus === 'loading' && <p className="gbc-loading">Loading grades…</p>}
 
-      <div className="sm-roster-stats">
-        <div className="sm-roster-stat sm-roster-stat-wide">
-          <span className="sm-roster-stat-kicker">Grade overview</span>
-          <h2 className="sm-roster-stat-title">Class performance</h2>
-          <div className="sm-roster-stat-legend">
-            <div className="sm-roster-legend-item">
-              <span className="sm-roster-dot sm-roster-dot-primary" />
-              <span className="sm-roster-legend-text">{rosterStats.total} Total students</span>
+      <div className="gbc-bento">
+        <article className="gbc-card gbc-card--average">
+          <div className="gbc-card--average__top">
+            <div className="gbc-icon-wrap">
+              <span className="material-symbols-outlined gbc-icon-wrap__ic">analytics</span>
             </div>
-            <div className="sm-roster-legend-item">
-              <span className="sm-roster-dot sm-roster-dot-tertiary" />
-              <span className="sm-roster-legend-text">{rosterStats.pendingMarks} Pending marks</span>
-            </div>
+            <span className="gbc-trend-pill">
+              <span className="material-symbols-outlined gbc-trend-pill__ic">trending_up</span>
+              {rosterStats.remedial} <span className="gbc-trend-pill__muted">below {PASS_PCT}%</span>
+            </span>
           </div>
-        </div>
-        <div className="sm-roster-stat sm-roster-stat-primary">
-          <span className="material-symbols-outlined sm-roster-stat-icon">school</span>
-          <h3 className="sm-roster-stat-value">
-            {rosterStats.classAvg != null ? `${rosterStats.classAvg.toFixed(0)}%` : '—'}
-          </h3>
-          <p className="sm-roster-stat-caption">Class average</p>
-        </div>
-        <div className="sm-roster-stat sm-roster-stat-wallet">
-          <span className="material-symbols-outlined sm-roster-stat-icon">warning</span>
-          <h3 className="sm-roster-stat-value">{rosterStats.atRisk}</h3>
-          <p className="sm-roster-stat-caption">Below passing ({PASS_PCT}%)</p>
-        </div>
+          <p className="gbc-kicker">System-Wide Average</p>
+          <div className="gbc-stat-line">
+            <span className="gbc-stat-line__value">{classAvgDisplay}</span>
+            <span className="gbc-stat-line__suffix">/ 100</span>
+          </div>
+          <div className="gbc-progress-track">
+            <div className="gbc-progress-fill" style={{ width: `${barPct}%` }} />
+          </div>
+        </article>
+
+        <article className="gbc-card gbc-card--spotlight">
+          <div className="gbc-card--spotlight__glow" aria-hidden />
+          {spotlight ? (
+            <>
+              <div className="gbc-spotlight-avatar-wrap">
+                <div className="gbc-spotlight-avatar-ring">
+                  <div className="gbc-spotlight-avatar-fallback" aria-hidden>
+                    {initialsFromName(spotlight.name)}
+                  </div>
+                </div>
+                <div className="gbc-spotlight-badge" aria-hidden>
+                  <span className="material-symbols-outlined gbc-spotlight-badge__ic">military_tech</span>
+                </div>
+              </div>
+              <div className="gbc-spotlight-copy">
+                <p className="gbc-spotlight-label">Student spotlight</p>
+                <h2 className="gbc-spotlight-name">{spotlight.name}</h2>
+                <div className="gbc-spotlight-stats">
+                  <div>
+                    <p className="gbc-spotlight-stat-label">GPA rank</p>
+                    <p className="gbc-spotlight-stat-value">
+                      {spotlightRankPct != null ? `${spotlightRankPct}%` : '—'}
+                    </p>
+                  </div>
+                  <div className="gbc-spotlight-divider" aria-hidden />
+                  <div className="gbc-spotlight-milestone">
+                    <p className="gbc-spotlight-stat-label">Excellence milestone</p>
+                    <div className="gbc-spotlight-milestone-row">
+                      <div className="gbc-progress-track gbc-progress-track--on-dark">
+                        <div
+                          className="gbc-progress-fill gbc-progress-fill--dim"
+                          style={{ width: `${spotlightBadges * 10}%` }}
+                        />
+                      </div>
+                      <span className="gbc-spotlight-badges">{spotlightBadges}/10 Badges</span>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" className="gbc-spotlight-cta" onClick={() => openStudent(spotlight.name)}>
+                  View Profile
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="gbc-spotlight-empty">No graded students in this section yet.</p>
+          )}
+        </article>
       </div>
 
-      <div className="sm-roster-filters">
-        <div className="sm-roster-search-wrap">
-          <span className="material-symbols-outlined sm-roster-search-ic">search</span>
+      <div className="gbc-matrix-wrap">
+        <div className="gbc-matrix-head">
+          <div>
+            <h3 className="gbc-matrix-title">Detailed Performance Matrix</h3>
+            <p className="gbc-matrix-sub">
+              Term 2 Examination Results (Spring {ACADEMIC_YEAR.split('-')[0]})
+            </p>
+          </div>
+          <div className="gbc-matrix-filters">
+            {GRADE_FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                className={`gbc-filter-chip ${gradeFilter === f.id ? 'is-active' : ''}`}
+                onClick={() => setGradeFilter(f.id)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="gbc-search-row">
+          <span className="material-symbols-outlined gbc-search-ic">search</span>
           <input
             type="search"
-            className="sm-roster-search-input"
+            className="gbc-search-input"
             placeholder="Search student name or roll number"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search students"
           />
         </div>
-        <div className="sm-roster-pills">
-          {GRADE_FILTERS.map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              className={`sm-roster-filter-pill ${gradeFilter === f.id ? 'active' : ''}`}
-              onClick={() => setGradeFilter(f.id)}
-            >
-              {f.label}
-            </button>
-          ))}
-          <span className="sm-roster-pills-divider" aria-hidden />
-          <button type="button" className="sm-roster-filter-icon" title="More filters" aria-label="More filters">
-            <span className="material-symbols-outlined">filter_list</span>
-          </button>
-        </div>
-      </div>
 
-      <div className="sm-roster-table-card">
-        <div className="sm-roster-table-scroll">
-          <table className="sm-roster-table">
+        <div className="gbc-table-scroll">
+          <table className="gbc-table">
             <thead>
               <tr>
-                <th className="sm-roster-th-check">
-                  <input
-                    ref={headCheckboxRef}
-                    type="checkbox"
-                    checked={allPageSelected}
-                    onChange={toggleSelectAllPage}
-                    aria-label="Select all on this page"
-                  />
-                </th>
-                <th>Student name</th>
-                <th>Roll no</th>
-                <th>Overall %</th>
-                <th>GPA</th>
-                <th>Records</th>
-                <th>Result</th>
-                <th className="sm-roster-th-actions">Actions</th>
+                <th>Roll No</th>
+                <th>Student Name</th>
+                <th className="gbc-th-num">FA1</th>
+                <th className="gbc-th-num">FA2</th>
+                <th className="gbc-th-num">Half Yr</th>
+                <th className="gbc-th-num">FA3</th>
+                <th className="gbc-th-num">FA4</th>
+                <th className="gbc-th-num">Annual</th>
+                <th className="gbc-th-num">Int</th>
+                <th className="gbc-th-num">Overall</th>
+                <th className="gbc-th-num">Grade</th>
+                <th className="gbc-th-action">Action</th>
               </tr>
             </thead>
             <tbody>
-              {pageRows.map((row, idx) => (
-                <tr
-                  key={row.id}
-                  className="sm-roster-tr grades-log-student-row"
-                  onClick={(e) => {
-                    if (e.target.closest('input, button')) return;
-                    openStudent(row.name);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
+              {pageRows.map((row, idx) => {
+                const m = row.matrix;
+                const overallTone =
+                  m.overall != null && m.overall >= 90 ? 'high' : m.overall != null && m.overall < PASS_PCT ? 'low' : '';
+                return (
+                  <tr
+                    key={row.id}
+                    className="gbc-tr"
+                    onClick={(e) => {
+                      if (e.target.closest('button')) return;
                       openStudent(row.name);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(selectedIds[row.id])}
-                      onChange={() => toggleRow(row.id)}
-                      aria-label={`Select ${row.name}`}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </td>
-                  <td>
-                    <div className="sm-roster-student-cell">
-                      <div className={`sm-roster-avatar sm-roster-avatar-${idx % 3}`}>{initialsFromName(row.name)}</div>
-                      <div>
-                        <span className="sm-roster-name-link grades-log-name">{row.name}</span>
-                        <p className="sm-roster-guardian">Guardian: {row.guardian}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="sm-roster-td-muted">{row.rollNo}</td>
-                  <td className="sm-roster-td-muted">
-                    {row.avgPct != null ? `${row.avgPct.toFixed(1)}%` : '—'}
-                  </td>
-                  <td className="sm-roster-td-muted">{row.gpaDisplay}</td>
-                  <td>
-                    <RecordsStatusPill
-                      gradeCount={row.gradeCount}
-                      hasPending={row.hasPending}
-                      allPublished={row.allPublished}
-                    />
-                  </td>
-                  <td>
-                    <ResultPill avgPct={row.avgPct} />
-                  </td>
-                  <td className="sm-roster-td-actions">
-                    <button
-                      type="button"
-                      className="sm-roster-more"
-                      aria-label={`Open grades for ${row.name}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
                         openStudent(row.name);
-                      }}
-                    >
-                      <span className="material-symbols-outlined">more_vert</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <td className="gbc-td-roll">{row.rollNo}</td>
+                    <td>
+                      <div className="gbc-name-cell">
+                        <div className={`gbc-avatar gbc-avatar--${idx % 3}`}>{initialsFromName(row.name)}</div>
+                        <span className="gbc-name">{row.name}</span>
+                      </div>
+                    </td>
+                    <td className="gbc-td-num">{formatCell(m.fa1)}</td>
+                    <td className="gbc-td-num">{formatCell(m.fa2)}</td>
+                    <td className="gbc-td-num">{formatCell(m.halfYr)}</td>
+                    <td className="gbc-td-num">{formatCell(m.fa3)}</td>
+                    <td className="gbc-td-num">{formatCell(m.fa4)}</td>
+                    <td className="gbc-td-num">{formatCell(m.annual)}</td>
+                    <td className="gbc-td-num">{formatIntCell(m.int)}</td>
+                    <td className={`gbc-td-num gbc-td-overall ${overallTone}`}>
+                      {m.overall != null ? `${m.overall}%` : '—'}
+                    </td>
+                    <td className="gbc-td-num">
+                      <GradeLetterBadge letter={m.gradeLetter} />
+                    </td>
+                    <td className="gbc-td-action">
+                      <button
+                        type="button"
+                        className="gbc-more"
+                        aria-label={`Actions for ${row.name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openStudent(row.name);
+                        }}
+                      >
+                        <span className="material-symbols-outlined">more_vert</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+
         {tableSource.length === 0 && loadStatus !== 'loading' && (
-          <p className="sm-empty-hint sm-roster-empty">No students match this view.</p>
+          <p className="gbc-empty">No students match this view.</p>
         )}
+
         {tableSource.length > 0 && (
-          <div className="sm-roster-pagination">
-            <p className="sm-roster-page-summary">
-              Showing <strong>{showFrom}</strong>-<strong>{showTo}</strong> of{' '}
-              <strong>{tableSource.length}</strong> students
+          <footer className="gbc-pagination">
+            <p className="gbc-page-summary">
+              Showing <strong>{showFrom}</strong>-<strong>{showTo}</strong> of <strong>{tableSource.length}</strong>{' '}
+              students
             </p>
-            <div className="sm-roster-page-btns">
+            <div className="gbc-page-btns">
               <button
                 type="button"
-                className="sm-roster-page-nav"
+                className="gbc-page-nav"
                 disabled={safePage <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 aria-label="Previous page"
@@ -492,15 +460,23 @@ export const GradesLogPage = () => {
                 <button
                   key={p}
                   type="button"
-                  className={`sm-roster-page-num ${p === safePage ? 'active' : ''}`}
+                  className={`gbc-page-num ${p === safePage ? 'is-current' : ''}`}
                   onClick={() => setPage(p)}
                 >
                   {p}
                 </button>
               ))}
+              {pageCount > 5 && pageButtonRange[pageButtonRange.length - 1] < pageCount && (
+                <>
+                  <span className="gbc-page-ellipsis">…</span>
+                  <button type="button" className="gbc-page-num" onClick={() => setPage(pageCount)}>
+                    {pageCount}
+                  </button>
+                </>
+              )}
               <button
                 type="button"
-                className="sm-roster-page-nav"
+                className="gbc-page-nav"
                 disabled={safePage >= pageCount}
                 onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
                 aria-label="Next page"
@@ -508,38 +484,9 @@ export const GradesLogPage = () => {
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
-          </div>
+          </footer>
         )}
       </div>
-
-      {selectedCount > 0 && (
-        <div className="sm-roster-float">
-          <div className="sm-roster-float-bubble">
-            <div className="sm-roster-float-avatars">
-              {selectedStudents.slice(0, 3).map((s, i) => (
-                <span key={s.id} className={`sm-roster-float-av sm-roster-avatar-${i % 3}`}>
-                  {initialsFromName(s.name)}
-                </span>
-              ))}
-            </div>
-            <p className="sm-roster-float-text">
-              {selectedCount} student{selectedCount === 1 ? '' : 's'} selected for reports
-            </p>
-          </div>
-          <button
-            type="button"
-            className="sm-roster-cta"
-            onClick={() =>
-              window.alert(
-                `Generate report cards for ${selectedCount} student${selectedCount === 1 ? '' : 's'} (demo).`
-              )
-            }
-          >
-            Generate report cards
-            <span className="material-symbols-outlined sm-roster-cta-ic">arrow_forward</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 };

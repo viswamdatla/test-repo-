@@ -63,11 +63,133 @@ const classLevelToRollPrefix = (level) => {
     .toUpperCase() || 'X';
 };
 
+/** Registry-style section keys (matches classSectionRegistry section ids / URL). */
+const classLevelToRegistrySectionCode = (level) => {
+  const m = /^Class\s+(\d+)$/i.exec(level || '');
+  if (m) return String(Number(m[1])).padStart(2, '0');
+  const short = { Nursery: 'NUR', LKG: 'LKG', UKG: 'UKG' };
+  return (
+    short[level] ||
+    String(level || 'X')
+      .replace(/\s+/g, '')
+      .slice(0, 3)
+      .toUpperCase()
+  );
+};
+
+const baseProfileSubjectsTemplate = () => [
+  { name: 'Mathematics', marks: 88, total: 100, grade: 'A' },
+  { name: 'Science', marks: 84, total: 100, grade: 'A' },
+  { name: 'English', marks: 79, total: 100, grade: 'B' },
+  { name: 'Social Studies', marks: 82, total: 100, grade: 'A' },
+  { name: 'Computer Science', marks: 91, total: 100, grade: 'A+' },
+];
+
+const gradeFromMarksPct = (marks, total = 100) => {
+  const pct = total ? (marks / total) * 100 : 0;
+  if (pct >= 95) return 'A+';
+  if (pct >= 90) return 'A';
+  if (pct >= 85) return 'B+';
+  if (pct >= 80) return 'B';
+  if (pct >= 75) return 'C+';
+  if (pct >= 70) return 'C';
+  if (pct >= 55) return 'D';
+  return 'F';
+};
+
+/** Merges profile / roster fields used by StudentManagementStudentDetailPage UI. Preserves ids, rollNo, kit fields, guardian, etc. */
+function enrichStudentRecord(s) {
+  const seqMatch = String(s?.id ?? '').match(/(\d+)/g);
+  const seq = seqMatch ? Number(seqMatch[seqMatch.length - 1]) : 1;
+  const ix = seq - 1;
+  const classId = s.classLevel || s.grade || '';
+  const sectionLetter = String(s.section || 'A');
+  const sectionRegistryKey = `${classLevelToRegistrySectionCode(classId)}-${sectionLetter}`;
+  const presentDays = Math.min(200, 160 + ((ix + 5) % 35));
+  const absentDays = Math.min(35, 8 + ((ix + 3) % 22));
+  const totalDays = presentDays + absentDays;
+  const subjects = baseProfileSubjectsTemplate().map((row, si) => {
+    const jitter = (((ix + 1) * (si + 3)) % 11) - 5;
+    const marks = Math.min(100, Math.max(41, row.marks + jitter));
+    return {
+      ...row,
+      marks,
+      grade: gradeFromMarksPct(marks, row.total),
+    };
+  });
+  const gpa = parseFloat((2.5 + (ix % 15) * 0.1).toFixed(2));
+  const totalFee = 85000 + (ix % 9) * 1800 - (ix % 4) * 400;
+  const feesPaidBase = Math.min(totalFee - 2500 + (ix % 17) * 900, totalFee - 500);
+  const feesPaid = Math.max(20000, Math.min(totalFee, feesPaidBase));
+  const hostelRow = (s.uniformStatus === 'complete' ? 'complete' : 'pending');
+  const profileStatusText = ix % 4 === 0 ? 'Inactive' : 'Active';
+
+  const fatherIncome = Math.min(9900000, 900000 + ((ix % 29) + 7) * 11000);
+  const motherIncome = Math.min(8800000, 650000 + ((ix % 17) + 3) * 9000);
+
+  return {
+    ...s,
+    classId,
+    sectionId: sectionRegistryKey,
+    attendancePct: Math.round((presentDays / Math.max(totalDays, 1)) * 100),
+    hostelStatus: s.hostelStatus || hostelRow,
+    studentAdmissionId: s.studentAdmissionId || `ADM${10000 + seq}`,
+    dob: s.dob || s.dateOfBirth || `${201 + (ix % 4)}-${String((ix % 11) + 1).padStart(2, '0')}-${String((ix % 26) + 1).padStart(2, '0')}`,
+    gender:
+      s.gender ||
+      (seq % 2 === 0 ? 'Male' : 'Female'),
+    bloodGroup: s.bloodGroup || ['A+', 'B+', 'O+', 'AB+'][ix % 4],
+    height: s.height ? String(s.height) : `${Math.min(180, 130 + ((ix % 18) || 8))} cm`,
+    weight: s.weight ? String(s.weight) : `${Math.min(72, 30 + ((ix % 12) || 3))} kg`,
+    address: s.address && String(s.address).trim() ? s.address : `${seq}, School Street, City`,
+    gpa,
+    academicStanding: s.academicStanding || 'Pass',
+    promoted: s.promoted ?? ix % 3 !== 2,
+    presentDays,
+    absentDays,
+    totalDays,
+    subjects,
+    father: s.father || {
+      name: `Guardian ${seq}`,
+      occupation: (ix % 2 === 0 ? 'Business Owner' : 'Service'),
+      phone: `981000${String(seq).padStart(4, '0')}`,
+      email: `father.${seq}@schoolmail.com`,
+      annualIncome: fatherIncome,
+    },
+    mother: s.mother || {
+      name: `Guardian ${seq} (Spouse)`,
+      occupation: (ix % 3 === 0 ? 'Engineer' : 'Homemaker'),
+      phone: `992000${String(seq).padStart(4, '0')}`,
+      email: `mother.${seq}@schoolmail.com`,
+      annualIncome: motherIncome,
+    },
+    conditions: s.conditions ?? 'None',
+    allergies: s.allergies ?? 'None',
+    vaccination: ix % 6 === 5 ? 'Follow-up Pending' : 'Up to Date',
+    admissionDate: s.admissionDate || '2021-06-15',
+    transport: s.transport ?? 'None',
+    hostel: s.hostel || 'Day Scholar',
+    docsVerified: s.docsVerified ?? ix % 5 !== 0,
+    previousSchool: s.previousSchool || 'Springfield Public School',
+    sport: ['Football', 'Cricket', 'Basketball', 'Athletics'][ix % 4],
+    club: ['Art Club', 'Science Club', 'Literary Club', 'Music Club'][ix % 4],
+    achievement:
+      ix % 2 === 0
+        ? 'Participated in annual cultural fest'
+        : 'Regional science fair honorable mention',
+    totalFee,
+    feesPaid,
+    scholarship: ix % 5 === 3 ? Math.min(10000, 2000 + (ix % 12) * 400) : 0,
+    profileStatus: s.profileStatus || profileStatusText,
+  };
+}
+
 const kitBooksCycle = ['taken', 'partial', 'not_taken'];
 const kitUniformCycle = ['complete', 'pending'];
 const kitPaymentCycle = ['paid', 'unpaid', 'partial'];
 
 const createStudents = () => {
+  const generatedStudentTarget = 200;
   const seed = [
     {
       id: 'stu-001',
@@ -127,7 +249,7 @@ const createStudents = () => {
       status: 'Pending',
     },
   ];
-  return buildList(seed, 42, (i) => {
+  const rawList = buildList(seed, generatedStudentTarget, (i) => {
     const cl = classLevels[i % classLevels.length];
     const sec = ['A', 'B', 'C'][i % 3];
     const prefix = classLevelToRollPrefix(cl);
@@ -151,6 +273,7 @@ const createStudents = () => {
       status: statusCycle[i % statusCycle.length],
     };
   });
+  return rawList.map((row) => enrichStudentRecord(row));
 };
 
 const createAttendance = () => {
@@ -331,7 +454,7 @@ const academicsSlice = createSlice({
         const id = `stu-${String(nextNumber).padStart(3, '0')}`;
         const admissionNo = r.admissionNo || `ST-2026-${String(1000 + nextNumber)}`;
         const rollNo = r.rollNo || `${rollPrefix}${section}${String(nextNumber).padStart(3, '0')}`;
-        state.data.students.push({
+        const base = enrichStudentRecord({
           id,
           admissionNo,
           name: r.name,
@@ -350,6 +473,7 @@ const academicsSlice = createSlice({
           address: r.address || '',
           status: r.status || 'Active',
         });
+        state.data.students.push(base);
         nextNumber += 1;
       });
     },

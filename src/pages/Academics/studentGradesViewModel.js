@@ -192,6 +192,126 @@ export const computeGpa = (courseRows) => {
   return pts.reduce((a, b) => a + b, 0) / pts.length;
 };
 
+/**
+ * One row per subject for a single student's grade rows (same column rules as section matrix).
+ * Maps Redux `grades` rows (exam: Quiz | Unit Test | Midterm | Final).
+ */
+export const buildSubjectReportRows = (studentGrades) => {
+  const bySubject = new Map();
+  for (const g of studentGrades || []) {
+    if (!bySubject.has(g.subject)) bySubject.set(g.subject, []);
+    bySubject.get(g.subject).push(g);
+  }
+  return [...bySubject.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([subject, recs]) => {
+      const row = matrixFromSubjectGradeRecords(recs);
+      return { subject, ...row };
+    });
+};
+
+/** Shared matrix logic for grade rows that already belong to one student and one subject. */
+export const matrixFromSubjectGradeRecords = (sg) => {
+  const avgExam = (examLabel) => {
+    const rows = sg.filter((g) => String(g.exam) === examLabel);
+    if (rows.length === 0) return null;
+    return rows.reduce((a, g) => a + Number(g.score), 0) / rows.length;
+  };
+
+  const fa1 = avgExam('Quiz');
+  const fa2 = avgExam('Unit Test');
+  const halfYr = avgExam('Midterm');
+  const annual = avgExam('Final');
+  const fa3 = fa1 != null && fa2 != null ? (fa1 + fa2) / 2 : null;
+  const fa4 = halfYr != null && annual != null ? (halfYr + annual) / 2 : null;
+
+  const courseRows = buildCourseRows(sg, 'finalTerm');
+  const fromCourse = courseRows[0]?.totalPct;
+  const parts = [fa1, fa2, halfYr, annual].filter((x) => x != null);
+  const total =
+    fromCourse != null
+      ? fromCourse
+      : parts.length > 0
+        ? parts.reduce((a, b) => a + b, 0) / parts.length
+        : null;
+
+  const intVal = total != null ? Math.min(10, Math.max(0, Math.round(total / 10))) : null;
+  const gradeLetter = total != null ? scoreToLetter(total) : null;
+
+  return {
+    fa1,
+    fa2,
+    halfYr,
+    fa3,
+    fa4,
+    annual,
+    int: intVal,
+    total,
+    gradeLetter,
+  };
+};
+
+export const studentSectionAttendancePct = (attendance, studentName, stage, classLevel, section) => {
+  const name = String(studentName || '').trim();
+  const recs = (attendance || []).filter(
+    (a) =>
+      String(a.student || '').trim() === name &&
+      a.stage === stage &&
+      a.classLevel === classLevel &&
+      (a.section || '') === section,
+  );
+  let present = 0;
+  let counted = 0;
+  for (const r of recs) {
+    const t = String(r.status || '').toLowerCase();
+    if (t === 'present' || t === 'late') present += 1;
+    if (t === 'present' || t === 'late' || t === 'absent' || t === 'leave' || t === 'sick') counted += 1;
+  }
+  if (!counted) return null;
+  return Math.round((100 * present) / counted);
+};
+
+export const buildPerformanceMatrixRow = (studentName, sectionGrades) => {
+  const sg = (sectionGrades || []).filter((g) => g.student === studentName);
+  const avgExam = (examLabel) => {
+    const rows = sg.filter((g) => String(g.exam) === examLabel);
+    if (rows.length === 0) return null;
+    return Math.round(rows.reduce((a, g) => a + Number(g.score), 0) / rows.length);
+  };
+
+  const fa1 = avgExam('Quiz');
+  const fa2 = avgExam('Unit Test');
+  const halfYr = avgExam('Midterm');
+  const annual = avgExam('Final');
+  const fa3 = fa1 != null && fa2 != null ? Math.round((fa1 + fa2) / 2) : null;
+  const fa4 = halfYr != null && annual != null ? Math.round((halfYr + annual) / 2) : null;
+
+  const termAvg = studentSectionAverage(sg, 'finalTerm');
+  const parts = [fa1, fa2, halfYr, annual].filter((x) => x != null);
+  const overall =
+    termAvg != null
+      ? Math.round(termAvg)
+      : parts.length > 0
+        ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length)
+        : null;
+
+  const intVal =
+    overall != null ? Math.min(10, Math.max(0, Math.round(overall / 10))) : null;
+  const gradeLetter = overall != null ? scoreToLetter(overall) : null;
+
+  return {
+    fa1,
+    fa2,
+    halfYr,
+    fa3,
+    fa4,
+    annual,
+    int: intVal,
+    overall,
+    gradeLetter,
+  };
+};
+
 export const gpaDeltaHint = (courseRows) => {
   if (courseRows.length < 2) return 0.1;
   const pts = courseRows.map((r) => letterToGpaPoints(r.gradeLetter));

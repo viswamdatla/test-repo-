@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import {
+  fetchAcademicsData,
+  selectAcademicsSectionItems,
+  selectAcademicsStatus,
+} from '../../store/academics/academicsSlice';
 import { getSectionContext, getSectionNavTitle } from './classSectionRegistry';
 import './SectionStudentsPage.scss';
 
@@ -15,7 +21,7 @@ const PAYMENT_FILTERS = [
 
 const MOCK_STUDENTS = [
   {
-    id: '1',
+    id: 'stu-001',
     name: 'Arjun Adhikari',
     guardian: 'Mohan Adhikari',
     rollNo: '6A001',
@@ -26,7 +32,7 @@ const MOCK_STUDENTS = [
     payment: 'paid',
   },
   {
-    id: '2',
+    id: 'stu-002',
     name: 'Bina Kumari',
     guardian: 'Sita Devi',
     rollNo: '6A002',
@@ -37,7 +43,7 @@ const MOCK_STUDENTS = [
     payment: 'unpaid',
   },
   {
-    id: '3',
+    id: 'stu-003',
     name: 'Deepak Khanal',
     guardian: 'Ram Khanal',
     rollNo: '6A003',
@@ -48,7 +54,7 @@ const MOCK_STUDENTS = [
     payment: 'partial',
   },
   {
-    id: '4',
+    id: 'stu-004',
     name: 'Pooja Sharma',
     guardian: 'Laxmi Sharma',
     rollNo: '6A004',
@@ -107,6 +113,11 @@ function PaymentPill({ status }) {
 
 export const SectionStudentsPage = () => {
   const { sectionId: sectionIdParam } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const loadStatus = useSelector(selectAcademicsStatus);
+  const storeStudents = useSelector((s) => selectAcademicsSectionItems(s, 'students'));
+
   const { pathname } = useLocation();
   const sectionId = sectionIdParam ? decodeURIComponent(sectionIdParam) : '';
 
@@ -118,6 +129,10 @@ export const SectionStudentsPage = () => {
   const ctx = useMemo(() => getSectionContext(sectionId), [sectionId]);
   const navTitle = useMemo(() => getSectionNavTitle(sectionId), [sectionId]);
   usePageTitle(navTitle);
+
+  useEffect(() => {
+    if (loadStatus === 'idle') dispatch(fetchAcademicsData());
+  }, [dispatch, loadStatus]);
 
   const [search, setSearch] = useState('');
   const [paymentFilter, setPaymentFilter] = useState('all');
@@ -132,13 +147,47 @@ export const SectionStudentsPage = () => {
     return `${classCode}${sectionLetter}`;
   }, [ctx]);
 
+  const storeStudentsForSection = useMemo(() => {
+    if (!ctx) return [];
+    const { classLabel, sectionLetter } = ctx;
+    return storeStudents
+      .filter(
+        (s) =>
+          String(s.classLevel || '') === String(classLabel || '') &&
+          String(s.section || '') === String(sectionLetter || ''),
+      )
+      .sort((a, b) => {
+        const numId = (sid) => {
+          const m = String(sid ?? '').match(/(\d+)$/);
+          return m ? Number(m[1]) : 0;
+        };
+        const na = numId(a.id);
+        const nb = numId(b.id);
+        if (na !== nb) return na - nb;
+        return String(a.id).localeCompare(String(b.id));
+      });
+  }, [ctx, storeStudents]);
+
   const students = useMemo(() => {
     if (!ctx) return [];
-    return MOCK_STUDENTS.map((s, i) => ({
-      ...s,
-      rollNo: `${rollPrefix}${String(i + 1).padStart(3, '0')}`,
-    }));
-  }, [ctx, rollPrefix]);
+    return MOCK_STUDENTS.map((s, i) => {
+      const matched = storeStudentsForSection[i];
+      const payment = matched?.paymentStatus || s.payment;
+      const hostelStatus = matched?.hostelStatus || s.hostelStatus;
+      const attendancePct =
+        typeof matched?.attendancePct === 'number' ? matched.attendancePct : s.attendancePct;
+      return {
+        ...s,
+        id: matched?.id ?? s.id,
+        name: matched?.name ?? s.name,
+        guardian: matched?.guardian ?? s.guardian,
+        rollNo: matched?.rollNo ?? `${rollPrefix}${String(i + 1).padStart(3, '0')}`,
+        payment,
+        hostelStatus,
+        attendancePct,
+      };
+    });
+  }, [ctx, rollPrefix, storeStudentsForSection]);
 
   const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -298,8 +347,21 @@ export const SectionStudentsPage = () => {
             </thead>
             <tbody>
               {filteredRows.map((row) => (
-                <tr key={row.id}>
-                  <td className="sec-students-td">
+                <tr
+                  key={row.id}
+                  className="student-row"
+                  onClick={() =>
+                    navigate(`student/${row.id}`, {
+                      state: { studentId: row.id, sectionId },
+                    })
+                  }
+                >
+                  <td
+                    className="sec-students-td"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
                     <input
                       type="checkbox"
                       className="sec-students-checkbox"
@@ -329,8 +391,20 @@ export const SectionStudentsPage = () => {
                   <td className="sec-students-td">
                     <PaymentPill status={row.payment} />
                   </td>
-                  <td className="sec-students-td sec-students-td--actions">
-                    <button type="button" className="sec-students-more" aria-label={`Actions for ${row.name}`}>
+                  <td
+                    className="sec-students-td sec-students-td--actions"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="sec-students-more"
+                      aria-label={`Actions for ${row.name}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
                       <span className="material-symbols-outlined">more_vert</span>
                     </button>
                   </td>

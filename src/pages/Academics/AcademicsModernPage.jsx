@@ -2,7 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { ClassCard } from './ClassCard';
-import { CLASS_CARDS, getSectionContext } from './classSectionRegistry';
+import {
+  appendDynamicClassCard,
+  createClassCardFromForm,
+  getMergedClassCards,
+  getSectionContext,
+} from './classSectionRegistry';
 import { classLevelToSlug, sectionToSlug } from './studentManagement/studentManagementConfig';
 import './AcademicsModernPage.scss';
 
@@ -10,7 +15,7 @@ const PAGE_META = {
   studentManagement: {
     title: 'Student Dashboard',
     subtitle: 'Organize and manage school enrollment by academic level.',
-    cta: 'Add Student',
+    cta: '+ Add Class',
   },
   timeTable: {
     title: 'Time Table',
@@ -85,28 +90,64 @@ const ACADEMICS_SECTION_LIST_BASE = {
   grades: '/academics/grades',
 };
 
+const defaultNewClassForm = () => ({
+  name: '',
+  code: '',
+  sections: 1,
+  teacher: '',
+  description: '',
+});
+
 export const AcademicsModernPage = ({ pageKey }) => {
   const meta = PAGE_META[pageKey] ?? PAGE_META.studentManagement;
   usePageTitle(meta.title);
   const navigate = useNavigate();
 
   const itemsPerRow = useItemsPerRow();
+  const [mergedClassTick, setMergedClassTick] = useState(0);
+  const mergedClassCards = useMemo(() => getMergedClassCards(), [mergedClassTick]);
+
   const [selectedClassCode, setSelectedClassCode] = useState(null);
   const [sectionsByClass, setSectionsByClass] = useState({});
 
+  const [showAddSectionModal, setShowAddSectionModal] = useState(false);
+  const [newSectionName, setNewSectionName] = useState('');
+
+  const [showAddClassModal, setShowAddClassModal] = useState(false);
+  const [newClassForm, setNewClassForm] = useState(defaultNewClassForm);
+  const [addClassFieldErrors, setAddClassFieldErrors] = useState({});
+
   const gridItems = useMemo(() => {
-    const classes = CLASS_CARDS.map((c) => ({ kind: 'class', ...c }));
+    const classes = mergedClassCards.map((c) => ({ kind: 'class', ...c }));
     if (pageKey === 'timeTable') return classes;
     return [...classes, { kind: 'add', id: 'add-new-class' }];
-  }, [pageKey]);
+  }, [mergedClassCards, pageKey]);
 
   const rows = useMemo(() => chunkItems(gridItems, itemsPerRow), [gridItems, itemsPerRow]);
 
   const classByCode = useMemo(() => {
     const m = new Map();
-    CLASS_CARDS.forEach((c) => m.set(c.code, c));
+    mergedClassCards.forEach((c) => m.set(c.code, c));
     return m;
-  }, []);
+  }, [mergedClassCards]);
+
+  useEffect(() => {
+    if (!showAddSectionModal && !showAddClassModal) return;
+    const onKeyDown = (e) => {
+      if (e.key !== 'Escape') return;
+      if (showAddSectionModal) {
+        setShowAddSectionModal(false);
+        setNewSectionName('');
+      }
+      if (showAddClassModal) {
+        setShowAddClassModal(false);
+        setNewClassForm(defaultNewClassForm());
+        setAddClassFieldErrors({});
+      }
+    };
+    globalThis.addEventListener('keydown', onKeyDown);
+    return () => globalThis.removeEventListener('keydown', onKeyDown);
+  }, [showAddSectionModal, showAddClassModal]);
 
   const handleClassClick = useCallback(
     (code) => {
@@ -195,28 +236,85 @@ export const AcademicsModernPage = ({ pageKey }) => {
     [selectedClassCode],
   );
 
-  const handleAddSectionClick = useCallback(() => {
-    if (!selectedClassCode) return;
-    setSectionsByClass((prev) => {
-      const list = [...(prev[selectedClassCode] ?? [])];
-      const pill = nextAvailablePill(list.map((s) => s.pill));
-      const id = `${selectedClassCode}-${pill}`;
-      const next = [
-        ...list,
-        {
-          id,
-          pill,
-          title: `Section ${pill}`,
-          count: 0,
-        },
-      ];
-      return { ...prev, [selectedClassCode]: next };
+  const handleAddSectionClick = useCallback(
+    (rawSectionName) => {
+      if (!selectedClassCode) return;
+      const trimmedName = String(rawSectionName ?? '').trim();
+      setSectionsByClass((prev) => {
+        const list = [...(prev[selectedClassCode] ?? [])];
+        const pill = nextAvailablePill(list.map((s) => s.pill));
+        const id = `${selectedClassCode}-${pill}`;
+        const title = trimmedName || `Section ${pill}`;
+        const next = [
+          ...list,
+          {
+            id,
+            pill,
+            title,
+            count: 0,
+          },
+        ];
+        return { ...prev, [selectedClassCode]: next };
+      });
+    },
+    [selectedClassCode],
+  );
+
+  const confirmAddSectionFromModal = useCallback(() => {
+    handleAddSectionClick(newSectionName);
+    setShowAddSectionModal(false);
+    setNewSectionName('');
+  }, [handleAddSectionClick, newSectionName]);
+
+  const closeAddSectionModal = useCallback(() => {
+    setShowAddSectionModal(false);
+    setNewSectionName('');
+  }, []);
+
+  const openAddClassModal = useCallback(() => {
+    setAddClassFieldErrors({});
+    setShowAddClassModal(true);
+  }, []);
+
+  const closeAddClassModal = useCallback(() => {
+    setShowAddClassModal(false);
+    setNewClassForm(defaultNewClassForm());
+    setAddClassFieldErrors({});
+  }, []);
+
+  const handleCreateClass = useCallback(() => {
+    const nameErr = String(newClassForm.name || '').trim() ? '' : 'This field is required';
+    const codeErr = String(newClassForm.code || '').trim() ? '' : 'This field is required';
+    setAddClassFieldErrors({
+      ...(nameErr ? { name: nameErr } : {}),
+      ...(codeErr ? { code: codeErr } : {}),
     });
-  }, [selectedClassCode]);
+    if (nameErr || codeErr) return;
+
+    const draft = createClassCardFromForm(newClassForm);
+    const exists = mergedClassCards.some((c) => c.code === draft.code);
+    if (exists) {
+      setAddClassFieldErrors({ code: 'This class code is already in use' });
+      return;
+    }
+
+    appendDynamicClassCard(draft);
+    setMergedClassTick((t) => t + 1);
+    closeAddClassModal();
+  }, [newClassForm, mergedClassCards, closeAddClassModal]);
 
   const panelLabel = selectedClass
     ? `Sections for ${selectedClass.label}`
     : 'Class sections';
+
+  const inputStyle = {
+    border: '1px solid #c1c7d3',
+    borderRadius: 8,
+    padding: '10px 14px',
+    fontSize: 14,
+    width: '100%',
+    boxSizing: 'border-box',
+  };
 
   return (
     <div className="ac-modern-page">
@@ -237,7 +335,7 @@ export const AcademicsModernPage = ({ pageKey }) => {
             <span>Filter View</span>
           </button>
           {meta.cta ? (
-            <button type="button" className="primary-btn">
+            <button type="button" className="primary-btn" onClick={openAddClassModal}>
               <span className="material-symbols-outlined">add_circle</span>
               <span>{meta.cta}</span>
             </button>
@@ -357,7 +455,7 @@ export const AcademicsModernPage = ({ pageKey }) => {
                   type="button"
                   className="ac-class-card ac-section-card add-card"
                   aria-label="Add new section"
-                  onClick={handleAddSectionClick}
+                  onClick={() => setShowAddSectionModal(true)}
                 >
                   <span className="material-symbols-outlined" aria-hidden>
                     add_circle_outline
@@ -378,6 +476,174 @@ export const AcademicsModernPage = ({ pageKey }) => {
           <button type="button">Start Promotion Flow</button>
         </article>
       </section>
+
+      {showAddSectionModal ? (
+        <div className="section-modal-backdrop" role="presentation" onClick={closeAddSectionModal}>
+          <div
+            className="section-modal-card"
+            role="dialog"
+            aria-labelledby="add-section-modal-title"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="add-section-modal-title" style={{ fontWeight: 600, margin: '0 0 8px' }}>
+              Add New Section
+            </h3>
+            <p style={{ margin: '0 0 20px', fontSize: 14, color: '#414751' }}>
+              This section will be added under {selectedClass ? selectedClass.label : 'the selected class'}.
+            </p>
+            <input
+              type="text"
+              placeholder="e.g. Section C"
+              value={newSectionName}
+              onChange={(e) => setNewSectionName(e.target.value)}
+              style={inputStyle}
+              autoFocus
+              aria-label="Section name"
+            />
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 12,
+                marginTop: 24,
+              }}
+            >
+              <button
+                type="button"
+                onClick={closeAddSectionModal}
+                className="ac-modal-btn ac-modal-btn--ghost"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmAddSectionFromModal}
+                className="ac-modal-btn ac-modal-btn--primary"
+              >
+                Add Section
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showAddClassModal ? (
+        <div className="section-modal-backdrop" role="presentation" onClick={closeAddClassModal}>
+          <div
+            className="add-class-modal-card"
+            role="dialog"
+            aria-labelledby="add-class-modal-title"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="add-class-modal-title" style={{ fontWeight: 600, margin: '0 0 8px' }}>
+              Add New Class
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <label style={{ display: 'block' }}>
+                <span style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                  Class Name
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. Class 11"
+                  required
+                  value={newClassForm.name}
+                  onChange={(e) => setNewClassForm((f) => ({ ...f, name: e.target.value }))}
+                  style={inputStyle}
+                  aria-invalid={Boolean(addClassFieldErrors.name)}
+                  aria-describedby={addClassFieldErrors.name ? 'add-class-name-err' : undefined}
+                />
+                {addClassFieldErrors.name ? (
+                  <p id="add-class-name-err" className="modal-field-error">
+                    {addClassFieldErrors.name}
+                  </p>
+                ) : null}
+              </label>
+              <label style={{ display: 'block' }}>
+                <span style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                  Class Code / Label
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. 11"
+                  maxLength={4}
+                  required
+                  value={newClassForm.code}
+                  onChange={(e) => setNewClassForm((f) => ({ ...f, code: e.target.value }))}
+                  style={inputStyle}
+                  aria-invalid={Boolean(addClassFieldErrors.code)}
+                  aria-describedby={addClassFieldErrors.code ? 'add-class-code-err' : undefined}
+                />
+                {addClassFieldErrors.code ? (
+                  <p id="add-class-code-err" className="modal-field-error">
+                    {addClassFieldErrors.code}
+                  </p>
+                ) : null}
+              </label>
+              <label style={{ display: 'block' }}>
+                <span style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                  Number of Sections
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={newClassForm.sections}
+                  onChange={(e) =>
+                    setNewClassForm((f) => ({
+                      ...f,
+                      sections: Number(e.target.value) || 1,
+                    }))
+                  }
+                  style={inputStyle}
+                  aria-label="Number of sections"
+                />
+              </label>
+              <label style={{ display: 'block' }}>
+                <span style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                  Class Teacher Name
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. Mrs. Sharma"
+                  value={newClassForm.teacher}
+                  onChange={(e) => setNewClassForm((f) => ({ ...f, teacher: e.target.value }))}
+                  style={inputStyle}
+                />
+              </label>
+              <label style={{ display: 'block' }}>
+                <span style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                  Description
+                </span>
+                <textarea
+                  placeholder="Optional notes..."
+                  rows={2}
+                  value={newClassForm.description}
+                  onChange={(e) => setNewClassForm((f) => ({ ...f, description: e.target.value }))}
+                  style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
+                />
+              </label>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 12,
+                marginTop: 24,
+              }}
+            >
+              <button type="button" onClick={closeAddClassModal} className="ac-modal-btn ac-modal-btn--ghost">
+                Cancel
+              </button>
+              <button type="button" onClick={handleCreateClass} className="ac-modal-btn ac-modal-btn--primary">
+                Create Class
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

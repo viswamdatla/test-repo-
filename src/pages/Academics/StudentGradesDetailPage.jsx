@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { usePageTitle } from '../../hooks/usePageTitle';
@@ -16,23 +16,19 @@ import {
   slugToClassLevel,
 } from './studentManagement/studentManagementConfig';
 import {
-  EXAM_FILTER_OPTIONS,
-  TERM_OPTIONS,
-  abbrevSubject,
   buildCourseRows,
   buildGpaTrendPoints,
-  classAverageBySubject,
+  buildSubjectReportRows,
   computeGpa,
   computeRankInSection,
-  distinctionLabel,
+  filterSectionGrades,
   gpaDeltaHint,
   letterGradeTone,
-  percentileLabel,
-  submissionRate,
-  filterSectionGrades,
+  studentSectionAttendancePct,
 } from './studentGradesViewModel';
-import './studentManagement/StudentManagementFlow.scss';
 import './StudentGradesDetailPage.scss';
+
+const ACADEMIC_YEAR = '2024-25';
 
 const initialsFromName = (name) => {
   const parts = String(name || '')
@@ -46,6 +42,31 @@ const initialsFromName = (name) => {
 
 const firstName = (name) => String(name || '').trim().split(/\s+/)[0] || 'Student';
 
+const ordinalRank = (n) => {
+  if (n == null || !Number.isFinite(n)) return '—';
+  const v = n % 100;
+  const suf = { 11: 'th', 12: 'th', 13: 'th' }[v] || { 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th';
+  return `${n}${suf}`;
+};
+
+const formatScoreCell = (v) => {
+  if (v == null || Number.isNaN(v)) return '—';
+  return (Math.round(v * 10) / 10).toFixed(1);
+};
+
+const formatIntCell = (v) => {
+  if (v == null) return '—';
+  return String(v).padStart(2, '0');
+};
+
+function ReportGradePill({ letter }) {
+  if (!letter || letter === '—') {
+    return <span className="src-grade-pill src-grade-pill--muted">—</span>;
+  }
+  const tone = letterGradeTone(letter);
+  return <span className={`src-grade-pill src-grade-pill--${tone}`}>{letter}</span>;
+}
+
 export const StudentGradesDetailPage = () => {
   const { classSlug, sectionSlug, studentSlug } = useParams();
   const { wizardBase } = useOutletContext();
@@ -54,6 +75,7 @@ export const StudentGradesDetailPage = () => {
   const loadStatus = useSelector(selectAcademicsStatus);
   const grades = useSelector((s) => selectAcademicsSectionItems(s, 'grades'));
   const students = useSelector((s) => selectAcademicsSectionItems(s, 'students'));
+  const attendance = useSelector((s) => selectAcademicsSectionItems(s, 'attendance'));
   const structure = useSelector(selectAcademicsStructure);
 
   const studentName = useMemo(() => {
@@ -68,14 +90,11 @@ export const StudentGradesDetailPage = () => {
   const classLevel = slugToClassLevel(classSlug, allClasses);
   const stage = useMemo(
     () => (classLevel ? resolveStageForClass(structure, classLevel) : null),
-    [structure, classLevel]
+    [structure, classLevel],
   );
   const sections = useSelector((s) => selectClassSections(s, stage, classLevel));
   const section = sectionFromSlug(sectionSlug, sections);
   const validClass = Boolean(classLevel && allClasses.includes(classLevel));
-
-  const [examFilterId, setExamFilterId] = useState(EXAM_FILTER_OPTIONS[0].id);
-  const [termId, setTermId] = useState(TERM_OPTIONS[0].id);
 
   useEffect(() => {
     if (loadStatus === 'idle') dispatch(fetchAcademicsData());
@@ -93,239 +112,282 @@ export const StudentGradesDetailPage = () => {
 
   const sectionGrades = useMemo(
     () => (stage && classLevel && section ? filterSectionGrades(grades, stage, classLevel, section) : []),
-    [grades, stage, classLevel, section]
+    [grades, stage, classLevel, section],
   );
 
   const studentGrades = useMemo(
     () => sectionGrades.filter((g) => g.student === studentName),
-    [sectionGrades, studentName]
+    [sectionGrades, studentName],
   );
 
   const rosterStudent = useMemo(
     () =>
       students.find(
         (s) =>
-          s.name === studentName &&
-          s.classLevel === classLevel &&
-          (s.section || '') === section
+          s.name === studentName && s.classLevel === classLevel && (s.section || '') === section && s.stage === stage,
       ),
-    [students, studentName, classLevel, section]
+    [students, studentName, classLevel, section, stage],
   );
 
-  const courseRows = useMemo(
-    () => buildCourseRows(studentGrades, examFilterId),
-    [studentGrades, examFilterId]
-  );
+  const subjectRows = useMemo(() => buildSubjectReportRows(studentGrades), [studentGrades]);
 
-  const gpa = useMemo(() => computeGpa(courseRows), [courseRows]);
-  const overallPct = useMemo(() => {
-    if (courseRows.length === 0) return null;
-    return courseRows.reduce((a, r) => a + r.totalPct, 0) / courseRows.length;
-  }, [courseRows]);
+  const courseRowsForGpa = useMemo(() => buildCourseRows(studentGrades, 'finalTerm'), [studentGrades]);
+
+  const gpa = useMemo(() => computeGpa(courseRowsForGpa), [courseRowsForGpa]);
+  const deltaHint = useMemo(() => gpaDeltaHint(courseRowsForGpa), [courseRowsForGpa]);
 
   const { rank, of } = useMemo(
-    () => computeRankInSection(sectionGrades, studentName, examFilterId),
-    [sectionGrades, studentName, examFilterId]
+    () => computeRankInSection(sectionGrades, studentName, 'finalTerm'),
+    [sectionGrades, studentName],
   );
 
-  const gpaTrend = useMemo(() => buildGpaTrendPoints(studentGrades), [studentGrades]);
-  const deltaHint = useMemo(() => gpaDeltaHint(courseRows), [courseRows]);
-  const submitRate = useMemo(() => submissionRate(studentGrades), [studentGrades]);
+  const attendancePct = useMemo(
+    () => studentSectionAttendancePct(attendance, studentName, stage, classLevel, section),
+    [attendance, studentName, stage, classLevel, section],
+  );
 
-  const peerRows = useMemo(() => {
-    return courseRows.map((row) => {
-      const classAvg = classAverageBySubject(sectionGrades, row.subject, examFilterId);
-      return {
-        subject: row.subject,
-        short: abbrevSubject(row.subject),
-        studentPct: row.totalPct,
-        classPct: classAvg ?? row.totalPct * 0.85,
-      };
-    });
-  }, [courseRows, sectionGrades, examFilterId]);
+  const creditsDisplay = subjectRows.length > 0 ? subjectRows.length * 4 : null;
 
-  const trendSvgPath = useMemo(() => {
-    const w = 200;
-    const h = 100;
-    const pts = gpaTrend.map((p, i) => {
-      const x = (i / Math.max(1, gpaTrend.length - 1)) * w;
-      const pct = p.pct != null ? p.pct : 65 + i * 5;
-      const y = h - (pct / 100) * (h - 8) - 4;
-      return { x, y };
-    });
-    if (pts.length === 0) return { line: '', fill: '', dots: [] };
-    let line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-    if (pts.length === 1) {
-      const p = pts[0];
-      line = `M ${p.x} ${p.y} L ${Math.min(w, p.x + 48)} ${p.y}`;
+  const topBandPct = useMemo(() => {
+    if (!rank || !of || of < 1) return null;
+    return Math.max(1, Math.min(100, Math.round((rank / of) * 100)));
+  }, [rank, of]);
+
+  const gpaProgressBars = useMemo(() => {
+    const pts = buildGpaTrendPoints(studentGrades);
+    const g = gpa ?? 0;
+    const v1 = pts[0]?.pct != null ? (pts[0].pct / 100) * 4 : g > 0 ? Math.max(0, g * 0.94) : null;
+    const v2 = pts[2]?.pct != null ? (pts[2].pct / 100) * 4 : g > 0 ? Math.max(0, g * 0.97) : null;
+    const v3 = g > 0 ? g : pts[3]?.pct != null ? (pts[3].pct / 100) * 4 : null;
+    const vals = [v1, v2, v3].map((x) => (x == null || Number.isNaN(x) ? 0 : x));
+    const max = Math.max(...vals, 0.01);
+    return [
+      { label: 'Term 1', gpa: v1, h: max ? (vals[0] / max) * 100 : 0 },
+      { label: 'Term 2', gpa: v2, h: max ? (vals[1] / max) * 100 : 0 },
+      { label: 'Term 3', gpa: v3, h: max ? (vals[2] / max) * 100 : 0, current: true },
+    ];
+  }, [studentGrades, gpa]);
+
+  const teacherRemark = useMemo(() => {
+    const fn = firstName(studentName);
+    const best = subjectRows.reduce(
+      (acc, r) => (r.total != null && (acc == null || r.total > acc.total) ? r : acc),
+      null,
+    );
+    const subj = best?.subject ?? 'core subjects';
+    if (gpa != null && gpa >= 3.5) {
+      return `${fn} continues to show strong performance across subjects, with particular strength in ${subj}. Keep building consistent study habits ahead of the next assessment cycle.`;
     }
-    const fill = `${line} L ${w} ${h} L 0 ${h} Z`;
-    return { line, fill, dots: pts };
-  }, [gpaTrend]);
-
-  const termLabel = TERM_OPTIONS.find((t) => t.id === termId)?.label ?? TERM_OPTIONS[0].label;
-  const honorStudent = gpa != null && gpa >= 3.5;
+    if (gpa != null && gpa >= 3) {
+      return `${fn} is meeting expectations this term. Focused practice in ${subj} and steady revision will help lift overall outcomes in the next term.`;
+    }
+    return `${fn} is developing foundational skills across subjects. Targeted support in ${subj} and regular attendance will support measurable improvement.`;
+  }, [studentName, subjectRows, gpa]);
 
   usePageTitle(
     studentName && classLevel && section
-      ? `${studentName} — Grades (${classLevel} ${section})`
-      : 'Academic Grades'
+      ? `${studentName} — Report (${classLevel} ${section})`
+      : 'Student Report Card',
   );
 
   if (!stage || !validClass || !section) return null;
 
-  const unknownStudent = loadStatus === 'succeeded' && studentGrades.length === 0;
-  const showLoading = loadStatus === 'idle' || loadStatus === 'loading';
   const loadFailed = loadStatus === 'failed';
+  const showLoading = loadStatus === 'idle' || loadStatus === 'loading';
+  const hasIdentity = Boolean(rosterStudent || studentGrades.length > 0);
+  const unknownStudent = loadStatus === 'succeeded' && !hasIdentity;
+
+  const displayName = rosterStudent?.name || studentName || 'Student';
+  const rollDisplay = rosterStudent?.rollNo || rosterStudent?.admissionNo || '—';
+  const idDisplay = rosterStudent?.admissionNo || rosterStudent?.id || '—';
+  const gpaBarPct = gpa != null ? Math.min(100, Math.max(0, (gpa / 4) * 100)) : 0;
 
   return (
-    <div className="sgd">
-      <button type="button" className="sgd-back sm-back" onClick={() => navigate(`${wizardBase}/${classSlug}/${sectionSlug}`)}>
-        <span className="material-symbols-outlined">arrow_back</span>
-        Grade log
-      </button>
+    <div className="src-page">
+      <div className="src-toolbar">
+        <button
+          type="button"
+          className="src-back"
+          onClick={() => navigate(`${wizardBase}/${classSlug}/${sectionSlug}`)}
+        >
+          <span className="material-symbols-outlined">arrow_back</span>
+          Gradebook
+        </button>
+        <button type="button" className="src-btn src-btn--outline" onClick={() => window.print()}>
+          <span className="material-symbols-outlined">print</span>
+          Print
+        </button>
+      </div>
 
       {loadFailed ? (
-        <div className="sgd-empty">
+        <div className="src-empty">
           <h1>Could not load academics data</h1>
           <p>Refresh the page or try again later.</p>
-          <button type="button" className="sgd-btn-primary" onClick={() => dispatch(fetchAcademicsData())}>
+          <button type="button" className="src-btn src-btn--primary" onClick={() => dispatch(fetchAcademicsData())}>
             Retry
           </button>
         </div>
       ) : showLoading ? (
-        <p className="sgd-loading sgd-loading--page">Loading…</p>
+        <p className="src-loading">Loading report…</p>
       ) : unknownStudent ? (
-        <div className="sgd-empty">
-          <h1>No grades for this student</h1>
-          <p>We could not find grade rows for “{studentName}” in {classLevel} section {section}.</p>
-          <button type="button" className="sgd-btn-primary" onClick={() => navigate(`${wizardBase}/${classSlug}/${sectionSlug}`)}>
-            Back to list
+        <div className="src-empty">
+          <h1>Student not found</h1>
+          <p>There is no roster or grade record for “{studentName}” in {classLevel} section {section}.</p>
+          <button
+            type="button"
+            className="src-btn src-btn--primary"
+            onClick={() => navigate(`${wizardBase}/${classSlug}/${sectionSlug}`)}
+          >
+            Back to Gradebook
           </button>
         </div>
       ) : (
-        <div className="sgd-grid">
-          <div className="sgd-main">
-            <header className="sgd-head">
-              <div>
-                <h1 className="sgd-title">Academic Grades</h1>
-                <div className="sgd-subrow">
-                  <span className="sgd-sub-muted">Student performance overview</span>
-                  <span className="sgd-dot" aria-hidden />
-                  <span className="sgd-sub-accent">
-                    {termLabel} · {classLevel} · Section {section}
+        <>
+          <header className="src-head">
+            <div>
+              <nav className="src-breadcrumb" aria-label="Breadcrumb">
+                <span>Academics</span>
+                <span className="material-symbols-outlined src-breadcrumb__sep">chevron_right</span>
+                <span>Grades</span>
+                <span className="material-symbols-outlined src-breadcrumb__sep">chevron_right</span>
+                <span className="src-breadcrumb__current">{displayName}</span>
+              </nav>
+              <h1 className="src-title">Student Report Card</h1>
+              <p className="src-meta-line">
+                Academic Year {ACADEMIC_YEAR} · {classLevel} — Section {section}
+              </p>
+            </div>
+            <button type="button" className="src-btn src-btn--primary" onClick={() => window.print()}>
+              Export report
+            </button>
+          </header>
+
+          <section className="src-hero-grid" aria-label="Student summary">
+            <div className="src-hero-card">
+              <div className="src-hero-avatar" aria-hidden>
+                {initialsFromName(displayName)}
+              </div>
+              <div className="src-hero-copy">
+                <h2 className="src-hero-name">{displayName}</h2>
+                <p className="src-hero-lines">
+                  <span>
+                    {classLevel} — Section {section} · Roll #{rollDisplay}
+                  </span>
+                  <span className="src-hero-lines__muted">ID: {idDisplay}</span>
+                </p>
+                {attendancePct != null && (
+                  <div className="src-att-pill">
+                    <span className="material-symbols-outlined">check_circle</span>
+                    Attendance: {attendancePct}%
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="src-kpi">
+              <div className="src-kpi__top">
+                <div className="src-kpi-icon src-kpi-icon--blue">
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    star
+                  </span>
+                </div>
+                {deltaHint != null && deltaHint !== 0 && (
+                  <span className="src-kpi-delta">
+                    {deltaHint >= 0 ? '+' : '−'}
+                    {Math.abs(Math.round(deltaHint * 100) / 100)} GPA
+                  </span>
+                )}
+              </div>
+              <p className="src-kpi-label">Overall GPA</p>
+              <p className="src-kpi-value">
+                {gpa != null ? gpa.toFixed(2) : '—'} <span className="src-kpi-suffix">/ 4.0</span>
+              </p>
+              <div className="src-kpi-bar">
+                <div className="src-kpi-bar__fill" style={{ width: `${gpaBarPct}%` }} />
+              </div>
+            </div>
+
+            <div className="src-kpi">
+              <div className="src-kpi__top">
+                <div className="src-kpi-icon src-kpi-icon--amber">
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    trophy
                   </span>
                 </div>
               </div>
-              <button type="button" className="sgd-export" onClick={() => window.print()}>
-                <span className="material-symbols-outlined">download</span>
-                Export PDF
-              </button>
-            </header>
-
-            <div className="sgd-kpis">
-              <div className="sgd-kpi">
-                <p className="sgd-kpi-label">Current GPA</p>
-                <div className="sgd-kpi-row">
-                  <span className="sgd-kpi-value sgd-kpi-value--primary">{gpa != null ? gpa.toFixed(2) : '—'}</span>
-                  {gpa != null && (
-                    <span className="sgd-kpi-delta">
-                      <span className="material-symbols-outlined">trending_up</span>
-                      {deltaHint >= 0 ? deltaHint : `−${Math.abs(deltaHint)}`}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="sgd-kpi">
-                <p className="sgd-kpi-label">Class rank</p>
-                <div className="sgd-kpi-row">
-                  <span className="sgd-kpi-value">#{rank ?? '—'}</span>
-                  <span className="sgd-kpi-of">of {of || '—'}</span>
-                </div>
-              </div>
-              <div className="sgd-kpi">
-                <p className="sgd-kpi-label">Overall %</p>
-                <div className="sgd-kpi-row">
-                  <span className="sgd-kpi-value">{overallPct != null ? `${overallPct.toFixed(1)}%` : '—'}</span>
-                  {overallPct != null && (
-                    <span className="sgd-kpi-delta sgd-kpi-delta--plain">{distinctionLabel(overallPct)}</span>
-                  )}
-                </div>
-              </div>
-              <div className={`sgd-kpi sgd-kpi--honor ${honorStudent ? 'is-active' : 'is-inactive'}`}>
-                <span className="material-symbols-outlined sgd-honor-ic">military_tech</span>
-                <span className="sgd-honor-label">Honor student</span>
-              </div>
+              <p className="src-kpi-label">Class rank</p>
+              <p className="src-kpi-value">
+                {ordinalRank(rank)} <span className="src-kpi-suffix">/ {of || '—'}</span>
+              </p>
+              {topBandPct != null && <p className="src-kpi-foot">Top {topBandPct}% of class</p>}
             </div>
 
-            <div className="sgd-filter-bar">
-              <div className="sgd-filter-field">
-                <label className="sgd-filter-label" htmlFor="sgd-exam-filter">
-                  Exam type filter
-                </label>
-                <div className="sgd-select-wrap">
-                  <select
-                    id="sgd-exam-filter"
-                    className="sgd-select"
-                    value={examFilterId}
-                    onChange={(e) => setExamFilterId(e.target.value)}
-                  >
-                    {EXAM_FILTER_OPTIONS.map((o) => (
-                      <option key={o.id} value={o.id}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="material-symbols-outlined sgd-select-chevron">expand_more</span>
+            <div className="src-kpi src-kpi--wide">
+              <div className="src-kpi__top">
+                <div className="src-kpi-icon src-kpi-icon--indigo">
+                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    workspace_premium
+                  </span>
                 </div>
               </div>
-              <div className="sgd-filter-divider" aria-hidden />
-              <div className="sgd-filter-context">
-                <span className="sgd-context-hint">Data context</span>
-                <div className="sgd-context-row">
-                  <span className="material-symbols-outlined">info</span>
-                  Viewing results for the selected exam weighting (mid/final columns follow records).
-                </div>
-              </div>
+              <p className="src-kpi-label">Academic credit</p>
+              <p className="src-kpi-value">{creditsDisplay != null ? `${creditsDisplay} Credits` : '—'}</p>
+              <p className="src-kpi-foot">Based on subjects in this section record</p>
             </div>
+          </section>
 
-            <section className="sgd-table-card">
-              <div className="sgd-table-head">
-                <h2 className="sgd-table-title">
-                  <span className="material-symbols-outlined">analytics</span>
-                  Detailed course performance
-                </h2>
-                <span className="sgd-pass-pill">Passing: 40%</span>
+          <div className="src-split">
+            <section className="src-panel" id="src-results" aria-labelledby="src-results-heading">
+              <div className="src-panel-head">
+                <h3 id="src-results-heading" className="src-panel-title">
+                  Academic results
+                </h3>
+                <button
+                  type="button"
+                  className="src-link-btn"
+                  onClick={() => navigate(`${wizardBase}/${classSlug}/${sectionSlug}`)}
+                >
+                  View full record
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </button>
               </div>
-              <div className="sgd-table-scroll">
-                <table className="sgd-table">
+              <div className="src-table-scroll">
+                <table className="src-table">
                   <thead>
                     <tr>
                       <th>Subject</th>
-                      <th className="sgd-th-num">Mid-term</th>
-                      <th className="sgd-th-num">Final-term</th>
-                      <th className="sgd-th-num">Total</th>
-                      <th className="sgd-th-num">Grade</th>
+                      <th className="src-th-num">FA1</th>
+                      <th className="src-th-num">FA2</th>
+                      <th className="src-th-num">H-Yearly</th>
+                      <th className="src-th-num">FA3</th>
+                      <th className="src-th-num">FA4</th>
+                      <th className="src-th-num">Annual</th>
+                      <th className="src-th-num">Internal</th>
+                      <th className="src-th-total">Total</th>
+                      <th className="src-th-grade">Grade</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {courseRows.length === 0 ? (
+                    {subjectRows.length === 0 ? (
                       <tr>
-                        <td className="sgd-table-empty" colSpan={5}>
-                          No course rows for this exam filter. Try another exam type or confirm marks are published.
+                        <td colSpan={10} className="src-table-empty">
+                          No published marks for this student in this section yet.
                         </td>
                       </tr>
                     ) : (
-                      courseRows.map((row) => (
+                      subjectRows.map((row) => (
                         <tr key={row.subject}>
-                          <td className="sgd-td-subj">{row.subject}</td>
-                          <td className="sgd-td-num">{row.mid != null ? `${row.mid}/100` : '—'}</td>
-                          <td className="sgd-td-num">{row.final != null ? `${row.final}/100` : '—'}</td>
-                          <td className="sgd-td-num sgd-td-strong">{row.totalPct.toFixed(1)}%</td>
-                          <td className="sgd-td-num">
-                            <span className={`sgd-grade-pill sgd-grade-pill--${letterGradeTone(row.gradeLetter)}`}>
-                              {row.gradeLetter}
-                            </span>
+                          <td className="src-td-subj">{row.subject}</td>
+                          <td className="src-td-num">{formatScoreCell(row.fa1)}</td>
+                          <td className="src-td-num">{formatScoreCell(row.fa2)}</td>
+                          <td className="src-td-num">{formatScoreCell(row.halfYr)}</td>
+                          <td className="src-td-num">{formatScoreCell(row.fa3)}</td>
+                          <td className="src-td-num">{formatScoreCell(row.fa4)}</td>
+                          <td className="src-td-num">{formatScoreCell(row.annual)}</td>
+                          <td className="src-td-num">{formatIntCell(row.int)}</td>
+                          <td className="src-td-total">{row.total != null ? formatScoreCell(row.total) : '—'}</td>
+                          <td className="src-td-grade">
+                            <ReportGradePill letter={row.gradeLetter} />
                           </td>
                         </tr>
                       ))
@@ -335,164 +397,49 @@ export const StudentGradesDetailPage = () => {
               </div>
             </section>
 
-            <section className="sgd-peer">
-              <div className="sgd-peer-bgicon" aria-hidden>
-                <span className="material-symbols-outlined">bar_chart</span>
-              </div>
-              <div className="sgd-peer-top">
-                <div>
-                  <h2 className="sgd-peer-title">Peer benchmarking</h2>
-                  <p className="sgd-peer-sub">Student vs. class average performance across subjects</p>
-                </div>
-                <div className="sgd-peer-legend">
-                  <span>
-                    <i className="sgd-lg swatch--student" /> {studentName}
-                  </span>
-                  <span>
-                    <i className="sgd-lg swatch--class" /> Class avg
-                  </span>
-                </div>
-              </div>
-              <div className="sgd-peer-bars">
-                {peerRows.length === 0 ? (
-                  <p className="sgd-peer-empty">Course data will appear here once marks exist for this filter.</p>
-                ) : (
-                  peerRows.map((pr) => {
-                    const max = 100;
-                    const h1 = Math.min(100, (pr.studentPct / max) * 100);
-                    const h2 = Math.min(100, (pr.classPct / max) * 100);
-                    return (
-                      <div key={pr.subject} className="sgd-peer-col">
-                        <div className="sgd-peer-bar-pair">
-                          <div
-                            className="sgd-bar sgd-bar--student"
-                            style={{ height: `${h1}%` }}
-                            title={`${pr.studentPct.toFixed(0)}%`}
-                          />
-                          <div
-                            className="sgd-bar sgd-bar--class"
-                            style={{ height: `${h2}%` }}
-                            title={`${pr.classPct.toFixed(0)}%`}
-                          />
-                        </div>
-                        <span className="sgd-peer-lbl">{pr.short}</span>
+            <aside className="src-aside" aria-label="Progress and remarks">
+              <div className="src-card">
+                <h4 className="src-card-title">GPA progress</h4>
+                <div className="src-bars">
+                  {gpaProgressBars.map((b) => (
+                    <div key={b.label} className="src-bar-col">
+                      <div className="src-bar-track">
+                        <div
+                          className={`src-bar-fill ${b.current ? 'src-bar-fill--current' : ''}`}
+                          style={{ height: `${Math.max(8, b.h)}%` }}
+                        />
+                        {b.gpa != null && (
+                          <span className={`src-bar-label ${b.current ? 'is-current' : ''}`}>{b.gpa.toFixed(2)}</span>
+                        )}
                       </div>
-                    );
-                  })
-                )}
-              </div>
-            </section>
-          </div>
-
-          <aside className="sgd-aside">
-            <div className="sgd-aside-card">
-              <label className="sgd-filter-label" htmlFor="sgd-term">
-                View assessment term
-              </label>
-              <div className="sgd-select-wrap">
-                <select id="sgd-term" className="sgd-select" value={termId} onChange={(e) => setTermId(e.target.value)}>
-                  {TERM_OPTIONS.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
-                    </option>
+                      <span className={`src-bar-term ${b.current ? 'is-current' : ''}`}>{b.label}</span>
+                    </div>
                   ))}
-                </select>
-                <span className="material-symbols-outlined sgd-select-chevron">expand_more</span>
-              </div>
-            </div>
-
-            <div className="sgd-aside-card">
-              <div className="sgd-trend-head">
-                <h3 className="sgd-aside-h">GPA trend</h3>
-                <span className="sgd-trend-badge">Annual</span>
-              </div>
-              <div className="sgd-trend-chart">
-                <svg className="sgd-trend-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="sgdTrendFill" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path d={trendSvgPath.fill} fill="url(#sgdTrendFill)" />
-                  <path
-                    d={trendSvgPath.line}
-                    fill="none"
-                    stroke="var(--primary)"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                {trendSvgPath.dots.map((p, i) => (
-                  <span
-                    key={i}
-                    className="sgd-trend-dot"
-                    style={{ left: `${(p.x / 200) * 100}%`, top: `${(p.y / 100) * 100}%` }}
-                  />
-                ))}
-              </div>
-              <div className="sgd-trend-labels">
-                {gpaTrend.map((t) => (
-                  <span key={t.label}>{t.label}</span>
-                ))}
-              </div>
-            </div>
-
-            <div className="sgd-aside-card sgd-teacher">
-              <div className="sgd-teacher-head">
-                <div className="sgd-teacher-avatar" aria-hidden>
-                  {initialsFromName('Sarah Thompson')}
-                </div>
-                <div>
-                  <h4 className="sgd-teacher-name">Ms. Sarah Thompson</h4>
-                  <p className="sgd-teacher-role">Class teacher</p>
                 </div>
               </div>
-              <div className="sgd-quote-wrap">
-                <span className="material-symbols-outlined sgd-quote-ic">format_quote</span>
-                <p className="sgd-quote-text">
-                  “{firstName(studentName)} has shown consistent effort this term. Continue building strong study
-                  habits ahead of the next assessment cycle.”
-                </p>
-              </div>
-              <div className="sgd-teacher-foot">
-                <span className="sgd-teacher-date">Date: June 12, 2024</span>
-                <button type="button" className="sgd-link-btn">
-                  Contact teacher
-                </button>
-              </div>
-            </div>
 
-            <div className="sgd-bento">
-              <div className="sgd-bento-item">
-                <span className="material-symbols-outlined sgd-bento-ic">hotel_class</span>
-                <p className="sgd-bento-val">{percentileLabel(rank, of)}</p>
-                <p className="sgd-bento-lbl">School percentile</p>
+              <div className="src-card src-card--quote">
+                <span className="material-symbols-outlined src-quote-watermark" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  format_quote
+                </span>
+                <h4 className="src-card-title src-card-title--inline">
+                  <span className="material-symbols-outlined">comment</span>
+                  Teacher remarks
+                </h4>
+                <p className="src-quote-body">{teacherRemark}</p>
+                <div className="src-teacher-row">
+                  <div className="src-teacher-avatar" aria-hidden>
+                    CT
+                  </div>
+                  <div>
+                    <p className="src-teacher-name">Class Teacher</p>
+                    <p className="src-teacher-role">Homeroom</p>
+                  </div>
+                </div>
               </div>
-              <div className="sgd-bento-item">
-                <span className="material-symbols-outlined sgd-bento-ic sgd-bento-ic--primary">pending_actions</span>
-                <p className="sgd-bento-val">{submitRate}%</p>
-                <p className="sgd-bento-lbl">Submission rate</p>
-              </div>
-            </div>
-
-            <div className="sgd-event">
-              <div className="sgd-event-bg" />
-              <div className="sgd-event-overlay">
-                <p className="sgd-event-kicker">Upcoming events</p>
-                <p className="sgd-event-title">Annual awards ceremony 2024</p>
-              </div>
-            </div>
-
-            {rosterStudent && (
-              <p className="sgd-roster-meta">
-                <strong>{rosterStudent.name}</strong>
-                {rosterStudent.admissionNo ? ` · ${rosterStudent.admissionNo}` : ''}
-                {rosterStudent.rollNo ? ` · Roll ${rosterStudent.rollNo}` : ''}
-              </p>
-            )}
-          </aside>
-        </div>
+            </aside>
+          </div>
+        </>
       )}
     </div>
   );

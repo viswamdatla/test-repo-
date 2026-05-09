@@ -1,6 +1,7 @@
 import React from 'react';
+import { AdmissionDraftNextGroup } from './AdmissionSaveDraftNext';
 
-export const Step2Academic = ({ formData, updateFormData, onNext, onBack }) => {
+export const Step2Academic = ({ formData, updateFormData, onNext, onBack, onSaveDraft }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onNext();
@@ -14,11 +15,11 @@ export const Step2Academic = ({ formData, updateFormData, onNext, onBack }) => {
           <p>Step 2 of 7: Please fill in the academic details accurately to proceed with the kit allocation.</p>
         </div>
 
-        <form className="admission-form" onSubmit={handleSubmit}>
+        <form className="admission-form" onSubmit={handleSubmit} noValidate>
           <div className="form-row-2">
             <div className="form-group">
               <label>Class Applied For*</label>
-              <select defaultValue={formData.classApplied || ""} required onChange={e => updateFormData({ classApplied: e.target.value })}>
+              <select defaultValue={formData.classApplied || ""} onChange={e => updateFormData({ classApplied: e.target.value })}>
                 <option value="" disabled>Select class</option>
                 <option>Nursery</option>
                 <option>LKG</option>
@@ -80,10 +81,12 @@ export const Step2Academic = ({ formData, updateFormData, onNext, onBack }) => {
               <span className="material-symbols-outlined text-sm">arrow_back</span>
               <span>Back</span>
             </button>
-            <button type="submit" className="btn-next bg-gradient-primary">
-              <span>Next</span>
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </button>
+            <AdmissionDraftNextGroup onSaveDraft={onSaveDraft}>
+              <button type="submit" className="btn-next bg-gradient-primary">
+                <span>Next</span>
+                <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+            </AdmissionDraftNextGroup>
           </div>
         </form>
       </div>

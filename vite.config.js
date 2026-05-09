@@ -5,9 +5,14 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    // Listen on all network interfaces — use the "Network" URL Vite prints to open the app from phones / other PCs.
     host: true,
+    port: 5173,
+    strictPort: false,
   },
   preview: {
     host: true,
+    port: 4173,
+    strictPort: false,
   },
 })

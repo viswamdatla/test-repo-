@@ -1,6 +1,7 @@
 import React from 'react';
+import { AdmissionDraftNextGroup } from './AdmissionSaveDraftNext';
 
-export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
+export const Step3Guardian = ({ formData, updateFormData, onNext, onBack, onSaveDraft }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onNext();
@@ -14,7 +15,7 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
           <p>Step 3 of 7: Provide contact details for parents and emergency contacts.</p>
         </div>
 
-        <form className="admission-form" onSubmit={handleSubmit}>
+        <form className="admission-form admission-form--guardian" onSubmit={handleSubmit} noValidate>
           
           {/* Father's Info */}
           <div className="section-divider">
@@ -27,7 +28,7 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
           <div className="form-row-2">
             <div className="form-group">
               <label>Name*</label>
-              <input type="text" placeholder="Enter father's full name" required defaultValue={formData.fatherName} onChange={e => updateFormData({ fatherName: e.target.value })}/>
+              <input type="text" placeholder="Enter father's full name" defaultValue={formData.fatherName} onChange={e => updateFormData({ fatherName: e.target.value })}/>
             </div>
             <div className="form-group">
               <label>Occupation</label>
@@ -37,15 +38,13 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
           <div className="form-row-2">
             <div className="form-group">
               <label>Phone*</label>
-              <input type="tel" placeholder="+1 (555) 000-0000" required defaultValue={formData.fatherPhone} onChange={e => updateFormData({ fatherPhone: e.target.value })}/>
+              <input type="tel" placeholder="+1 (555) 000-0000" defaultValue={formData.fatherPhone} onChange={e => updateFormData({ fatherPhone: e.target.value })}/>
             </div>
             <div className="form-group">
               <label>Email</label>
               <input type="email" placeholder="father@example.com" defaultValue={formData.fatherEmail} onChange={e => updateFormData({ fatherEmail: e.target.value })}/>
             </div>
           </div>
-
-          <div style={{ height: '32px' }}></div> {/* Spacer */}
 
           {/* Mother's Info */}
           <div className="section-divider">
@@ -58,7 +57,7 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
           <div className="form-row-2">
             <div className="form-group">
               <label>Name*</label>
-              <input type="text" placeholder="Enter mother's full name" required defaultValue={formData.motherName} onChange={e => updateFormData({ motherName: e.target.value })}/>
+              <input type="text" placeholder="Enter mother's full name" defaultValue={formData.motherName} onChange={e => updateFormData({ motherName: e.target.value })}/>
             </div>
             <div className="form-group">
               <label>Occupation</label>
@@ -68,15 +67,13 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
           <div className="form-row-2">
             <div className="form-group">
               <label>Phone*</label>
-              <input type="tel" placeholder="+1 (555) 000-0000" required defaultValue={formData.motherPhone} onChange={e => updateFormData({ motherPhone: e.target.value })}/>
+              <input type="tel" placeholder="+1 (555) 000-0000" defaultValue={formData.motherPhone} onChange={e => updateFormData({ motherPhone: e.target.value })}/>
             </div>
             <div className="form-group">
               <label>Email</label>
               <input type="email" placeholder="mother@example.com" defaultValue={formData.motherEmail} onChange={e => updateFormData({ motherEmail: e.target.value })}/>
             </div>
           </div>
-
-          <div style={{ height: '32px' }}></div> {/* Spacer */}
 
           {/* Income Details */}
           <div className="section-divider">
@@ -93,7 +90,7 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
             </div>
             <div className="form-group">
               <label>Income Bracket (in lakhs)*</label>
-              <select defaultValue={formData.incomeBracket || ""} required onChange={e => updateFormData({ incomeBracket: e.target.value })}>
+              <select defaultValue={formData.incomeBracket || ""} onChange={e => updateFormData({ incomeBracket: e.target.value })}>
                 <option value="" disabled>Select income bracket</option>
                 <option value="1">&lt; 1 lakh</option>
                 <option value="2">1 - 3 lakhs</option>
@@ -104,8 +101,6 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
               </select>
             </div>
           </div>
-
-          <div style={{ height: '32px' }}></div> {/* Spacer */}
 
           {/* Emergency Contact */}
           <div className="section-divider">
@@ -130,15 +125,17 @@ export const Step3Guardian = ({ formData, updateFormData, onNext, onBack }) => {
             </div>
           </div>
 
-          <div className="form-actions space-between" style={{ marginTop: '40px' }}>
+          <div className="form-actions space-between">
             <button type="button" className="btn-back" onClick={onBack}>
               <span className="material-symbols-outlined text-sm">arrow_back</span>
               <span>Back</span>
             </button>
-            <button type="submit" className="btn-next bg-gradient-primary">
-              <span>Next</span>
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </button>
+            <AdmissionDraftNextGroup onSaveDraft={onSaveDraft}>
+              <button type="submit" className="btn-next bg-gradient-primary">
+                <span>Next</span>
+                <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+            </AdmissionDraftNextGroup>
           </div>
         </form>
       </div>

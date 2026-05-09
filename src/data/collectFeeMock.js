@@ -100,8 +100,12 @@ export const collectFeeDefaultLines = [
 export const ADMIN_FEE = 5;
 
 export const collectFeePaymentMethods = [
-  { id: 'cash', label: 'Cash', icon: 'payments' },
-  { id: 'upi', label: 'UPI', icon: 'qr_code_2' },
-  { id: 'card', label: 'Card', icon: 'credit_card' },
-  { id: 'cheque', label: 'Cheque', icon: 'request_quote' },
+  { id: 'cash', label: 'Cash', description: 'Pay at the school counter', icon: 'payments' },
+  { id: 'upi-canara', label: 'Canara Bank UPI', description: 'Institution VPA', icon: 'account_balance' },
+  { id: 'upi-bharath', label: 'UPI to Bharath Kumar', description: 'Staff collection', icon: 'person' },
+  { id: 'card', label: 'Card', description: 'Debit / credit at POS', icon: 'credit_card' },
+  { id: 'credit', label: 'Credit', description: 'Post to credit ledger', icon: 'credit_score' },
+  { id: 'other', label: 'Other', description: 'Manual reconciliation', icon: 'more_horiz' },
+  { id: 'upi-bob', label: 'BOB UPI', description: 'Bank of Baroda UPI', icon: 'qr_code_2' },
+  { id: 'cheque', label: 'Cheque', description: 'Cheque deposit', icon: 'request_quote' },
 ];

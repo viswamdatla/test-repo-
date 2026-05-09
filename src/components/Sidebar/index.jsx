@@ -72,7 +72,9 @@ export const Sidebar = () => {
           }}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          <span className="material-symbols-outlined">{isCollapsed ? 'chevron_right' : 'chevron_left'}</span>
+          <span className="material-symbols-outlined" aria-hidden>
+            menu
+          </span>
         </button>
       </div>
       <nav className="sidebar-nav">

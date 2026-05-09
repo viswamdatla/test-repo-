@@ -1,6 +1,7 @@
 import React from 'react';
+import { AdmissionDraftNextGroup } from './AdmissionSaveDraftNext';
 
-export const Step1Student = ({ formData, updateFormData, onNext }) => {
+export const Step1Student = ({ formData, updateFormData, onNext, onSaveDraft }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onNext();
@@ -14,22 +15,22 @@ export const Step1Student = ({ formData, updateFormData, onNext }) => {
           <p>Step 1 of 7: Basic demographic and identity details.</p>
         </div>
 
-        <form className="admission-form" onSubmit={handleSubmit}>
+        <form className="admission-form" onSubmit={handleSubmit} noValidate>
           <div className="form-row-2">
             <div className="form-group">
               <label>First Name*</label>
-              <input type="text" placeholder="e.g. Aarav" required defaultValue={formData.firstName} onChange={e => updateFormData({ firstName: e.target.value })}/>
+              <input type="text" placeholder="e.g. Aarav" defaultValue={formData.firstName} onChange={e => updateFormData({ firstName: e.target.value })}/>
             </div>
             <div className="form-group">
               <label>Last Name*</label>
-              <input type="text" placeholder="e.g. Sharma" required defaultValue={formData.lastName} onChange={e => updateFormData({ lastName: e.target.value })}/>
+              <input type="text" placeholder="e.g. Sharma" defaultValue={formData.lastName} onChange={e => updateFormData({ lastName: e.target.value })}/>
             </div>
           </div>
 
           <div className="form-row-2">
             <div className="form-group">
               <label>Gender*</label>
-              <select defaultValue={formData.gender || ""} required onChange={e => updateFormData({ gender: e.target.value })}>
+              <select defaultValue={formData.gender || ""} onChange={e => updateFormData({ gender: e.target.value })}>
                 <option value="" disabled>Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -72,7 +73,7 @@ export const Step1Student = ({ formData, updateFormData, onNext }) => {
           <div className="form-row-2">
             <div className="form-group">
               <label>Date of Birth*</label>
-              <input type="date" required defaultValue={formData.dob} onChange={e => updateFormData({ dob: e.target.value })}/>
+              <input type="date" defaultValue={formData.dob} onChange={e => updateFormData({ dob: e.target.value })}/>
             </div>
             <div className="form-group">
               <label>Religion</label>
@@ -85,15 +86,13 @@ export const Step1Student = ({ formData, updateFormData, onNext }) => {
             <input type="text" placeholder="Name of previous academic institution" defaultValue={formData.previousSchool} onChange={e => updateFormData({ previousSchool: e.target.value })}/>
           </div>
 
-          <div className="form-actions">
-            <p className="required-note">* Required fields must be completed</p>
-            <div className="action-buttons">
-              <button type="button" className="btn-draft">Save Draft</button>
+          <div className="form-actions admission-form-actions--step1-draft">
+            <AdmissionDraftNextGroup onSaveDraft={onSaveDraft}>
               <button type="submit" className="btn-next bg-gradient-primary">
                 <span>Next</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
-            </div>
+            </AdmissionDraftNextGroup>
           </div>
         </form>
       </div>

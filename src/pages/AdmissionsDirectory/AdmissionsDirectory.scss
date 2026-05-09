@@ -1,388 +1,368 @@
-.directory-container {
-  padding: 32px clamp(16px, 3vw, 40px);
-  max-width: none;
-  width: 100%;
+// Admissions dashboard — extends Employees design system (EmployeesDirectory.scss)
+
+.admissions-dashboard {
+  .admissions-kpi-card--enrolled {
+    border-bottom-color: #15803d;
+  }
+}
+
+/* Funnel — matches app card surfaces ( Employees / financial ) */
+.admissions-funnel {
+  background: var(--surface-container-low);
+  border: 1px solid rgba(193, 199, 211, 0.12);
+  border-radius: 16px;
+  padding: clamp(20px, 4vw, 32px);
+  margin-bottom: clamp(28px, 5vw, 48px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.admissions-funnel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-bottom: 28px;
+}
+
+.admissions-funnel__title {
   margin: 0;
-  box-sizing: border-box;
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--on-surface);
+}
 
-  .directory-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 40px;
+.admissions-funnel__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: var(--surface-container-lowest);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--outline);
+}
 
-    .header-text {
-      h2 {
-        font-size: 36px;
-        font-weight: 800;
-        color: var(--on-surface);
-        letter-spacing: -0.02em;
-      }
-      p {
-        color: var(--on-surface-variant);
-        margin-top: 8px;
-        max-width: 500px;
-        line-height: 1.5;
-      }
-    }
+.admissions-funnel__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+}
 
-    .btn-new {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      background: linear-gradient(to right, var(--primary), var(--primary-container));
-      color: white;
-      box-shadow: 0 10px 15px -3px rgba(0, 93, 167, 0.2);
-      transition: transform 0.2s;
+.admissions-funnel__track-wrap {
+  position: relative;
+}
 
-      &:hover {
-        transform: scale(1.05);
-      }
-    }
+.admissions-funnel__track-bg {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: var(--surface-container-highest);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.admissions-funnel__track-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--primary), var(--primary-container));
+  border-radius: 9999px;
+}
+
+.admissions-funnel__nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admissions-funnel__node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.admissions-funnel__node-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px var(--surface-container-low);
+  z-index: 1;
+
+  .material-symbols-outlined {
+    font-size: 20px;
   }
 
-  /* KPI Cards */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 24px;
-    margin-bottom: 48px;
-
-    @media (min-width: 768px) { grid-template-columns: repeat(2, 1fr); }
-    @media (min-width: 1024px) { grid-template-columns: repeat(4, 1fr); }
-
-    .kpi-card {
-      background-color: var(--surface-container-lowest);
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      border-bottom: 4px solid transparent;
-      transition: box-shadow 0.2s;
-
-      &:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-      &:nth-child(1) { border-bottom-color: var(--primary); }
-      &:nth-child(2) { border-bottom-color: var(--tertiary); }
-      &:nth-child(3) { border-bottom-color: var(--secondary); }
-      &:nth-child(4) { border-bottom-color: #16a34a; }
-
-      &.border-tertiary {
-        border-left: 4px solid var(--tertiary);
-      }
-
-      .kpi-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-
-        .icon-wrapper {
-          padding: 8px;
-          border-radius: 8px;
-          display: flex;
-
-          &.color-primary { background: #eff6ff; color: var(--primary); }
-          &.color-tertiary { background: var(--tertiary-fixed); color: var(--tertiary); }
-          &.color-secondary { background: var(--secondary-container); color: var(--secondary); }
-          &.color-success { background: #f0fdf4; color: #166534; }
-        }
-
-        .kpi-badge {
-          font-size: 12px;
-          font-weight: 700;
-          padding: 4px 8px;
-          border-radius: 9999px;
-
-          &.badge-primary { background: rgba(0, 93, 167, 0.1); color: var(--primary); }
-          &.badge-tertiary { background: rgba(127, 83, 0, 0.1); color: var(--tertiary); }
-          &.badge-success { background: #dcfce7; color: #166534; }
-        }
-      }
-
-      .kpi-label {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--on-surface-variant);
-      }
-
-      .kpi-value {
-        font-size: 30px;
-        font-weight: 800;
-        margin-top: 4px;
-        color: var(--on-surface);
-      }
-    }
+  &--on {
+    background: var(--primary);
+    color: var(--on-primary);
   }
 
-  /* Funnel Section */
-  .funnel-section {
-    background-color: var(--surface-container-low);
-    padding: 32px;
-    border-radius: 12px;
-    margin-bottom: 48px;
+  &--off {
+    background: var(--surface-container-highest);
+    color: var(--outline);
+  }
+}
 
-    .funnel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
+.admissions-funnel__node-text {
+  text-align: center;
+  min-width: 0;
+}
 
-      h4 { font-size: 18px; font-weight: 700; }
-      
-      .active-badge {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 4px 12px;
-        background-color: var(--surface-container-lowest);
-        border-radius: 9999px;
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--outline);
+.admissions-funnel__node-title {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--on-surface);
 
-        .dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          &.bg-primary { background-color: var(--primary); }
-        }
-      }
-    }
+  &--muted {
+    color: var(--outline);
+  }
+}
 
-    .funnel-track-wrapper {
-      position: relative;
+.admissions-funnel__node-desc {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--on-surface-variant);
 
-      .funnel-track-bg {
-        position: absolute;
-        top: 20px;
-        left: 0;
-        width: 100%;
-        height: 8px;
-        background-color: var(--surface-container-highest);
-        border-radius: 9999px;
-        overflow: hidden;
+  &--muted {
+    color: var(--outline);
+  }
+}
 
-        .funnel-track-fill {
-          height: 100%;
-          background: linear-gradient(to right, var(--primary), var(--primary-container));
-          border-radius: 9999px;
-        }
-      }
+/* Table panel */
+.admissions-table-panel {
+  margin-top: 0;
+}
 
-      .funnel-nodes {
-        position: relative;
-        display: flex;
-        justify-content: space-between;
-        
-        .node {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
+.admissions-table-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 22px;
+  border-bottom: 1px solid rgba(193, 199, 211, 0.18);
+  background: var(--surface-container-lowest);
+}
 
-          .node-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 0 4px var(--surface-container-low);
-            z-index: 10;
-            
-            &.bg-primary { background: var(--primary); color: white; }
-            &.bg-inactive { background: var(--surface-container-highest); color: var(--outline); }
+.admissions-table-card-title {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--on-surface);
+}
 
-            .material-symbols-outlined { font-size: 20px; }
-          }
-          
-          .node-text {
-            text-align: center;
-            .node-title {
-              font-size: 12px;
-              font-weight: 700;
-              margin-bottom: 2px;
-              &.color-dark { color: #18181b; }
-              &.color-light { color: #a1a1aa; }
-            }
-            .node-desc {
-              font-size: 10px;
-              color: #71717a;
-            }
-          }
-        }
-      }
-    }
+.admissions-table-filter-caption {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+
+  strong {
+    color: var(--on-surface);
+    font-weight: 700;
+  }
+}
+
+.admissions-filter-clear {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: var(--primary-container);
+  }
+}
+
+.admissions-table-empty {
+  text-align: center;
+  padding: 32px 16px !important;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+}
+
+.admissions-table-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admissions-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  border: 1px solid rgba(193, 199, 211, 0.45);
+  background: var(--surface-container-low);
+  color: var(--on-surface-variant);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  .material-symbols-outlined {
+    font-size: 16px;
   }
 
-  /* Table Section */
-  .directory-table-section {
-    background-color: var(--surface-container-lowest);
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    overflow: hidden;
+  &:hover {
+    background: var(--surface-container-high);
+    border-color: rgba(193, 199, 211, 0.65);
+    color: var(--on-surface);
+  }
+}
 
-    .table-header {
-      padding: 24px 32px;
-      border-bottom: 1px solid var(--surface-container);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+/* Table body — align with reference: IDs/links, muted columns, stage pills */
+.admissions-student-table {
+  thead tr {
+    background: #f9f8f6;
+  }
 
-      h4 { font-size: 18px; font-weight: 700; }
+  thead th {
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+}
 
-      .table-actions {
-        display: flex;
-        gap: 12px;
+.admissions-th-action,
+.admissions-td-action {
+  text-align: right;
+}
 
-        .btn-secondary {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 16px;
-          background-color: var(--surface-container-low);
-          color: var(--on-surface-variant);
-          border: none;
-          font-weight: 700;
-          font-size: 12px;
-          cursor: pointer;
-          transition: background 0.2s;
+.admissions-id-cell {
+  font-family: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+}
 
-          &:hover { background-color: var(--surface-container-high); }
-          .material-symbols-outlined { font-size: 16px; }
-        }
-      }
-    }
+.admissions-cell-muted {
+  font-size: 14px;
+  font-weight: 600 !important;
+  color: var(--on-surface-variant) !important;
+}
 
-    .table-scroll {
-      overflow-x: auto;
-      
-      .student-table {
-        width: 100%;
-        text-align: left;
-        border-collapse: collapse;
+.admissions-link-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--primary);
+  cursor: pointer;
 
-        thead {
-          tr {
-            background-color: var(--surface-container-low);
-            th {
-              padding: 16px 32px;
-              text-transform: uppercase;
-              font-size: 10px;
-              font-weight: 700;
-              letter-spacing: 0.1em;
-              color: var(--on-surface-variant);
-            }
-          }
-        }
+  &:hover {
+    text-decoration: underline;
+  }
+}
 
-        tbody {
-          tr {
-            border-bottom: 1px solid var(--surface-container);
-            transition: background 0.2s;
-            &:hover { background-color: var(--surface-container-low); }
-            
-            td {
-              padding: 20px 32px;
-              vertical-align: middle;
+.admissions-avatar {
+  font-size: 11px;
+  font-weight: 900;
 
-              &.id-col { font-family: monospace; font-size: 14px; font-weight: 700; color: var(--primary); }
-              &.text-muted { font-size: 14px; color: var(--on-surface-variant); }
-              &.text-right { text-align: right; }
+  &--blue {
+    background: #dbeafe;
+    color: var(--primary);
+  }
 
-              .student-info-cell {
-                display: flex;
-                align-items: center;
-                gap: 12px;
+  &--amber {
+    background: #fef3c7;
+    color: #b45309;
+  }
 
-                .avatar {
-                  width: 32px;
-                  height: 32px;
-                  border-radius: 50%;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  font-size: 10px;
-                  font-weight: 700;
+  &--green {
+    background: #dcfce7;
+    color: #15803d;
+  }
 
-                  &.bg-blue-light { background: #dbeafe; } &.color-primary { color: var(--primary); }
-                  &.bg-amber-light { background: #fef3c7; } &.color-amber { color: #b45309; }
-                  &.bg-green-light { background: #dcfce7; } &.color-green { color: #15803d; }
-                  &.bg-rose-light { background: #ffe4e6; } &.color-rose { color: #be123c; }
-                }
-                .student-name {
-                  font-size: 14px;
-                  font-weight: 700;
-                  color: var(--on-surface);
-                }
-              }
+  &--rose {
+    background: #ffe4e6;
+    color: #be123c;
+  }
+}
 
-              .stage-badge {
-                padding: 4px 12px;
-                border-radius: 9999px;
-                font-size: 10px;
-                font-weight: 700;
+.admissions-stage-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
 
-                &.bg-secondary-container { background: var(--secondary-container); color: var(--on-secondary-container); }
-                &.bg-tertiary-fixed { background: var(--tertiary-fixed); color: var(--tertiary); }
-                &.bg-green-light-badge { background: #dcfce7; color: #15803d; }
-                &.bg-primary-light { background: rgba(0, 93, 167, 0.1); color: var(--primary); }
-              }
+.admissions-stage-pill--blue {
+  background: rgba(0, 93, 167, 0.1);
+  color: var(--primary);
+}
 
-              .btn-text {
-                background: none;
-                border: none;
-                color: var(--primary);
-                font-weight: 700;
-                font-size: 12px;
-                cursor: pointer;
-                &:hover { text-decoration: underline; }
-              }
-            }
-          }
-        }
-      }
-    }
+.admissions-stage-pill--amber {
+  background: rgba(245, 158, 11, 0.16);
+  color: #b45309;
+}
 
-    .table-pagination {
-      padding: 16px 32px;
-      background-color: var(--surface-container-low);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+.admissions-stage-pill--green {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
 
-      p { font-size: 12px; color: var(--on-surface-variant); }
+.admissions-stage-pill--lavender {
+  background: rgba(99, 102, 241, 0.12);
+  color: #4338ca;
+}
 
-      .pagination-controls {
-        display: flex;
-        gap: 8px;
+.admissions-stage-pill--slate {
+  background: var(--surface-container-highest);
+  color: var(--on-surface-variant);
+}
 
-        .page-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid var(--outline-variant);
-          background: var(--surface-container-lowest);
-          color: var(--outline);
-          cursor: pointer;
-          font-size: 12px;
-          font-weight: 700;
+@media (max-width: 768px) {
+  .admissions-funnel__nodes {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-          &:hover:not(.active) { background: var(--surface); color: var(--on-surface); }
-          &.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .admissions-funnel__track-bg {
+    display: none;
+  }
 
-          .material-symbols-outlined { font-size: 14px; }
-        }
-      }
-    }
+  .admissions-funnel__node {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .admissions-funnel__node-text {
+    text-align: left;
   }
 }

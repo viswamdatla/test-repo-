@@ -36,6 +36,12 @@ function formatOrderIdForDisplay(id) {
   return s.startsWith('CFP') ? `#${s}` : `#${s}`;
 }
 
+function formatRupee(n) {
+  const x = Number(n);
+  if (Number.isNaN(x)) return '₹0.00';
+  return `₹${x.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export const CollectFeeFlowPage = () => {
   usePageTitle('Collect Fee');
   const navigate = useNavigate();
@@ -47,6 +53,12 @@ export const CollectFeeFlowPage = () => {
   const [studentSearch, setStudentSearch] = useState('');
   const [lines, setLines] = useState(() => collectFeeDefaultLines.map((l) => ({ ...l })));
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [secondPaymentMethod, setSecondPaymentMethod] = useState('upi-canara');
+  const [splitEnabled, setSplitEnabled] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [payNowAmount, setPayNowAmount] = useState(0);
+  const [splitPrimaryAmount, setSplitPrimaryAmount] = useState(0);
+  const [orderNotes, setOrderNotes] = useState('');
   const [remarks, setRemarks] = useState('');
   const [completed, setCompleted] = useState(false);
   const [receiptMeta, setReceiptMeta] = useState(null);
@@ -78,6 +90,14 @@ export const CollectFeeFlowPage = () => {
   );
   const total = subtotal + ADMIN_FEE;
 
+  const finalPayable = useMemo(() => Math.max(0, total - discountAmount), [total, discountAmount]);
+  const payNowClamped = Math.min(Math.max(0, payNowAmount), finalPayable);
+  const remainingFeeDue = Math.max(0, finalPayable - payNowClamped);
+  const splitPrimaryClamped = splitEnabled
+    ? Math.min(Math.max(0, splitPrimaryAmount), payNowClamped)
+    : payNowClamped;
+  const splitSecondaryAmount = splitEnabled ? Math.max(0, payNowClamped - splitPrimaryClamped) : 0;
+
   const toggleLine = (id) => {
     setLines((prev) => prev.map((l) => (l.id === id ? { ...l, checked: !l.checked } : l)));
   };
@@ -87,7 +107,11 @@ export const CollectFeeFlowPage = () => {
 
   const paidLines = useMemo(() => lines.filter((l) => l.checked), [lines]);
   const paymentLabel = collectFeePaymentMethods.find((m) => m.id === paymentMethod)?.label ?? paymentMethod;
-  const paymentIcon = collectFeePaymentMethods.find((m) => m.id === paymentMethod)?.icon ?? 'payments';
+  const secondPaymentLabel = collectFeePaymentMethods.find((m) => m.id === secondPaymentMethod)?.label ?? secondPaymentMethod;
+
+  const canCompletePayment =
+    payNowClamped > 0.009 &&
+    (!splitEnabled || Math.abs(splitPrimaryClamped + splitSecondaryAmount - payNowClamped) < 0.02);
 
   const subtotalLinesOnly = useMemo(
     () => paidLines.reduce((sum, l) => sum + l.amount, 0),
@@ -95,11 +119,21 @@ export const CollectFeeFlowPage = () => {
   );
 
   const paymentReceiptDetail = useMemo(() => {
-    if (paymentMethod === 'card') return `${paymentLabel} (Visa ending in 4421)`;
-    if (paymentMethod === 'upi') return `${paymentLabel} (institution UPI)`;
-    if (paymentMethod === 'cheque') return `${paymentLabel} (reference on cheque)`;
-    return paymentLabel;
-  }, [paymentMethod, paymentLabel]);
+    const lineFor = (id) => collectFeePaymentMethods.find((m) => m.id === id)?.label ?? id;
+    if (splitEnabled && splitSecondaryAmount >= 0.01) {
+      return `${lineFor(paymentMethod)} ${formatRupee(splitPrimaryClamped)} + ${lineFor(secondPaymentMethod)} ${formatRupee(splitSecondaryAmount)}`;
+    }
+    if (paymentMethod === 'card') return `${lineFor(paymentMethod)} (POS reference)`;
+    if (String(paymentMethod).includes('upi')) return `${lineFor(paymentMethod)} (UPI)`;
+    if (paymentMethod === 'cheque') return `${lineFor(paymentMethod)} (reference on cheque)`;
+    return lineFor(paymentMethod);
+  }, [
+    paymentMethod,
+    secondPaymentMethod,
+    splitEnabled,
+    splitSecondaryAmount,
+    splitPrimaryClamped,
+  ]);
 
   const handleComplete = () => {
     const issuedAt = new Date();
@@ -122,6 +156,12 @@ export const CollectFeeFlowPage = () => {
     setStudentSearch('');
     setLines(collectFeeDefaultLines.map((l) => ({ ...l })));
     setPaymentMethod('cash');
+    setSecondPaymentMethod('upi-canara');
+    setSplitEnabled(false);
+    setDiscountAmount(0);
+    setPayNowAmount(0);
+    setSplitPrimaryAmount(0);
+    setOrderNotes('');
     setRemarks('');
     setReceiptMeta(null);
     setCompleted(false);
@@ -170,18 +210,19 @@ export const CollectFeeFlowPage = () => {
                   <p className="cf-pay-confirm__value">{student.name}</p>
                 </div>
                 <div className="cf-pay-confirm__field">
-                  <span className="cf-pay-confirm__label">Amount Paid</span>
-                  <p className="cf-pay-confirm__amount">${total.toFixed(2)}</p>
+                  <span className="cf-pay-confirm__label">Amount received (this payment)</span>
+                  <p className="cf-pay-confirm__amount">{formatRupee(payNowClamped)}</p>
                 </div>
                 <div className="cf-pay-confirm__field">
-                  <span className="cf-pay-confirm__label">Payment Method</span>
-                  <div className="cf-pay-confirm__method">
-                    <span className="material-symbols-outlined" aria-hidden>
-                      {paymentIcon}
-                    </span>
-                    <p className="cf-pay-confirm__value">{paymentLabel}</p>
-                  </div>
+                  <span className="cf-pay-confirm__label">Payment</span>
+                  <p className="cf-pay-confirm__value cf-pay-confirm__value--multiline">{paymentReceiptDetail}</p>
                 </div>
+                {remainingFeeDue > 0.009 ? (
+                  <div className="cf-pay-confirm__field">
+                    <span className="cf-pay-confirm__label">Remaining fee balance</span>
+                    <p className="cf-pay-confirm__amount cf-pay-confirm__amount--warn">{formatRupee(remainingFeeDue)}</p>
+                  </div>
+                ) : null}
               </div>
             </div>
             <div className="cf-pay-confirm__dots" aria-hidden>
@@ -311,8 +352,8 @@ export const CollectFeeFlowPage = () => {
                         <p className="cf-receipt-doc__line-title">{line.label}</p>
                         {line.detail ? <p className="cf-receipt-doc__line-detail">{line.detail}</p> : null}
                       </td>
-                      <td className="cf-receipt-doc__col-num">${line.amount.toFixed(2)}</td>
-                      <td className="cf-receipt-doc__col-num cf-receipt-doc__col-bold">${line.amount.toFixed(2)}</td>
+                      <td className="cf-receipt-doc__col-num">{formatRupee(line.amount)}</td>
+                      <td className="cf-receipt-doc__col-num cf-receipt-doc__col-bold">{formatRupee(line.amount)}</td>
                     </tr>
                   ))}
                   <tr>
@@ -320,16 +361,17 @@ export const CollectFeeFlowPage = () => {
                       <p className="cf-receipt-doc__line-title">Administrative fee</p>
                       <p className="cf-receipt-doc__line-detail">Processing and documentation.</p>
                     </td>
-                    <td className="cf-receipt-doc__col-num">${ADMIN_FEE.toFixed(2)}</td>
-                    <td className="cf-receipt-doc__col-num cf-receipt-doc__col-bold">${ADMIN_FEE.toFixed(2)}</td>
+                    <td className="cf-receipt-doc__col-num">{formatRupee(ADMIN_FEE)}</td>
+                    <td className="cf-receipt-doc__col-num cf-receipt-doc__col-bold">{formatRupee(ADMIN_FEE)}</td>
                   </tr>
                 </tbody>
               </table>
             </section>
 
-            {remarks.trim() ? (
+            {remarks.trim() || orderNotes.trim() ? (
               <p className="cf-receipt-doc__remarks">
-                <strong>Notes:</strong> {remarks.trim()}
+                <strong>Notes:</strong>{' '}
+                {[remarks.trim(), orderNotes.trim()].filter(Boolean).join(' · ')}
               </p>
             ) : null}
 
@@ -347,20 +389,36 @@ export const CollectFeeFlowPage = () => {
               <div className="cf-receipt-doc__summary">
                 <div className="cf-receipt-doc__summary-row">
                   <span>Subtotal</span>
-                  <span>${subtotalLinesOnly.toFixed(2)}</span>
+                  <span>{formatRupee(subtotalLinesOnly)}</span>
                 </div>
                 <div className="cf-receipt-doc__summary-row">
                   <span>Processing Fee</span>
-                  <span>$0.00</span>
+                  <span>{formatRupee(0)}</span>
                 </div>
                 <div className="cf-receipt-doc__summary-row">
                   <span>Administrative fee</span>
-                  <span>${ADMIN_FEE.toFixed(2)}</span>
+                  <span>{formatRupee(ADMIN_FEE)}</span>
                 </div>
+                {discountAmount > 0.009 ? (
+                  <div className="cf-receipt-doc__summary-row">
+                    <span>Discount / waiver</span>
+                    <span>−{formatRupee(discountAmount)}</span>
+                  </div>
+                ) : null}
                 <div className="cf-receipt-doc__summary-total">
-                  <span>Total Amount</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Final payable</span>
+                  <span>{formatRupee(finalPayable)}</span>
                 </div>
+                <div className="cf-receipt-doc__summary-row cf-receipt-doc__summary-row--emph">
+                  <span>Amount received (this payment)</span>
+                  <span>{formatRupee(payNowClamped)}</span>
+                </div>
+                {remainingFeeDue > 0.009 ? (
+                  <div className="cf-receipt-doc__summary-row cf-receipt-doc__summary-row--due">
+                    <span>Balance due</span>
+                    <span>{formatRupee(remainingFeeDue)}</span>
+                  </div>
+                ) : null}
               </div>
             </footer>
 
@@ -397,7 +455,7 @@ export const CollectFeeFlowPage = () => {
   }
 
   return (
-    <div className="cf-flow">
+    <div className={`cf-flow ${step === 3 ? 'cf-flow--wide' : ''}`}>
       <header className="cf-flow__hero">
         <div className="cf-flow__hero-row">
           <div>
@@ -559,22 +617,22 @@ export const CollectFeeFlowPage = () => {
                   <input type="checkbox" checked={line.checked} onChange={() => toggleLine(line.id)} />
                   <span>{line.label}</span>
                 </label>
-                <span className="cf-line__amt">${line.amount.toFixed(2)}</span>
+                <span className="cf-line__amt">{formatRupee(line.amount)}</span>
               </li>
             ))}
           </ul>
           <div className="cf-totals">
             <div className="cf-totals__row">
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{formatRupee(subtotal)}</span>
             </div>
             <div className="cf-totals__row">
               <span>Administrative fee</span>
-              <span>${ADMIN_FEE.toFixed(2)}</span>
+              <span>{formatRupee(ADMIN_FEE)}</span>
             </div>
             <div className="cf-totals__row cf-totals__row--total">
               <span>Total due</span>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatRupee(total)}</span>
             </div>
           </div>
 
@@ -582,62 +640,347 @@ export const CollectFeeFlowPage = () => {
             <button type="button" className="cf-btn cf-btn--ghost" onClick={() => setStep(1)}>
               Back
             </button>
-            <button type="button" className="cf-btn cf-btn--primary" disabled={!canGoStep3} onClick={() => setStep(3)}>
+            <button
+              type="button"
+              className="cf-btn cf-btn--primary"
+              disabled={!canGoStep3}
+              onClick={() => {
+                setDiscountAmount(0);
+                setPayNowAmount(total);
+                setSplitPrimaryAmount(total);
+                setSplitEnabled(false);
+                setPaymentMethod('cash');
+                setSecondPaymentMethod('upi-canara');
+                setOrderNotes('');
+                setStep(3);
+              }}
+            >
               Continue to payment
             </button>
           </div>
         </section>
       )}
 
-      {step === 3 && student && (
-        <section className="cf-panel" aria-labelledby="cf-step3-title">
-          <h2 id="cf-step3-title" className="cf-panel__title">
-            Payment
-          </h2>
-          <p className="cf-panel__lead">
-            Amount to collect: <strong>${total.toFixed(2)}</strong>
-          </p>
+      {step === 3 && student && selectedClass && selectedSection && (
+        <div className="cf-pay-step">
+          <div className="cf-pay-layout">
+            <div className="cf-pay-main">
+              <h2 id="cf-step3-title" className="cf-pay-main__title">
+                Select Payment Method
+              </h2>
+              <p className="cf-pay-main__payable">
+                Final payable: <strong>{formatRupee(finalPayable)}</strong>
+              </p>
 
-          <div className="cf-field">
-            <span className="cf-field__label">Method</span>
-            <div className="cf-method-grid">
-              {collectFeePaymentMethods.map((m) => (
+              <div className="cf-field">
+                <span className="cf-field__label">Payment options</span>
+                <div className="cf-method-card-grid">
+                  {collectFeePaymentMethods.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      className={`cf-method-card ${paymentMethod === m.id ? 'is-selected' : ''}`}
+                      onClick={() => {
+                        setPaymentMethod(m.id);
+                        if (secondPaymentMethod === m.id) {
+                          const alt = collectFeePaymentMethods.find((x) => x.id !== m.id);
+                          if (alt) setSecondPaymentMethod(alt.id);
+                        }
+                      }}
+                    >
+                      {paymentMethod === m.id ? (
+                        <span className="cf-method-card__check material-symbols-outlined" aria-hidden>
+                          check_circle
+                        </span>
+                      ) : null}
+                      <span className="cf-method-card__icon">
+                        <span className="material-symbols-outlined">{m.icon}</span>
+                      </span>
+                      <span className="cf-method-card__label">{m.label}</span>
+                      {m.description ? <span className="cf-method-card__desc">{m.description}</span> : null}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="cf-split-bar">
+                <span className="cf-split-bar__label">Enable Split Payment</span>
                 <button
-                  key={m.id}
                   type="button"
-                  className={`cf-method ${paymentMethod === m.id ? 'is-selected' : ''}`}
-                  onClick={() => setPaymentMethod(m.id)}
+                  role="switch"
+                  aria-checked={splitEnabled}
+                  className={`cf-switch ${splitEnabled ? 'is-on' : ''}`}
+                  onClick={() => {
+                    const next = !splitEnabled;
+                    setSplitEnabled(next);
+                    if (next) {
+                      setSplitPrimaryAmount(payNowClamped);
+                    }
+                  }}
                 >
-                  <span className="material-symbols-outlined">{m.icon}</span>
-                  {m.label}
+                  <span className="cf-switch__thumb" />
                 </button>
-              ))}
+              </div>
+
+              {splitEnabled ? (
+                <div className="cf-split-fields">
+                  <div className="cf-field">
+                    <label className="cf-field__label" htmlFor="cf-split-primary-amt">
+                      {`Amount via ${paymentLabel}`}
+                    </label>
+                    <input
+                      id="cf-split-primary-amt"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      className="cf-input"
+                      value={splitPrimaryAmount === 0 ? '' : splitPrimaryAmount}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === '') {
+                          setSplitPrimaryAmount(0);
+                          return;
+                        }
+                        const n = Math.min(Math.max(0, Number(raw) || 0), payNowClamped);
+                        setSplitPrimaryAmount(n);
+                      }}
+                      onBlur={() => {
+                        if (!Number.isFinite(splitPrimaryAmount) || splitPrimaryAmount < 0) {
+                          setSplitPrimaryAmount(0);
+                        }
+                      }}
+                      onFocus={(e) => e.target.select()}
+                    />
+                  </div>
+                  <div className="cf-field cf-field--readonly">
+                    <span className="cf-field__label">Remaining (2nd method)</span>
+                    <div className="cf-readonly-val">{formatRupee(splitSecondaryAmount)}</div>
+                  </div>
+                  <div className="cf-field">
+                    <label className="cf-field__label" htmlFor="cf-second-method">
+                      Second method (receives remaining amount)
+                    </label>
+                    <select
+                      id="cf-second-method"
+                      className="cf-select"
+                      value={secondPaymentMethod}
+                      onChange={(e) => setSecondPaymentMethod(e.target.value)}
+                    >
+                      {collectFeePaymentMethods
+                        .filter((m) => m.id !== paymentMethod)
+                        .map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.label}
+                          </option>
+                        ))}
+                    </select>
+                    <p className="cf-second-hint">
+                      {secondPaymentLabel.toUpperCase()}: {formatRupee(splitSecondaryAmount)}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="cf-field">
+                <label className="cf-field__label" htmlFor="cf-remarks">
+                  Remarks (optional)
+                </label>
+                <textarea
+                  id="cf-remarks"
+                  className="cf-textarea"
+                  rows={3}
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                  placeholder="Transaction reference, cheque no., UPI ref., etc."
+                />
+              </div>
+
+              <div className="cf-pay-main__back">
+                <button type="button" className="cf-btn cf-btn--ghost" onClick={() => setStep(2)}>
+                  <span className="material-symbols-outlined">arrow_back</span>
+                  Back
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="cf-field">
-            <label className="cf-field__label" htmlFor="cf-remarks">
-              Remarks (optional)
-            </label>
-            <textarea
-              id="cf-remarks"
-              className="cf-textarea"
-              rows={3}
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              placeholder="Receipt notes, reference no., etc."
-            />
-          </div>
+            <aside className="cf-pay-summary" aria-label="Order summary">
+              <div className="cf-pay-summary__head">
+                <span className="material-symbols-outlined" aria-hidden>
+                  shopping_bag
+                </span>
+                <h3 className="cf-pay-summary__title">Order Summary</h3>
+              </div>
 
-          <div className="cf-actions">
-            <button type="button" className="cf-btn cf-btn--ghost" onClick={() => setStep(2)}>
-              Back
-            </button>
-            <button type="button" className="cf-btn cf-btn--primary" onClick={handleComplete}>
-              Complete payment
-            </button>
+              <div className="cf-pay-summary__student">
+                <div className="cf-pay-summary__avatar" aria-hidden>
+                  {student.initials}
+                </div>
+                <div>
+                  <p className="cf-pay-summary__name">{student.name}</p>
+                  <p className="cf-pay-summary__meta">
+                    Class: {selectedClass.name} · Section: {selectedSection.name}
+                  </p>
+                </div>
+              </div>
+
+              <ul className="cf-pay-summary__lines">
+                {paidLines.map((line) => (
+                  <li key={line.id} className="cf-pay-summary__line">
+                    <div>
+                      <p className="cf-pay-summary__line-title">{line.label}</p>
+                      {line.detail ? <p className="cf-pay-summary__line-detail">{line.detail}</p> : null}
+                    </div>
+                    <span className="cf-pay-summary__line-amt">{formatRupee(line.amount)}</span>
+                  </li>
+                ))}
+                <li className="cf-pay-summary__line">
+                  <div>
+                    <p className="cf-pay-summary__line-title">Administrative fee</p>
+                    <p className="cf-pay-summary__line-detail">Processing and documentation</p>
+                  </div>
+                  <span className="cf-pay-summary__line-amt">{formatRupee(ADMIN_FEE)}</span>
+                </li>
+              </ul>
+
+              <div className="cf-pay-summary__calc">
+                <div className="cf-pay-summary__row">
+                  <span>Subtotal</span>
+                  <span>{formatRupee(subtotal)}</span>
+                </div>
+                <div className="cf-pay-summary__row cf-pay-summary__row--total">
+                  <span>Total amount</span>
+                  <span>{formatRupee(total)}</span>
+                </div>
+                <div className="cf-field cf-field--compact">
+                  <label className="cf-field__label" htmlFor="cf-discount">
+                    Discount
+                  </label>
+                  <input
+                    id="cf-discount"
+                    type="number"
+                    min={0}
+                    max={total}
+                    step="0.01"
+                    className="cf-input cf-input--sm"
+                    value={discountAmount === 0 ? '' : discountAmount}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === '') {
+                        setDiscountAmount(0);
+                        const fp = total;
+                        const nextPay = Math.min(payNowAmount, fp);
+                        setPayNowAmount(nextPay);
+                        setSplitPrimaryAmount((sp) => Math.min(sp, nextPay));
+                        return;
+                      }
+                      const d = Math.min(Math.max(0, Number(raw) || 0), total);
+                      const fp = Math.max(0, total - d);
+                      setDiscountAmount(d);
+                      const nextPay = Math.min(payNowAmount, fp);
+                      setPayNowAmount(nextPay);
+                      setSplitPrimaryAmount((sp) => Math.min(sp, nextPay));
+                    }}
+                  />
+                </div>
+                <div className="cf-pay-summary__row cf-pay-summary__row--final">
+                  <span>Final payable</span>
+                  <span>{formatRupee(finalPayable)}</span>
+                </div>
+                <div className="cf-field cf-field--compact">
+                  <label className="cf-field__label" htmlFor="cf-pay-now">
+                    Paying now (partial allowed)
+                  </label>
+                  <input
+                    id="cf-pay-now"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    className="cf-input cf-input--sm"
+                    value={payNowAmount === 0 ? '' : payNowAmount}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === '') {
+                        setPayNowAmount(0);
+                        setSplitPrimaryAmount(0);
+                        return;
+                      }
+                      const n = Math.min(Math.max(0, Number(raw) || 0), finalPayable);
+                      setPayNowAmount(n);
+                      if (splitEnabled) {
+                        setSplitPrimaryAmount((sp) => Math.min(sp, n));
+                      }
+                    }}
+                  />
+                  <p className="cf-pay-hint">Leave less than final payable to record a partial fee payment.</p>
+                </div>
+              </div>
+
+              <div className="cf-pay-pink">
+                <p className="cf-pay-pink__title">Payment summary</p>
+                <div className="cf-pay-pink__row">
+                  <span>Paid now</span>
+                  <span>{formatRupee(payNowClamped)}</span>
+                </div>
+                <div className="cf-pay-pink__row">
+                  <span>Remaining due</span>
+                  <span>{formatRupee(remainingFeeDue)}</span>
+                </div>
+              </div>
+
+              <div className="cf-pay-pink cf-pay-pink--split">
+                <p className="cf-pay-pink__title">Payment split (this transaction)</p>
+                {!splitEnabled ? (
+                  <p className="cf-pay-split-line">
+                    <strong>{paymentLabel}:</strong> {formatRupee(payNowClamped)}
+                  </p>
+                ) : (
+                  <>
+                    <p className="cf-pay-split-line">
+                      <strong>{paymentLabel}:</strong> {formatRupee(splitPrimaryClamped)}
+                    </p>
+                    {splitSecondaryAmount > 0.009 ? (
+                      <p className="cf-pay-split-line">
+                        <strong>{secondPaymentLabel}:</strong> {formatRupee(splitSecondaryAmount)}
+                      </p>
+                    ) : (
+                      <p className="cf-pay-split-line cf-pay-split-line--muted">Second method: {formatRupee(0)}</p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="cf-field cf-field--compact">
+                <label className="cf-field__label" htmlFor="cf-order-notes">
+                  Notes (optional)
+                </label>
+                <textarea
+                  id="cf-order-notes"
+                  className="cf-textarea cf-textarea--compact"
+                  rows={2}
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                  placeholder="Quick notes shown on internal record…"
+                />
+              </div>
+
+              <p className="cf-pay-secure">
+                <span className="material-symbols-outlined" aria-hidden>
+                  lock
+                </span>
+                Secure encrypted checkout
+              </p>
+
+              <button
+                type="button"
+                className="cf-btn cf-btn--primary cf-pay-complete"
+                disabled={!canCompletePayment}
+                onClick={handleComplete}
+              >
+                Complete Payment
+              </button>
+            </aside>
           </div>
-        </section>
+        </div>
       )}
     </div>
   );

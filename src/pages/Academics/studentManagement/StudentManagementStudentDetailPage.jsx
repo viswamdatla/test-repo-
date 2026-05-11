@@ -1,450 +1,756 @@
 import React, { useEffect, useMemo } from 'react';
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchAcademicsData, selectAcademicsSectionItems } from '../../../store/academics/academicsSlice';
 import { usePageTitle } from '../../../hooks/usePageTitle';
-import {
-  flattenAllClassNames,
-  resolveStageForClass,
-  sectionFromSlug,
-  sectionToSlug,
-  slugToClassLevel,
-} from './studentManagementConfig';
-import {
-  fetchAcademicsData,
-  selectAcademicsStructure,
-  selectClassSections,
-  selectAcademicsSectionItems,
-  selectAcademicsStatus,
-} from '../../../store/academics/academicsSlice';
-import { ACADEMIC_YEAR_LABEL, buildStudentProfileView } from './studentProfileViewModel';
-import '../AcademicsPages.scss';
-import './StudentManagementFlow.scss';
+import './StudentProfilePage.scss';
 
-const initialsFromName = (name) => {
-  const parts = String(name || '')
+function classLevelToRegistrySectionCode(level) {
+  const m = /^Class\s+(\d+)$/i.exec(level || '');
+  if (m) return String(Number(m[1])).padStart(2, '0');
+  const map = { Nursery: 'NUR', LKG: 'LKG', UKG: 'UKG' };
+  return (
+    map[level] ||
+    String(level || 'X')
+      .replace(/\s+/g, '')
+      .slice(0, 3)
+      .toUpperCase()
+  );
+}
+
+function studentRegistrySectionKey(st) {
+  if (st?.sectionId) return String(st.sectionId);
+  const letter = String(st?.section ?? '');
+  return `${classLevelToRegistrySectionCode(st?.classLevel)}-${letter}`;
+}
+
+function formatINR(amount) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(Number(amount) || 0);
+}
+
+const CALENDAR_DAYS_SPEC = [
+  { day: 1, kind: 'present' },
+  { day: 2, kind: 'present' },
+  { day: 3, kind: 'present' },
+  { day: 4, kind: 'absent' },
+  { day: 5, kind: 'present' },
+  { day: 6, kind: 'weekend' },
+  { day: 7, kind: 'weekend' },
+  { day: 8, kind: 'present' },
+  { day: 9, kind: 'present' },
+  { day: 10, kind: 'today' },
+  { day: 11, kind: 'present' },
+  { day: 12, kind: 'present' },
+  { day: 13, kind: 'weekend' },
+  { day: 14, kind: 'weekend' },
+  { day: 15, kind: 'present' },
+  { day: 16, kind: 'present' },
+  { day: 17, kind: 'present' },
+  { day: 18, kind: 'absent' },
+  { day: 19, kind: 'present' },
+  { day: 20, kind: 'weekend' },
+  { day: 21, kind: 'weekend' },
+  { day: 22, kind: 'present' },
+  { day: 23, kind: 'present' },
+  { day: 24, kind: 'absent' },
+  { day: 25, kind: 'present' },
+  { day: 26, kind: 'present' },
+  { day: 27, kind: 'weekend' },
+  { day: 28, kind: 'weekend' },
+  { day: 29, kind: 'present' },
+  { day: 30, kind: 'present' },
+];
+
+function escapePreviewText(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function openUploadedDocument(doc, studentName) {
+  if (doc.url) {
+    globalThis.open(doc.url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  const title = escapePreviewText(doc.label || 'Uploaded Document');
+  const fileName = escapePreviewText(doc.fileName || 'Document file');
+  const owner = escapePreviewText(studentName || 'Student');
+  const html = `<!doctype html>
+<html>
+  <head>
+    <title>${title}</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #111827; }
+      main { max-width: 760px; margin: 48px auto; background: #fff; border: 1px solid #d9dee8; border-radius: 20px; padding: 32px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); }
+      .label { color: #005da7; font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+      h1 { margin: 10px 0 8px; font-size: 32px; }
+      p { color: #475569; line-height: 1.6; }
+      .preview { margin-top: 24px; min-height: 340px; border: 2px dashed #c8d7ef; border-radius: 16px; display: grid; place-items: center; text-align: center; background: #f8fbff; }
+      .file { font-weight: 800; color: #111827; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="label">Uploaded Document Preview</div>
+      <h1>${title}</h1>
+      <p>Student: <strong>${owner}</strong></p>
+      <p class="file">${fileName}</p>
+      <div class="preview">
+        <div>
+          <h2>Document preview placeholder</h2>
+          <p>Connect a storage URL in <code>doc.url</code> to show the real uploaded file here.</p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>`;
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  globalThis.open(url, '_blank', 'noopener,noreferrer');
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function gradeBadgeModifiers(grade) {
+  const g = String(grade || '')
     .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-  if (parts.length === 0) return '?';
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-};
+    .toUpperCase()
+    .replace(/\s+/g, '');
+  if (g === 'A+') return 'grade-badge--aplus';
+  if (g === 'A') return 'grade-badge--a';
+  if (g === 'B+') return 'grade-badge--bplus';
+  if (g === 'B') return 'grade-badge--b';
+  if (g === 'C+') return 'grade-badge--cplus';
+  if (g === 'C') return 'grade-badge--c';
+  if (g === 'D') return 'grade-badge--d';
+  if (g === 'F') return 'grade-badge--f';
+  return 'grade-badge--d';
+}
 
-export const StudentManagementStudentDetailPage = () => {
-  const { classSlug, sectionSlug, studentId } = useParams();
-  const { wizardBase } = useOutletContext();
+function calDayMods(kind) {
+  if (kind === 'present') return 'cal-day cal-day--present';
+  if (kind === 'absent') return 'cal-day cal-day--absent';
+  if (kind === 'weekend') return 'cal-day cal-day--weekend';
+  if (kind === 'today') return 'cal-day cal-day--today';
+  return 'cal-day cal-day--neutral';
+}
+
+function BackButton({ onClick }) {
+  return (
+    <button type="button" className="back-btn" onClick={onClick}>
+      <span className="material-symbols-outlined" aria-hidden>
+        arrow_back
+      </span>
+      Back to Students
+    </button>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="student-profile-page profile-loading">
+      <div className="profile-spinner" aria-hidden />
+      <span>Loading…</span>
+    </div>
+  );
+}
+
+function NotFoundState({ onBack }) {
+  return (
+    <div className="student-profile-page profile-not-found">
+      <BackButton onClick={onBack} />
+      <h1 className="profile-header__title">Student not found</h1>
+      <p className="profile-not-found__sub">This student is not in the selected class and section.</p>
+    </div>
+  );
+}
+
+function ProfileHeader({ student, onEdit, onMessage }) {
+  const active = String(student.profileStatus || 'Active').toLowerCase() === 'active';
+  return (
+    <header className="profile-header">
+      <div className="profile-header__main">
+        <div className="profile-header__id-row">
+          <span className={`status-badge ${active ? 'status-badge--active' : 'status-badge--inactive'}`}>
+            {active ? 'Active' : 'Inactive'}
+          </span>
+          <span className="profile-header__admission">Student ID: #{student.studentAdmissionId}</span>
+        </div>
+        <h1 className="profile-header__title">{student.name}</h1>
+        <p className="profile-header__meta">
+          <span className="material-symbols-outlined" aria-hidden>
+            location_on
+          </span>
+          {student.classLevel} • Section {student.section} • Roll No: {student.rollNo}
+        </p>
+      </div>
+      <div className="profile-header__actions">
+        <button type="button" className="profile-btn profile-btn--outline" onClick={onEdit}>
+          <span className="material-symbols-outlined">edit</span>
+          Edit Profile
+        </button>
+        <button type="button" className="profile-btn profile-btn--primary" onClick={onMessage}>
+          <span className="material-symbols-outlined">mail</span>
+          Message Guardian
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function PersonalInfoCard({ student }) {
+  return (
+    <section className="profile-card profile-card--personal">
+      <div className="profile-photo-placeholder" aria-hidden>
+        <span className="material-symbols-outlined">person</span>
+      </div>
+      <h2 className="profile-card__title">Personal Information</h2>
+      <dl>
+        <div className="profile-detail-row">
+          <dt>Date of Birth</dt>
+          <dd>{student.dob || student.dateOfBirth || '—'}</dd>
+        </div>
+        <div className="profile-detail-row">
+          <dt>Gender</dt>
+          <dd>{student.gender || '—'}</dd>
+        </div>
+        <div className="profile-detail-row">
+          <dt>Blood Group</dt>
+          <dd>{student.bloodGroup || '—'}</dd>
+        </div>
+        <div className="profile-detail-row">
+          <dt>Height / Weight</dt>
+          <dd>
+            {student.height || '—'} / {student.weight || '—'}
+          </dd>
+        </div>
+        <div className="profile-detail-row profile-detail-row--stack">
+          <dt>Address</dt>
+          <dd>{student.address || '—'}</dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
+function AcademicSummaryCard({ student }) {
+  const subjects = Array.isArray(student.subjects) ? student.subjects : [];
+  const pctAtt =
+    student.totalDays && student.presentDays != null
+      ? Math.round((student.presentDays / student.totalDays) * 100)
+      : typeof student.attendancePct === 'number'
+        ? student.attendancePct
+        : 0;
+
+  return (
+    <section className="profile-card profile-card--academic">
+      <div className="academic-summary__head">
+        <div>
+          <h2 className="profile-card__title academic-summary__title">Academic Summary</h2>
+          <p className="academic-summary__sub">
+            {student.classLevel} • Section {student.section} • Standing:{' '}
+            <span className="academic-summary__standing">{student.academicStanding || 'Pass'}</span>
+          </p>
+        </div>
+        <span className="promotion-badge">{student.promoted !== false ? 'Promotion: Yes' : 'Promotion: No'}</span>
+      </div>
+
+      <div className="academic-summary__stats">
+        <div className="profile-stat-block profile-stat-block--gpa">
+          <span className="profile-stat-block__watermark" aria-hidden>
+            <span className="material-symbols-outlined profile-stat-block__watermark-icon">workspace_premium</span>
+          </span>
+          <p className="profile-stat-block__hint">Cumulative GPA</p>
+          <p className="profile-stat-block__value">
+            {typeof student.gpa === 'number' ? student.gpa.toFixed(2) : student.gpa}
+            <span className="profile-stat-block__fraction">/4.0</span>
+          </p>
+        </div>
+        <div className="profile-stat-block profile-stat-block--att">
+          <p className="profile-stat-block__hint">Attendance</p>
+          <p className="profile-stat-block__value">
+            {pctAtt}
+            <span className="profile-stat-block__fraction">%</span>
+          </p>
+          <p className="profile-stat-block__footnotes">
+            {student.presentDays ?? '—'} Present / {student.absentDays ?? '—'} Absent (Total: {student.totalDays ?? '—'}{' '}
+            Days)
+          </p>
+          <div className="profile-progress-bar">
+            <div
+              className="profile-progress-bar__fill profile-progress-bar__fill--tertiary"
+              style={{ width: `${Math.min(100, Math.max(0, pctAtt))}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="profile-subject-caption">Subject-wise Performance</h3>
+        <div className="profile-subject-table-wrap">
+          <table className="profile-subject-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Grade</th>
+                <th className="profile-subject-table__bar-col" aria-hidden>
+                  {' '}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {subjects.map((row) => {
+                const total = Number(row.total) || 100;
+                const marks = Number(row.marks) || 0;
+                const barPct = Math.min(100, Math.round((marks / total) * 100));
+                return (
+                  <tr key={row.name}>
+                    <td>{row.name}</td>
+                    <td className="subject-marks-cell">
+                      {marks}/{total}
+                    </td>
+                    <td>
+                      <span className={`grade-badge ${gradeBadgeModifiers(row.grade)}`}>{row.grade}</span>
+                    </td>
+                    <td>
+                      <div className="profile-progress-bar">
+                        <div className="profile-progress-bar__fill" style={{ width: `${barPct}%` }} />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GuardianCard({ student }) {
+  const father = student.father || {};
+  const mother = student.mother || {};
+  return (
+    <section className="profile-card">
+      <h2 className="profile-card__title">
+        <span className="material-symbols-outlined" aria-hidden>
+          family_restroom
+        </span>
+        Guardian Information
+      </h2>
+      <div className="guardian-grid">
+        <div className="guardian-card">
+          <p className="guardian-card__label">Father</p>
+          <p className="guardian-card__name">{father.name}</p>
+          <p className="guardian-card__role">{father.occupation}</p>
+          <div className="guardian-card__detail">
+            <span className="material-symbols-outlined">call</span>
+            <span>{father.phone}</span>
+          </div>
+          <div className="guardian-card__detail">
+            <span className="material-symbols-outlined">mail</span>
+            <span>{father.email}</span>
+          </div>
+          <div className="guardian-card__income">
+            <span className="guardian-card__income-label">Annual Income:</span>
+            <span className="guardian-card__income-value">{formatINR(father.annualIncome)}</span>
+          </div>
+        </div>
+        <div className="guardian-card">
+          <p className="guardian-card__label">Mother</p>
+          <p className="guardian-card__name">{mother.name}</p>
+          <p className="guardian-card__role">{mother.occupation}</p>
+          <div className="guardian-card__detail">
+            <span className="material-symbols-outlined">call</span>
+            <span>{mother.phone}</span>
+          </div>
+          <div className="guardian-card__detail">
+            <span className="material-symbols-outlined">mail</span>
+            <span>{mother.email}</span>
+          </div>
+          <div className="guardian-card__income">
+            <span className="guardian-card__income-label">Annual Income:</span>
+            <span className="guardian-card__income-value">{formatINR(mother.annualIncome)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="emergency-strip">
+        <p className="emergency-strip__label">Emergency Contacts</p>
+        <div className="emergency-strip__row">
+          <span>
+            <strong>Primary:</strong> {father.phone} ({father.name})
+          </span>
+          <span>
+            <strong>Secondary:</strong> {mother.phone} ({mother.name})
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HealthCard({ student }) {
+  const vaccinationOk = String(student.vaccination || '').toLowerCase().includes('up to date');
+  return (
+    <section className="profile-card">
+      <h2 className="profile-card__title">
+        <span className="material-symbols-outlined profile-card__title-icon--health" aria-hidden>
+          health_and_safety
+        </span>
+        Health & Safety
+      </h2>
+      <div className="health-grid">
+        <div className="health-box">
+          <p className="health-box__label">Conditions</p>
+          <p className="health-box__value">{student.conditions}</p>
+        </div>
+        <div className="health-box">
+          <p className="health-box__label">Allergies</p>
+          <p className="health-box__value">{student.allergies}</p>
+        </div>
+        <div
+          className={`health-box ${vaccinationOk ? 'health-box--vaccination-ok' : 'health-box--vaccination-warn'}`}
+        >
+          <p className="health-box__label">Vaccination</p>
+          <p className="health-box__value">{student.vaccination}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AdminCard({ student }) {
+  return (
+    <section className="profile-card admin-list">
+      <h2 className="profile-card__title">
+        <span className="material-symbols-outlined" aria-hidden>
+          badge
+        </span>
+        Administration
+      </h2>
+      <dl>
+        <div className="profile-detail-row">
+          <dt>Admission Date</dt>
+          <dd>{student.admissionDate}</dd>
+        </div>
+        <div className="profile-detail-row">
+          <dt>Transport</dt>
+          <dd className="profile-detail-row__muted">{student.transport}</dd>
+        </div>
+        <div className="profile-detail-row">
+          <dt>Hostel</dt>
+          <dd>{student.hostel}</dd>
+        </div>
+        <div className="profile-detail-row">
+          <dt>Docs Verified</dt>
+          <dd>
+            {student.docsVerified ? (
+              <span className="docs-verified">
+                <span className="material-symbols-outlined">check_circle</span>
+                Yes
+              </span>
+            ) : (
+              <span>No</span>
+            )}
+          </dd>
+        </div>
+        <div className="profile-detail-row profile-detail-row--stack">
+          <dt>Previous School</dt>
+          <dd>{student.previousSchool}</dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
+function UploadedDocumentsCard({ student }) {
+  const documents = Array.isArray(student.uploadedDocuments) ? student.uploadedDocuments : [];
+
+  return (
+    <section className="profile-card uploaded-documents-card">
+      <div className="uploaded-documents-card__head">
+        <h2 className="profile-card__title uploaded-documents-card__title">
+          <span className="material-symbols-outlined" aria-hidden>
+            folder_copy
+          </span>
+          Uploaded Documents
+        </h2>
+        {student.docsVerified ? (
+          <span className="uploaded-documents-card__verified">
+            <span className="material-symbols-outlined">verified</span>
+            Verified
+          </span>
+        ) : (
+          <span className="uploaded-documents-card__pending">Pending Review</span>
+        )}
+      </div>
+
+      {documents.length > 0 ? (
+        <div className="uploaded-documents-list">
+          {documents.map((doc) => {
+            const uploaded = doc.status === 'Uploaded';
+            return (
+              <div key={doc.id || doc.label} className="uploaded-document-row">
+                <div className={`uploaded-document-row__icon ${uploaded ? '' : 'uploaded-document-row__icon--muted'}`}>
+                  <span className="material-symbols-outlined">{uploaded ? 'description' : 'draft'}</span>
+                </div>
+                <div className="uploaded-document-row__main">
+                  <p className="uploaded-document-row__label">
+                    {doc.label}
+                    {doc.required && <span className="uploaded-document-row__required">Required</span>}
+                  </p>
+                  <p className="uploaded-document-row__file">{doc.fileName || 'Not provided'}</p>
+                </div>
+                <span className={uploaded ? 'uploaded-document-row__status' : 'uploaded-document-row__status is-missing'}>
+                  {doc.status || 'Not Provided'}
+                </span>
+                {uploaded && (
+                  <button
+                    type="button"
+                    className="uploaded-document-row__view"
+                    onClick={() => openUploadedDocument(doc, student.name)}
+                  >
+                    View
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="uploaded-documents-card__empty">No uploaded documents are recorded for this student.</p>
+      )}
+    </section>
+  );
+}
+
+function ExtracurricularCard({ student }) {
+  return (
+    <section className="profile-card">
+      <h2 className="profile-card__title">Extracurricular</h2>
+      <div className="extra-list">
+        <div className="extra-row">
+          <div className="extra-row__icon-wrap">
+            <span className="material-symbols-outlined">sports_soccer</span>
+          </div>
+          <div>
+            <p className="extra-row__label">Sports</p>
+            <p className="extra-row__value">{student.sport}</p>
+          </div>
+        </div>
+        <div className="extra-row">
+          <div className="extra-row__icon-wrap">
+            <span className="material-symbols-outlined">palette</span>
+          </div>
+          <div>
+            <p className="extra-row__label">Clubs</p>
+            <p className="extra-row__value">{student.club}</p>
+          </div>
+        </div>
+        <div className="extra-row extra-row--achievement">
+          <div>
+            <p className="extra-row__label">Achievements</p>
+            <p className="extra-row__value">{student.achievement}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function QuickActionsCard() {
+  return (
+    <section className="profile-card profile-card--actions">
+      <h2 className="profile-card__title">Quick Actions</h2>
+      <div className="actions-grid">
+        <button type="button" className="action-btn">
+          <span className="material-symbols-outlined">description</span>
+          Report
+        </button>
+        <button type="button" className="action-btn">
+          <span className="material-symbols-outlined profile-action-icon-fill">verified</span>
+          Verify
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function AttendanceSnapshotCard() {
+  return (
+    <section className="profile-card attendance-snapshot-card">
+      <div className="attendance-snapshot-card__heading">
+        <h2 className="profile-card__title attendance-snapshot-card__title">Attendance Snapshot</h2>
+        <span>April 2024</span>
+      </div>
+      <div className="attendance-cal-week-row" aria-hidden>
+        <span>M</span>
+        <span>T</span>
+        <span>W</span>
+        <span>T</span>
+        <span>F</span>
+        <span>S</span>
+        <span>S</span>
+      </div>
+      <div className="attendance-calendar">
+        {CALENDAR_DAYS_SPEC.map(({ day, kind }) => (
+          <div key={`cal-${day}-${kind}`} className={calDayMods(kind)}>
+            {day}
+          </div>
+        ))}
+      </div>
+      <div className="calendar-legend">
+        <div className="calendar-legend__item">
+          <span className="calendar-legend__dot calendar-legend__dot--present" />
+          Present
+        </div>
+        <div className="calendar-legend__item">
+          <span className="calendar-legend__dot calendar-legend__dot--absent" />
+          Absent
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FinancialSnapshotCard({ student }) {
+  const total = Number(student.totalFee) || 0;
+  const paid = Number(student.feesPaid) || 0;
+  const scholar = Number(student.scholarship) || 0;
+  const outstanding = Math.max(0, total - paid - scholar);
+  const pct = total > 0 ? Math.min(100, Math.round(((paid + scholar) / total) * 100)) : 0;
+
+  return (
+    <section className="profile-card profile-card--financial">
+      <div className="profile-financial-rows">
+        <h2 className="profile-card__title">
+          <span className="material-symbols-outlined" aria-hidden>
+            payments
+          </span>
+          Financial Snapshot
+        </h2>
+        <div className="financial-row">
+          <span className="financial-row__label">Total Annual Fee</span>
+          <span className="financial-row__value">{formatINR(total)}</span>
+        </div>
+        <div className="financial-row">
+          <span className="financial-row__label">Fees Paid</span>
+          <span className="financial-row__value">{formatINR(paid)}</span>
+        </div>
+        <div className="profile-progress-bar financial-row__bar">
+          <div className="profile-progress-bar__fill profile-progress-bar__fill--white" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="financial-row financial-row--large">
+          <span className="financial-row__label financial-row__label--strong">Outstanding Balance</span>
+          <span>{formatINR(outstanding)}</span>
+        </div>
+        <div className="financial-divider financial-row">
+          <span className="financial-row__footer-label">Scholarship Applied</span>
+          <span>{formatINR(scholar)}</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function StudentManagementStudentDetailPage() {
+  const { studentId, sectionId: sectionRouteParam } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const loadStatus = useSelector(selectAcademicsStatus);
-  const structure = useSelector(selectAcademicsStructure);
-  const students = useSelector((s) => selectAcademicsSectionItems(s, 'students'));
+  const loadStatus = useSelector((s) => s.academics.loadStatus);
 
-  const allClasses = useMemo(() => flattenAllClassNames(structure), [structure]);
-  const classLevel = slugToClassLevel(classSlug, allClasses);
-  const stage = useMemo(
-    () => (classLevel ? resolveStageForClass(structure, classLevel) : null),
-    [structure, classLevel]
-  );
-  const sections = useSelector((s) => selectClassSections(s, stage, classLevel));
-  const section = sectionFromSlug(sectionSlug, sections);
-  const validClass = Boolean(classLevel && allClasses.includes(classLevel));
+  const studentsList = useSelector((s) => selectAcademicsSectionItems(s, 'students'));
+
+  const resolvedSectionKey = useMemo(() => {
+    const fromRoute = sectionRouteParam ? decodeURIComponent(sectionRouteParam) : '';
+    return location.state?.sectionId || fromRoute;
+  }, [location.state, sectionRouteParam]);
+
+  const rosterPath =
+    resolvedSectionKey ? `/academics/student-management/section/${encodeURIComponent(resolvedSectionKey)}` : null;
+
+  const goBack = () => {
+    if (rosterPath) navigate(rosterPath);
+    else navigate(-1);
+  };
 
   useEffect(() => {
     if (loadStatus === 'idle') dispatch(fetchAcademicsData());
   }, [dispatch, loadStatus]);
 
-  const student = useMemo(() => students.find((s) => s.id === studentId), [students, studentId]);
-
-  const validStudent = useMemo(() => {
-    if (!student || !stage || !classLevel || !section) return false;
-    return (
-      student.stage === stage &&
-      student.classLevel === classLevel &&
-      (student.section || '') === section
-    );
-  }, [student, stage, classLevel, section]);
-
-  const profile = useMemo(
-    () => (student ? buildStudentProfileView(student) : null),
-    [student]
+  const student = useMemo(
+    () => studentsList.find((st) => st.id === studentId) ?? null,
+    [studentsList, studentId],
   );
 
-  const insights = useMemo(() => {
-    if (!profile) return [];
-    const rows = [];
-    const bookPending = profile.bookItems.some((b) => b.status === 'pending');
-    const uniPending = profile.uniformItems.some((u) => u.status === 'pending');
-    if (uniPending) {
-      rows.push({
-        tone: 'primary',
-        title: 'Uniform item pending',
-        body: 'Complete size verification when the remaining piece is collected.',
-      });
-    } else {
-      rows.push({
-        tone: 'primary',
-        title: 'Uniform size match',
-        body: 'Sizes were last reviewed at the start of term. Last check: OK.',
-      });
-    }
-    if (bookPending) {
-      rows.push({
-        tone: 'orange',
-        title: 'Textbook collection pending',
-        body: 'Items may be ready in the warehouse for parent pickup.',
-      });
-    }
-    return rows;
-  }, [profile]);
+  const sectionMatches = useMemo(() => {
+    if (!student || !resolvedSectionKey) return true;
+    return studentRegistrySectionKey(student) === resolvedSectionKey;
+  }, [student, resolvedSectionKey]);
 
-  useEffect(() => {
-    if (!validClass || !stage) {
-      navigate(wizardBase, { replace: true });
-      return;
-    }
-    if (!section) {
-      navigate(`${wizardBase}/${classSlug}`, { replace: true });
-      return;
-    }
-  }, [stage, validClass, section, navigate, wizardBase, classSlug]);
+  usePageTitle(student && sectionMatches ? `${student.name} — Profile` : 'Student profile');
 
-  usePageTitle(student && validStudent ? `${student.name} — Profile` : 'Student profile');
+  if (loadStatus === 'idle' || loadStatus === 'loading') {
+    return <LoadingState />;
+  }
 
-  const listPath = `${wizardBase}/${classSlug}/${sectionToSlug(section || '')}`;
-
-  if (!stage || !validClass || !section) return null;
-
-  if (loadStatus === 'loading' && !student) {
+  if (loadStatus === 'failed') {
     return (
-      <div className="sm-profile-page">
-        <p className="sm-loading">Loading…</p>
+      <div className="student-profile-page profile-not-found">
+        <BackButton onClick={() => navigate('/academics/student-management')} />
+        <h1 className="profile-header__title">Unable to load students</h1>
+        <p className="profile-not-found__sub">Refresh the page or try again later.</p>
       </div>
     );
   }
 
-  if (!student || !validStudent || !profile) {
-    return (
-      <div className="sm-profile-page sm-profile-page--narrow">
-        <button type="button" className="sm-back" onClick={() => navigate(listPath)}>
-          <span className="material-symbols-outlined">arrow_back</span>
-          Students
-        </button>
-        <h1 className="sm-profile-fallback-title">Student not found</h1>
-        <p className="sm-profile-fallback-sub">This student is not in the selected class and section.</p>
-      </div>
-    );
+  if (!student || !sectionMatches) {
+    return <NotFoundState onBack={goBack} />;
   }
 
-  const admissionTag = student.admissionNo ? `#${student.admissionNo}` : `#${student.id}`;
-  const mailGuardian = student.email
-    ? `mailto:${encodeURIComponent(student.email)}?subject=${encodeURIComponent(`Regarding ${student.name}`)}`
-    : null;
+  const guardianMail = student.email || student.father?.email;
+
+  const onMessage = () => {
+    if (guardianMail) {
+      window.location.href = `mailto:${encodeURIComponent(guardianMail)}?subject=${encodeURIComponent(`Regarding ${student.name}`)}`;
+      return;
+    }
+    window.alert('No guardian email on file.');
+  };
+
+  const onEdit = () => window.alert('Profile editor is not wired yet.');
 
   return (
-    <div className="sm-profile-page">
-      <button type="button" className="sm-back sm-profile-back" onClick={() => navigate(listPath)}>
-        <span className="material-symbols-outlined">arrow_back</span>
-        Students
-      </button>
+    <div className="student-profile-page">
+      <BackButton onClick={goBack} />
 
-      <section className="sm-profile-hero">
-        <div className="sm-profile-hero-main">
-          <div className="sm-profile-photo-wrap">
-            <div className="sm-profile-photo">{initialsFromName(student.name)}</div>
-            <div className="sm-profile-photo-badge" aria-hidden>
-              <span className="material-symbols-outlined sm-profile-photo-badge-ic">check</span>
-            </div>
-          </div>
-          <div className="sm-profile-hero-copy">
-            <h1 className="sm-profile-name">{student.name}</h1>
-            <div className="sm-profile-meta-row">
-              <span className="sm-profile-id-pill">{admissionTag}</span>
-              <span className="sm-profile-class-line">
-                <span className="material-symbols-outlined sm-profile-class-ic">school</span>
-                {student.classLevel} — Section {student.section}
-              </span>
-            </div>
-            <div className="sm-profile-hero-actions">
-              <button
-                type="button"
-                className="sm-profile-btn sm-profile-btn-primary"
-                onClick={() => window.alert('Profile editor is not wired yet.')}
-              >
-                <span className="material-symbols-outlined">edit</span>
-                Modify profile
-              </button>
-              <button
-                type="button"
-                className="sm-profile-btn sm-profile-btn-secondary"
-                onClick={() => window.print()}
-              >
-                <span className="material-symbols-outlined">print</span>
-                ID card
-              </button>
-            </div>
-          </div>
+      <ProfileHeader student={student} onEdit={onEdit} onMessage={onMessage} />
+
+      <div className="bento-grid">
+        <PersonalInfoCard student={student} />
+        <AcademicSummaryCard student={student} />
+        <div className="profile-col-left">
+          <GuardianCard student={student} />
+          <HealthCard student={student} />
+          <AdminCard student={student} />
+          <UploadedDocumentsCard student={student} />
         </div>
-        <div className="sm-profile-hero-kit">
-          <p className="sm-profile-kit-kicker">Kit status overview</p>
-          <div className="sm-profile-kit-progress-head">
-            <span className="sm-profile-kit-progress-label">Completion</span>
-            <span className="sm-profile-kit-progress-pct">{profile.completionPct}%</span>
-          </div>
-          <div className="sm-profile-kit-bar">
-            <div className="sm-profile-kit-bar-fill" style={{ width: `${profile.completionPct}%` }} />
-          </div>
-          <div className="sm-profile-kit-badges">
-            <div className="sm-profile-kit-mini">
-              <p className="sm-profile-kit-mini-label">Book kit</p>
-              <p
-                className={`sm-profile-kit-mini-value ${profile.booksOverviewLabel === 'Complete' ? 'is-ok' : 'is-warn'}`}
-              >
-                {profile.booksOverviewLabel}
-              </p>
-            </div>
-            <div className="sm-profile-kit-mini">
-              <p className="sm-profile-kit-mini-label">Uniform</p>
-              <p className={`sm-profile-kit-mini-value ${profile.uniformOverviewIsComplete ? 'is-ok' : 'is-warn'}`}>
-                {profile.uniformOverviewLabel}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="sm-profile-grid">
-        <div className="sm-profile-col-main">
-          <div className="sm-profile-two-cards">
-            <div className="sm-profile-card">
-              <div className="sm-profile-card-head">
-                <div className="sm-profile-card-icon sm-profile-card-icon-blue">
-                  <span className="material-symbols-outlined">person</span>
-                </div>
-                <h2 className="sm-profile-card-title">Personal info</h2>
-              </div>
-              <dl className="sm-profile-rows">
-                <div className="sm-profile-row">
-                  <dt>Full name</dt>
-                  <dd>{student.name}</dd>
-                </div>
-                <div className="sm-profile-row">
-                  <dt>Gender</dt>
-                  <dd>{profile.gender}</dd>
-                </div>
-                <div className="sm-profile-row">
-                  <dt>Date of birth</dt>
-                  <dd>{profile.dateOfBirthDisplay}</dd>
-                </div>
-                <div className="sm-profile-row">
-                  <dt>Guardian name</dt>
-                  <dd>{student.guardian || '—'}</dd>
-                </div>
-                <div className="sm-profile-row">
-                  <dt>Contact number</dt>
-                  <dd>{student.phone || '—'}</dd>
-                </div>
-              </dl>
-            </div>
-
-            <div className="sm-profile-card">
-              <div className="sm-profile-card-head">
-                <div className="sm-profile-card-icon sm-profile-card-icon-amber">
-                  <span className="material-symbols-outlined">school</span>
-                </div>
-                <h2 className="sm-profile-card-title">Academic info</h2>
-              </div>
-              <dl className="sm-profile-rows">
-                <div className="sm-profile-row">
-                  <dt>Roll number</dt>
-                  <dd>{student.rollNo || '—'}</dd>
-                </div>
-                <div className="sm-profile-row">
-                  <dt>Academic year</dt>
-                  <dd>{ACADEMIC_YEAR_LABEL}</dd>
-                </div>
-                <div className="sm-profile-row">
-                  <dt>Admission date</dt>
-                  <dd>{profile.admissionDateDisplay}</dd>
-                </div>
-                <div className="sm-profile-row">
-                  <dt>House</dt>
-                  <dd className="sm-profile-house">{profile.house}</dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          <div className="sm-profile-card sm-profile-card-flush">
-            <div className="sm-profile-kit-panel-head">
-              <div className="sm-profile-card-head sm-profile-card-head-inline">
-                <div className="sm-profile-card-icon sm-profile-card-icon-soft">
-                  <span className="material-symbols-outlined">inventory_2</span>
-                </div>
-                <h2 className="sm-profile-card-title">Kit distribution status</h2>
-              </div>
-              <button
-                type="button"
-                className="sm-profile-link-btn"
-                onClick={() => window.alert('Distribution history would open here.')}
-              >
-                <span className="material-symbols-outlined">history</span>
-                Distribution history
-              </button>
-            </div>
-
-            <div className="sm-profile-kit-panel-body">
-              <div className="sm-profile-kit-section">
-                <div className="sm-profile-kit-section-head">
-                  <h3 className="sm-profile-kit-section-title">Book kit distribution</h3>
-                  <span
-                    className={`sm-profile-kit-count ${profile.bookItems.some((b) => b.status === 'pending') ? 'is-warn' : 'is-ok'}`}
-                  >
-                    {profile.bookCollectedLabel}
-                  </span>
-                </div>
-                <div className="sm-profile-book-grid">
-                  {profile.bookItems.map((b) => (
-                    <div
-                      key={b.key}
-                      className={`sm-profile-book-card ${b.status === 'pending' ? 'is-pending' : ''}`}
-                    >
-                      <div
-                        className={`sm-profile-book-icon ${b.status === 'taken' ? 'is-ok' : 'is-pending'}`}
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          style={
-                            b.status === 'taken' && b.icon !== 'pending'
-                              ? { fontVariationSettings: "'FILL' 0" }
-                              : undefined
-                          }
-                        >
-                          {b.icon}
-                        </span>
-                      </div>
-                      <p className="sm-profile-book-label">{b.label}</p>
-                      {b.status === 'taken' ? (
-                        <>
-                          <span className="sm-profile-chip sm-profile-chip-ok">Taken</span>
-                          <p className="sm-profile-book-value">Value: ${Number(b.value).toFixed(2)}</p>
-                        </>
-                      ) : (
-                        <>
-                          <span className="sm-profile-chip sm-profile-chip-pending">Pending</span>
-                          <button
-                            type="button"
-                            className="sm-profile-assign"
-                            onClick={() => window.alert(`Assign ${b.label}?`)}
-                          >
-                            Assign now
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="sm-profile-kit-section">
-                <div className="sm-profile-kit-section-head">
-                  <h3 className="sm-profile-kit-section-title">Uniform kit (sizes &amp; status)</h3>
-                  <span
-                    className={`sm-profile-kit-count ${profile.uniformItems.some((u) => u.status === 'pending') ? 'is-warn' : 'is-ok'}`}
-                  >
-                    {profile.uniformCollectedLabel}
-                  </span>
-                </div>
-                <div className="sm-profile-uniform-grid">
-                  {profile.uniformItems.map((u, idx) => (
-                    <div
-                      key={u.key}
-                      className={`sm-profile-uniform-cell ${idx > 0 ? 'has-divider' : ''}`}
-                    >
-                      <p className="sm-profile-uniform-label">{u.label}</p>
-                      <p className="sm-profile-uniform-size">{u.size}</p>
-                      <span
-                        className={`sm-profile-uniform-status ${u.status === 'taken' ? 'is-ok' : 'is-pending'}`}
-                      >
-                        {u.status === 'taken' ? 'Taken' : 'Pending'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="sm-profile-col-side">
-          <div className="sm-profile-card sm-profile-pay-card">
-            <div className="sm-profile-pay-deco" aria-hidden />
-            <div className="sm-profile-card-head">
-              <div className="sm-profile-card-icon sm-profile-card-icon-primary-solid">
-                <span className="material-symbols-outlined">payments</span>
-              </div>
-              <h2 className="sm-profile-card-title">Payment summary</h2>
-            </div>
-            <div className="sm-profile-pay-rows">
-              <div className="sm-profile-pay-row">
-                <span>Total kit value</span>
-                <strong>${profile.kitTotal.toFixed(2)}</strong>
-              </div>
-              <div className="sm-profile-pay-row sm-profile-pay-row--green">
-                <span>Paid amount</span>
-                <strong>${profile.paid.toFixed(2)}</strong>
-              </div>
-              <div className="sm-profile-pay-row sm-profile-pay-row--orange">
-                <span>Balance due</span>
-                <strong>${profile.balance.toFixed(2)}</strong>
-              </div>
-            </div>
-            <button
-              type="button"
-              className="sm-profile-record-pay"
-              onClick={() => window.alert('Record payment flow is not wired yet.')}
-            >
-              <span className="material-symbols-outlined">receipt_long</span>
-              Record payment
-            </button>
-          </div>
-
-          <div className="sm-profile-insights">
-            <h3 className="sm-profile-insights-title">Quick insights</h3>
-            {insights.map((row) => (
-              <div key={row.title} className="sm-profile-insight">
-                <span className={`sm-profile-insight-dot ${row.tone === 'orange' ? 'is-orange' : ''}`} />
-                <div>
-                  <p className="sm-profile-insight-title">{row.title}</p>
-                  <p className="sm-profile-insight-body">{row.body}</p>
-                </div>
-              </div>
-            ))}
-            <div className="sm-profile-insights-deco" aria-hidden />
-          </div>
-
-          <div className="sm-profile-quick-grid">
-            {mailGuardian ? (
-              <a className="sm-profile-quick-btn" href={mailGuardian}>
-                <span className="material-symbols-outlined">mail</span>
-                <span>Contact parent</span>
-              </a>
-            ) : (
-              <button
-                type="button"
-                className="sm-profile-quick-btn"
-                onClick={() => window.alert('No email on file.')}
-              >
-                <span className="material-symbols-outlined">mail</span>
-                <span>Contact parent</span>
-              </button>
-            )}
-            <button type="button" className="sm-profile-quick-btn" onClick={() => window.print()}>
-              <span className="material-symbols-outlined">description</span>
-              <span>Export PDF</span>
-            </button>
-          </div>
+        <div className="profile-col-right">
+          <QuickActionsCard />
+          <AttendanceSnapshotCard />
+          <FinancialSnapshotCard student={student} />
+          <ExtracurricularCard student={student} />
         </div>
       </div>
     </div>
   );
-};
+}

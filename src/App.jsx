@@ -24,8 +24,11 @@ import { AcademicsModernPage } from './pages/Academics/AcademicsModernPage';
 import { AcademicsKeyedOutlet } from './pages/Academics/AcademicsKeyedOutlet';
 import { AttendanceLogPage } from './pages/Academics/AttendanceLogPage';
 import { GradesLogPage } from './pages/Academics/GradesLogPage';
+import { StudentGradesDetailPage } from './pages/Academics/StudentGradesDetailPage';
 import { SectionStudentsPage } from './pages/Academics/SectionStudentsPage';
+import StudentManagementStudentDetailPage from './pages/Academics/studentManagement/StudentManagementStudentDetailPage';
 import { SectionTimeTablePage } from './pages/Academics/SectionTimeTablePage';
+import { AcademicsFlatGatewayPage } from './pages/Academics/wizard/AcademicsFlatGatewayPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 import { UserManagementPage } from './pages/UserManagement/UserManagementPage';
 
@@ -59,14 +62,21 @@ function App() {
             <Route index element={<Navigate to="student-management" replace />} />
             <Route path="student-management" element={<AcademicsModernPage pageKey="studentManagement" />} />
             <Route path="student-management/section/:sectionId" element={<SectionStudentsPage />} />
+            <Route
+              path="student-management/section/:sectionId/student/:studentId"
+              element={<StudentManagementStudentDetailPage />}
+            />
             <Route path="time-table" element={<AcademicsModernPage pageKey="timeTable" />} />
             <Route path="time-table/section/:sectionId" element={<SectionTimeTablePage />} />
             <Route path="attendance" element={<AcademicsKeyedOutlet wizardBase="/academics/attendance" />}>
               <Route index element={<AcademicsModernPage pageKey="attendance" />} />
+              <Route path=":classSlug" element={<AcademicsFlatGatewayPage />} />
               <Route path=":classSlug/:sectionSlug" element={<AttendanceLogPage />} />
             </Route>
             <Route path="grades" element={<AcademicsKeyedOutlet wizardBase="/academics/grades" />}>
               <Route index element={<AcademicsModernPage pageKey="grades" />} />
+              <Route path=":classSlug" element={<AcademicsFlatGatewayPage />} />
+              <Route path=":classSlug/:sectionSlug/student/:studentSlug" element={<StudentGradesDetailPage />} />
               <Route path=":classSlug/:sectionSlug" element={<GradesLogPage />} />
             </Route>
           </Route>

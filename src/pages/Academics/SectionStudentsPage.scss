@@ -377,8 +377,13 @@ $sec-radius-lg: 16px;
   }
 }
 
-.sec-students-table tbody tr:hover {
-  background: var(--surface-container-low);
+.sec-students-table tbody tr.student-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--surface-container-low, #f6f3f2);
+  }
 }
 
 .sec-students-checkbox {

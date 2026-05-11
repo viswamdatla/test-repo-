@@ -500,3 +500,65 @@ $card-shadow: 0 4px 14px rgba(27, 28, 28, 0.05);
     font-weight: 700;
   }
 }
+
+.section-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-modal-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  min-width: 400px;
+  width: 100%;
+  max-width: 480px;
+}
+
+body.dark .section-modal-card {
+  background: #1e1e2e;
+}
+
+.add-class-modal-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  min-width: 480px;
+  width: 100%;
+  max-width: 560px;
+}
+
+body.dark .add-class-modal-card {
+  background: #1e1e2e;
+}
+
+.modal-field-error {
+  color: #ba1a1a;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.ac-modal-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &--ghost {
+    border: 1px solid #c1c7d3;
+    background: transparent;
+    color: #414751;
+  }
+
+  &--primary {
+    background: #005da7;
+    color: #fff;
+    border: none;
+  }
+}

@@ -1676,6 +1676,30 @@
   color: var(--on-surface-variant);
 }
 
+.um-access-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+  color: var(--primary);
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 13%, transparent);
+  }
+}
+
 .um-td-branch {
   font-size: 14px;
   font-weight: 600;
@@ -2176,6 +2200,10 @@
   border: 1px solid color-mix(in srgb, var(--outline-variant) 25%, transparent);
 }
 
+.um-modal--wide {
+  max-width: 720px;
+}
+
 .um-modal-title {
   font-family: 'Manrope', sans-serif;
   font-size: 20px;
@@ -2214,6 +2242,84 @@
     padding: 0 12px;
     font: inherit;
     color: var(--on-surface);
+  }
+}
+
+.um-modal-access {
+  padding-top: 4px;
+}
+
+.um-modal-access-head {
+  margin-bottom: 10px;
+
+  h4 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--on-surface);
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--on-surface-variant);
+  }
+}
+
+.um-user-access-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.um-user-access-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-container-low);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 22%, transparent);
+}
+
+.um-user-access-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--on-surface);
+}
+
+.um-user-access-hint {
+  margin: 3px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+}
+
+.um-user-access-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--on-surface);
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+  }
+}
+
+@media (max-width: 560px) {
+  .um-user-access-row {
+    grid-template-columns: 1fr 1fr;
+
+    > div {
+      grid-column: 1 / -1;
+    }
   }
 }
 

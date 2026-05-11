@@ -28,6 +28,7 @@ import { StudentGradesDetailPage } from './pages/Academics/StudentGradesDetailPa
 import { SectionStudentsPage } from './pages/Academics/SectionStudentsPage';
 import StudentManagementStudentDetailPage from './pages/Academics/studentManagement/StudentManagementStudentDetailPage';
 import { SectionTimeTablePage } from './pages/Academics/SectionTimeTablePage';
+import { AcademicsFlatGatewayPage } from './pages/Academics/wizard/AcademicsFlatGatewayPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 import { UserManagementPage } from './pages/UserManagement/UserManagementPage';
 
@@ -69,10 +70,12 @@ function App() {
             <Route path="time-table/section/:sectionId" element={<SectionTimeTablePage />} />
             <Route path="attendance" element={<AcademicsKeyedOutlet wizardBase="/academics/attendance" />}>
               <Route index element={<AcademicsModernPage pageKey="attendance" />} />
+              <Route path=":classSlug" element={<AcademicsFlatGatewayPage />} />
               <Route path=":classSlug/:sectionSlug" element={<AttendanceLogPage />} />
             </Route>
             <Route path="grades" element={<AcademicsKeyedOutlet wizardBase="/academics/grades" />}>
               <Route index element={<AcademicsModernPage pageKey="grades" />} />
+              <Route path=":classSlug" element={<AcademicsFlatGatewayPage />} />
               <Route path=":classSlug/:sectionSlug/student/:studentSlug" element={<StudentGradesDetailPage />} />
               <Route path=":classSlug/:sectionSlug" element={<GradesLogPage />} />
             </Route>

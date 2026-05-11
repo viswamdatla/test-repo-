@@ -43,11 +43,79 @@ const CALENDAR_DAYS_SPEC = [
   { day: 8, kind: 'present' },
   { day: 9, kind: 'present' },
   { day: 10, kind: 'today' },
-  { day: 11, kind: 'neutral' },
-  { day: 12, kind: 'neutral' },
+  { day: 11, kind: 'present' },
+  { day: 12, kind: 'present' },
   { day: 13, kind: 'weekend' },
   { day: 14, kind: 'weekend' },
+  { day: 15, kind: 'present' },
+  { day: 16, kind: 'present' },
+  { day: 17, kind: 'present' },
+  { day: 18, kind: 'absent' },
+  { day: 19, kind: 'present' },
+  { day: 20, kind: 'weekend' },
+  { day: 21, kind: 'weekend' },
+  { day: 22, kind: 'present' },
+  { day: 23, kind: 'present' },
+  { day: 24, kind: 'absent' },
+  { day: 25, kind: 'present' },
+  { day: 26, kind: 'present' },
+  { day: 27, kind: 'weekend' },
+  { day: 28, kind: 'weekend' },
+  { day: 29, kind: 'present' },
+  { day: 30, kind: 'present' },
 ];
+
+function escapePreviewText(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function openUploadedDocument(doc, studentName) {
+  if (doc.url) {
+    globalThis.open(doc.url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  const title = escapePreviewText(doc.label || 'Uploaded Document');
+  const fileName = escapePreviewText(doc.fileName || 'Document file');
+  const owner = escapePreviewText(studentName || 'Student');
+  const html = `<!doctype html>
+<html>
+  <head>
+    <title>${title}</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #111827; }
+      main { max-width: 760px; margin: 48px auto; background: #fff; border: 1px solid #d9dee8; border-radius: 20px; padding: 32px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); }
+      .label { color: #005da7; font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+      h1 { margin: 10px 0 8px; font-size: 32px; }
+      p { color: #475569; line-height: 1.6; }
+      .preview { margin-top: 24px; min-height: 340px; border: 2px dashed #c8d7ef; border-radius: 16px; display: grid; place-items: center; text-align: center; background: #f8fbff; }
+      .file { font-weight: 800; color: #111827; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="label">Uploaded Document Preview</div>
+      <h1>${title}</h1>
+      <p>Student: <strong>${owner}</strong></p>
+      <p class="file">${fileName}</p>
+      <div class="preview">
+        <div>
+          <h2>Document preview placeholder</h2>
+          <p>Connect a storage URL in <code>doc.url</code> to show the real uploaded file here.</p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>`;
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  globalThis.open(url, '_blank', 'noopener,noreferrer');
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
 
 function gradeBadgeModifiers(grade) {
   const g = String(grade || '')
@@ -403,6 +471,67 @@ function AdminCard({ student }) {
   );
 }
 
+function UploadedDocumentsCard({ student }) {
+  const documents = Array.isArray(student.uploadedDocuments) ? student.uploadedDocuments : [];
+
+  return (
+    <section className="profile-card uploaded-documents-card">
+      <div className="uploaded-documents-card__head">
+        <h2 className="profile-card__title uploaded-documents-card__title">
+          <span className="material-symbols-outlined" aria-hidden>
+            folder_copy
+          </span>
+          Uploaded Documents
+        </h2>
+        {student.docsVerified ? (
+          <span className="uploaded-documents-card__verified">
+            <span className="material-symbols-outlined">verified</span>
+            Verified
+          </span>
+        ) : (
+          <span className="uploaded-documents-card__pending">Pending Review</span>
+        )}
+      </div>
+
+      {documents.length > 0 ? (
+        <div className="uploaded-documents-list">
+          {documents.map((doc) => {
+            const uploaded = doc.status === 'Uploaded';
+            return (
+              <div key={doc.id || doc.label} className="uploaded-document-row">
+                <div className={`uploaded-document-row__icon ${uploaded ? '' : 'uploaded-document-row__icon--muted'}`}>
+                  <span className="material-symbols-outlined">{uploaded ? 'description' : 'draft'}</span>
+                </div>
+                <div className="uploaded-document-row__main">
+                  <p className="uploaded-document-row__label">
+                    {doc.label}
+                    {doc.required && <span className="uploaded-document-row__required">Required</span>}
+                  </p>
+                  <p className="uploaded-document-row__file">{doc.fileName || 'Not provided'}</p>
+                </div>
+                <span className={uploaded ? 'uploaded-document-row__status' : 'uploaded-document-row__status is-missing'}>
+                  {doc.status || 'Not Provided'}
+                </span>
+                {uploaded && (
+                  <button
+                    type="button"
+                    className="uploaded-document-row__view"
+                    onClick={() => openUploadedDocument(doc, student.name)}
+                  >
+                    View
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="uploaded-documents-card__empty">No uploaded documents are recorded for this student.</p>
+      )}
+    </section>
+  );
+}
+
 function ExtracurricularCard({ student }) {
   return (
     <section className="profile-card">
@@ -613,12 +742,13 @@ export default function StudentManagementStudentDetailPage() {
           <GuardianCard student={student} />
           <HealthCard student={student} />
           <AdminCard student={student} />
-          <ExtracurricularCard student={student} />
+          <UploadedDocumentsCard student={student} />
         </div>
         <div className="profile-col-right">
           <QuickActionsCard />
           <AttendanceSnapshotCard />
           <FinancialSnapshotCard student={student} />
+          <ExtracurricularCard student={student} />
         </div>
       </div>
     </div>

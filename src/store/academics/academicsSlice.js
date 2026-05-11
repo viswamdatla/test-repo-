@@ -97,6 +97,51 @@ const gradeFromMarksPct = (marks, total = 100) => {
   return 'F';
 };
 
+const buildStudentDocuments = (seq, ix, existingDocuments = null) => {
+  if (Array.isArray(existingDocuments) && existingDocuments.length > 0) return existingDocuments;
+
+  const serial = String(seq).padStart(4, '0');
+  const documents = [
+    {
+      id: 'aadhaar',
+      label: 'Aadhaar Card',
+      fileName: `aadhaar-${serial}.pdf`,
+      status: 'Uploaded',
+      required: true,
+    },
+    {
+      id: 'birthCertificate',
+      label: 'Birth Certificate',
+      fileName: `birth-certificate-${serial}.pdf`,
+      status: 'Uploaded',
+      required: true,
+    },
+    {
+      id: 'transferCertificate',
+      label: 'Transfer Certificate',
+      fileName: ix % 4 === 0 ? '' : `transfer-certificate-${serial}.pdf`,
+      status: ix % 4 === 0 ? 'Not Provided' : 'Uploaded',
+      required: false,
+    },
+    {
+      id: 'previousMarksCard',
+      label: 'Previous Marks Card',
+      fileName: ix % 3 === 0 ? '' : `previous-marks-card-${serial}.pdf`,
+      status: ix % 3 === 0 ? 'Not Provided' : 'Uploaded',
+      required: false,
+    },
+    {
+      id: 'otherCertificate',
+      label: 'Other Certificate',
+      fileName: ix % 5 === 0 ? `other-certificate-${serial}.pdf` : '',
+      status: ix % 5 === 0 ? 'Uploaded' : 'Not Provided',
+      required: false,
+    },
+  ];
+
+  return documents.filter((doc) => doc.required || doc.status === 'Uploaded');
+};
+
 /** Merges profile / roster fields used by StudentManagementStudentDetailPage UI. Preserves ids, rollNo, kit fields, guardian, etc. */
 function enrichStudentRecord(s) {
   const seqMatch = String(s?.id ?? '').match(/(\d+)/g);
@@ -170,6 +215,7 @@ function enrichStudentRecord(s) {
     transport: s.transport ?? 'None',
     hostel: s.hostel || 'Day Scholar',
     docsVerified: s.docsVerified ?? ix % 5 !== 0,
+    uploadedDocuments: buildStudentDocuments(seq, ix, s.uploadedDocuments),
     previousSchool: s.previousSchool || 'Springfield Public School',
     sport: ['Football', 'Cricket', 'Basketball', 'Athletics'][ix % 4],
     club: ['Art Club', 'Science Club', 'Literary Club', 'Music Club'][ix % 4],

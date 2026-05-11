@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { fetchEmployeesData, selectEmployeesSectionItems, selectEmployeesStatus } from '../../store/employees/employeesSlice';
+import '../Academics/SectionTimeTablePage.scss';
 import './EmployeeDetailPage.scss';
 
 const sectionTitle = (section) => {
@@ -10,6 +11,72 @@ const sectionTitle = (section) => {
   if (section === 'administration') return 'Administration Profile';
   if (section === 'operational') return 'Operational Staff Profile';
   return 'Employee Profile';
+};
+
+const TEACHER_TIMETABLE_DAYS = [
+  { key: 'mon', label: 'Monday' },
+  { key: 'tue', label: 'Tuesday' },
+  { key: 'wed', label: 'Wednesday' },
+  { key: 'thu', label: 'Thursday' },
+  { key: 'fri', label: 'Friday' },
+];
+
+const formatWorkingYears = (years) => {
+  if (years === undefined || years === null || years === '') return undefined;
+  const numericYears = Number(years);
+  if (Number.isNaN(numericYears)) return years;
+  return `${numericYears} year${numericYears === 1 ? '' : 's'}`;
+};
+
+const escapePreviewText = (value) =>
+  String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+
+const openTeacherDocumentPreview = (doc, teacherName) => {
+  if (doc.url) {
+    globalThis.open(doc.url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  const title = escapePreviewText(doc.label || 'Uploaded Document');
+  const fileName = escapePreviewText(doc.fileName || 'Document file');
+  const owner = escapePreviewText(teacherName || 'Teacher');
+  const html = `<!doctype html>
+<html>
+  <head>
+    <title>${title}</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #111827; }
+      main { max-width: 760px; margin: 48px auto; background: #fff; border: 1px solid #d9dee8; border-radius: 20px; padding: 32px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); }
+      .label { color: #005da7; font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+      h1 { margin: 10px 0 8px; font-size: 32px; }
+      p { color: #475569; line-height: 1.6; }
+      .preview { margin-top: 24px; min-height: 340px; border: 2px dashed #c8d7ef; border-radius: 16px; display: grid; place-items: center; text-align: center; background: #f8fbff; }
+      .file { font-weight: 800; color: #111827; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="label">Uploaded Document Preview</div>
+      <h1>${title}</h1>
+      <p>Teacher: <strong>${owner}</strong></p>
+      <p class="file">${fileName}</p>
+      <div class="preview">
+        <div>
+          <h2>Document preview placeholder</h2>
+          <p>Connect a storage URL in <code>doc.url</code> to show the real uploaded file here.</p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>`;
+  const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+  globalThis.open(url, '_blank', 'noopener,noreferrer');
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
 };
 
 const detailFieldsFor = (employee, section) => {
@@ -25,9 +92,19 @@ const detailFieldsFor = (employee, section) => {
   ];
   if (section === 'teachers') {
     return [
-      ...common,
-      { label: 'Teacher Category', value: employee.category },
-      { label: 'Role Detail', value: employee.roleDetail },
+      { label: 'Department', value: employee.department },
+      { label: 'Email', value: employee.email },
+      { label: 'Phone', value: employee.phone },
+      {
+        label: 'Teacher Class / Working Years',
+        type: 'classYears',
+        classValue: employee.category,
+        yearsValue: formatWorkingYears(employee.workingYears),
+      },
+      { label: 'Experience', value: employee.experience },
+      { label: 'Previous School', value: employee.previousSchool },
+      { label: 'Documents', value: employee.documents },
+      { label: 'Qualifications', value: employee.qualifications },
     ];
   }
   if (section === 'operational') {
@@ -96,7 +173,7 @@ const adminResponsibilities = (department) => {
   ];
 };
 
-const adminTimelineFrom = (employee, score) => {
+const adminTimelineFrom = (employee) => {
   const org = 'Campus360';
   const prior = 'Regional Academy';
   return [
@@ -196,16 +273,187 @@ const assignedClassesFrom = (employee) => {
     { code: '10A', name: `Core ${dept}`, students: 28, room: 'Room 302', score: 89, tag },
     { code: '11B', name: `${dept} Applied`, students: 31, room: 'Lab 02', score: 82, tag },
     { code: '12C', name: `${dept} Advanced`, students: 24, room: 'Room 401', score: 76, tag },
+    { code: '09A', name: `${dept} Foundation`, students: 30, room: 'Room 208', score: 84, tag },
+    { code: '08B', name: `${dept} Enrichment`, students: 27, room: 'Room 214', score: 79, tag },
+    { code: '07C', name: `${dept} Workshop`, students: 26, room: 'Lab 01', score: 87, tag },
+    { code: '06A', name: `${dept} Basics`, students: 32, room: 'Room 118', score: 81, tag },
+    { code: '05B', name: `${dept} Prep`, students: 29, room: 'Room 110', score: 74, tag },
   ];
 };
 
-const weeklyScheduleFrom = (employee) => {
+const teacherClassSlot = (subject, room, accent = 'var(--primary)') => ({
+  type: 'class',
+  subject,
+  room,
+  accent,
+});
+
+const teacherFreeSlot = { type: 'free' };
+
+const teacherTimetableFrom = (employee) => {
   const dept = employee?.department || 'Subject';
+  const shortCategory = employee?.category || 'General';
   return [
-    { time: '08:00 - 09:30', monday: `${dept} 10A`, tuesday: '—', wednesday: `${dept} 10A`, thursday: '—', friday: 'Staff Meeting' },
-    { time: '10:00 - 11:30', monday: '—', tuesday: `${dept} 11B`, wednesday: '—', thursday: `${dept} 11B`, friday: 'Office Hours' },
-    { time: '13:00 - 14:30', monday: `${dept} 12C`, tuesday: `${dept} 12C`, wednesday: 'Planning', thursday: '—', friday: 'Review Session' },
+    {
+      type: 'period',
+      time: '09:00 AM',
+      ordinal: '1st Period',
+      slots: {
+        mon: teacherClassSlot(`${dept} 10A`, 'Room 302', 'var(--primary)'),
+        tue: teacherClassSlot(`${dept} 11B`, 'Room 305', '#4caf50'),
+        wed: teacherClassSlot(`${dept} 10A`, 'Room 302', 'var(--primary)'),
+        thu: teacherClassSlot(`${dept} 12C`, 'Room 401', '#009688'),
+        fri: teacherClassSlot(`${shortCategory} Mentoring`, 'Room 204', '#795548'),
+      },
+    },
+    {
+      type: 'period',
+      time: '10:00 AM',
+      ordinal: '2nd Period',
+      slots: {
+        mon: teacherClassSlot(`${dept} 11B`, 'Room 305', '#4caf50'),
+        tue: teacherFreeSlot,
+        wed: teacherClassSlot(`${dept} 12C`, 'Room 401', '#009688'),
+        thu: teacherClassSlot(`${dept} 10A`, 'Room 302', 'var(--primary)'),
+        fri: teacherClassSlot('Assessment Review', 'Faculty Room', '#3f51b5'),
+      },
+    },
+    {
+      type: 'period',
+      time: '11:00 AM',
+      ordinal: '3rd Period',
+      slots: {
+        mon: teacherFreeSlot,
+        tue: teacherClassSlot(`${dept} 12C`, 'Room 401', '#009688'),
+        wed: teacherClassSlot('Lesson Planning', 'Faculty Room', '#ff9800'),
+        thu: teacherFreeSlot,
+        fri: teacherClassSlot(`${dept} 11B`, 'Room 305', '#4caf50'),
+      },
+    },
+    { type: 'lunch', label: 'Lunch Break · 12:30–1:15 PM' },
+    {
+      type: 'period',
+      time: '01:15 PM',
+      ordinal: '4th Period',
+      slots: {
+        mon: teacherClassSlot(`${dept} Lab`, 'Lab 02', '#e91e63'),
+        tue: teacherClassSlot(`${dept} 10A`, 'Room 302', 'var(--primary)'),
+        wed: teacherFreeSlot,
+        thu: teacherClassSlot(`${dept} 11B`, 'Room 305', '#4caf50'),
+        fri: teacherClassSlot('Remedial Class', 'Room 210', '#9c27b0'),
+      },
+    },
+    {
+      type: 'period',
+      time: '02:15 PM',
+      ordinal: '5th Period',
+      slots: {
+        mon: teacherClassSlot(`${dept} 12C`, 'Room 401', '#009688'),
+        tue: teacherClassSlot('Office Hours', 'Faculty Room', '#ffc107'),
+        wed: teacherClassSlot(`${dept} Lab`, 'Lab 02', '#e91e63'),
+        thu: teacherClassSlot('Department Meet', 'Conference Hall', '#3f51b5'),
+        fri: teacherFreeSlot,
+      },
+    },
+    {
+      type: 'period',
+      time: '03:15 PM',
+      ordinal: '6th Period',
+      slots: {
+        mon: teacherClassSlot('Club Activity', 'Activity Room', '#f44336'),
+        tue: teacherFreeSlot,
+        wed: teacherClassSlot(`${dept} 10A`, 'Room 302', 'var(--primary)'),
+        thu: teacherClassSlot(`${dept} 12C`, 'Room 401', '#009688'),
+        fri: teacherClassSlot('Weekly Review', 'Faculty Room', '#795548'),
+      },
+    },
+    {
+      type: 'period',
+      time: '04:15 PM',
+      ordinal: '7th Period',
+      slots: {
+        mon: teacherFreeSlot,
+        tue: teacherClassSlot('Parent Interaction', 'Counselling Room', '#ff9800'),
+        wed: teacherClassSlot('Resource Prep', 'Faculty Room', '#ffc107'),
+        thu: teacherFreeSlot,
+        fri: teacherClassSlot('Staff Meeting', 'Auditorium', '#3f51b5'),
+      },
+    },
   ];
+};
+
+const renderTeacherTimetableSlot = (display) => {
+  if (display.type === 'free') {
+    return (
+      <div className="sec-tt-slot sec-tt-slot--free">
+        <span className="sec-tt-slot-free-label">Free period</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="sec-tt-slot" style={{ borderLeftColor: display.accent }}>
+      <span className="sec-tt-slot-subject">{display.subject}</span>
+      <div className="sec-tt-slot-teacher">
+        <span className="material-symbols-outlined">location_on</span>
+        <span>{display.room}</span>
+      </div>
+    </div>
+  );
+};
+
+const TeacherUploadedDocumentsCard = ({ employee }) => {
+  const documents = Array.isArray(employee.uploadedDocuments) ? employee.uploadedDocuments : [];
+
+  return (
+    <article className="emp-detail-card emp-card-documents">
+      <div className="emp-uploaded-documents-head">
+        <h2>
+          <span className="material-symbols-outlined" aria-hidden>
+            folder_copy
+          </span>
+          Uploaded Documents
+        </h2>
+        <span className="emp-uploaded-documents-pill">Pending Review</span>
+      </div>
+
+      {documents.length > 0 ? (
+        <div className="emp-uploaded-documents-list">
+          {documents.map((doc) => {
+            const uploaded = doc.status === 'Uploaded';
+            return (
+              <div key={doc.id || doc.label} className="emp-uploaded-document-row">
+                <div className={`emp-uploaded-document-icon ${uploaded ? '' : 'is-muted'}`}>
+                  <span className="material-symbols-outlined">{uploaded ? 'description' : 'draft'}</span>
+                </div>
+                <div className="emp-uploaded-document-main">
+                  <p className="emp-uploaded-document-label">
+                    {doc.label}
+                    {doc.required && <span>Required</span>}
+                  </p>
+                  <p className="emp-uploaded-document-file">{doc.fileName || 'Not provided'}</p>
+                </div>
+                <span className={uploaded ? 'emp-uploaded-document-status' : 'emp-uploaded-document-status is-missing'}>
+                  {doc.status || 'Not Provided'}
+                </span>
+                {uploaded && (
+                  <button
+                    type="button"
+                    className="emp-uploaded-document-view"
+                    onClick={() => openTeacherDocumentPreview(doc, employee.name)}
+                  >
+                    View
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="emp-uploaded-documents-empty">No uploaded documents are recorded for this teacher.</p>
+      )}
+    </article>
+  );
 };
 
 export const EmployeeDetailPage = () => {
@@ -230,12 +478,12 @@ export const EmployeeDetailPage = () => {
   const detailFields = useMemo(() => detailFieldsFor(employee, section), [employee, section]);
   const assignedClasses = useMemo(() => assignedClassesFrom(employee), [employee]);
   const termPerformance = useMemo(() => termPerformanceFrom(employee), [employee]);
-  const weeklySchedule = useMemo(() => weeklyScheduleFrom(employee), [employee]);
+  const teacherTimetable = useMemo(() => teacherTimetableFrom(employee), [employee]);
 
   const adminKpis = useMemo(() => adminKpisFrom(score), [score]);
   const expertise = useMemo(() => expertiseFrom(score), [score]);
   const adminResp = useMemo(() => adminResponsibilities(employee?.department), [employee?.department]);
-  const adminTimeline = useMemo(() => adminTimelineFrom(employee, score), [employee, score]);
+  const adminTimeline = useMemo(() => adminTimelineFrom(employee), [employee]);
   const opsMetrics = useMemo(() => opsMetricsFrom(score), [score]);
   const opsDomains = useMemo(() => opsDomainsFrom(employee?.department), [employee?.department]);
   const opsEquipment = useMemo(() => opsEquipmentFrom(employee, score), [employee, score]);
@@ -334,13 +582,28 @@ export const EmployeeDetailPage = () => {
                 <h2>Academic Qualifications</h2>
                 <div className="emp-detail-grid">
                   {detailFields.map((field) => (
-                    <div key={field.label} className="emp-detail-field">
-                      <span>{field.label}</span>
-                      <p>{field.value || '—'}</p>
-                    </div>
+                    field.type === 'classYears' ? (
+                      <div key={field.label} className="emp-detail-field emp-detail-field--inline-pair">
+                        <div className="emp-detail-mini-tile">
+                          <span>Teacher Class</span>
+                          <p>{field.classValue || '—'}</p>
+                        </div>
+                        <div className="emp-detail-mini-tile">
+                          <span>Working Years</span>
+                          <p>{field.yearsValue || '—'}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div key={field.label} className="emp-detail-field">
+                        <span>{field.label}</span>
+                        <p>{field.value || '—'}</p>
+                      </div>
+                    )
                   ))}
                 </div>
               </article>
+
+              <TeacherUploadedDocumentsCard employee={employee} />
 
               <article className="emp-detail-card">
                 <div className="emp-card-head">
@@ -429,31 +692,57 @@ export const EmployeeDetailPage = () => {
                   <h2>Weekly Schedule</h2>
                   <span>Timetable</span>
                 </div>
-                <div className="emp-table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Time Slot</th>
-                        <th>Monday</th>
-                        <th>Tuesday</th>
-                        <th>Wednesday</th>
-                        <th>Thursday</th>
-                        <th>Friday</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {weeklySchedule.map((slot) => (
-                        <tr key={slot.time}>
-                          <td>{slot.time}</td>
-                          <td>{slot.monday}</td>
-                          <td>{slot.tuesday}</td>
-                          <td>{slot.wednesday}</td>
-                          <td>{slot.thursday}</td>
-                          <td>{slot.friday}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="emp-teacher-timetable">
+                  <div className="sec-tt-legend">
+                    <span className="material-symbols-outlined" aria-hidden>
+                      calendar_month
+                    </span>
+                    <p>
+                      Teacher timetable follows the same weekly grid used in the student timetable, with assigned
+                      classes, rooms, free periods, and lunch break clearly separated.
+                    </p>
+                  </div>
+                  <div className="emp-teacher-timetable-scroll">
+                    <div className="sec-tt-grid-shell">
+                      <div className="sec-tt-grid-head sec-tt-timetable-grid">
+                        <div className="sec-tt-grid-head-cell sec-tt-grid-head-cell--period">Period</div>
+                        {TEACHER_TIMETABLE_DAYS.map((day) => (
+                          <div key={day.key} className="sec-tt-grid-head-cell sec-tt-grid-head-cell--day">
+                            {day.label}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="sec-tt-grid-body">
+                        {teacherTimetable.map((period) => {
+                          if (period.type === 'lunch') {
+                            return (
+                              <div key="teacher-lunch" className="sec-tt-lunch-row">
+                                <span className="material-symbols-outlined" aria-hidden>
+                                  restaurant
+                                </span>
+                                <span>{period.label}</span>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div key={period.ordinal} className="sec-tt-period-row sec-tt-timetable-grid">
+                              <div className="sec-tt-period-col">
+                                <span className="sec-tt-period-time">{period.time}</span>
+                                <span className="sec-tt-period-ordinal">{period.ordinal}</span>
+                              </div>
+                              {TEACHER_TIMETABLE_DAYS.map((day) => (
+                                <div key={`${period.ordinal}-${day.key}`} className="sec-tt-day-cell">
+                                  {renderTeacherTimetableSlot(period.slots[day.key])}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </article>
             </section>
@@ -926,24 +1215,6 @@ export const EmployeeDetailPage = () => {
         )}
       </div>
 
-      <section className="emp-detail-card emp-detail-card-legacy">
-        <h2>Profile Type</h2>
-        <div className="emp-detail-grid">
-          <div className="emp-detail-field">
-            <span>Section</span>
-            <p>{sectionTitle(section)}</p>
-          </div>
-          <div className="emp-detail-field">
-            <span>View layout</span>
-            <p>
-              {isTeacher && 'Teacher: hero, record, performance, classes, schedule'}
-              {isAdmin && 'Administrator: hero, KPIs, responsibilities, timeline, expertise, verified, map, record'}
-              {isOps && 'Support: hero, metrics, domains, equipment, shifts, coverage, record'}
-              {!isTeacher && !isAdmin && !isOps && 'Standard record'}
-            </p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

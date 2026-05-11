@@ -10,6 +10,7 @@ import {
   fetchUserManagement,
   resetAccessMatrix,
   saveTemplateDraft,
+  setAssignmentAccess,
   setAccessPermission,
   setAssignmentField,
   setAuditActionFilter,
@@ -18,6 +19,7 @@ import {
   setPage,
   setSearchQuery,
   setTemplateDraftField,
+  setUserAccess,
   startTemplateEdit,
 } from '../../store/userManagement/userManagementSlice';
 import './UserManagementPage.scss';
@@ -108,6 +110,13 @@ const PERM_MODULES = [
   },
 ];
 
+const USER_ACCESS_MODULES = [
+  { key: 'academics', title: 'Academics', hint: 'Students, timetable, attendance, grades' },
+  { key: 'finance', title: 'Finance', hint: 'Fees, payroll, expenses' },
+  { key: 'inventory', title: 'Inventory', hint: 'Kits, stock, assets' },
+  { key: 'personnel', title: 'Personnel', hint: 'Employees, leave, staff records' },
+];
+
 const initialsFromName = (name) => {
   const parts = String(name || '')
     .trim()
@@ -148,6 +157,13 @@ const actionPillClass = (key) => {
   return 'um-audit-pill um-audit-pill--system';
 };
 
+const accessSummary = (access) => {
+  const modules = USER_ACCESS_MODULES.map((module) => access?.[module.key]).filter(Boolean);
+  const viewCount = modules.filter((item) => item.view).length;
+  const editCount = modules.filter((item) => item.edit).length;
+  return `${viewCount} view / ${editCount} edit`;
+};
+
 export const UserManagementPage = () => {
   usePageTitle('User Management');
 
@@ -184,6 +200,7 @@ export const UserManagementPage = () => {
   const [selectedPersonnelIds, setSelectedPersonnelIds] = useState(() => new Set());
   const [accessRoleKey, setAccessRoleKey] = useState('super-admin');
   const [accessDirty, setAccessDirty] = useState(false);
+  const [accessUserId, setAccessUserId] = useState(null);
 
   const personnelPageSize = 10;
 
@@ -249,12 +266,9 @@ export const UserManagementPage = () => {
   }, [users, personnelBranch, personnelRole, personnelStatus, personnelActiveOnly, personnelSearch]);
 
   const personnelPageCount = Math.max(1, Math.ceil(personnelFiltered.length / personnelPageSize));
-  const personnelStart = (personnelPage - 1) * personnelPageSize;
+  const safePersonnelPage = Math.min(personnelPage, personnelPageCount);
+  const personnelStart = (safePersonnelPage - 1) * personnelPageSize;
   const personnelRows = personnelFiltered.slice(personnelStart, personnelStart + personnelPageSize);
-
-  useEffect(() => {
-    if (personnelPage > personnelPageCount) setPersonnelPage(personnelPageCount);
-  }, [personnelPage, personnelPageCount]);
 
   const filteredAudit = useMemo(() => {
     let list = [...auditLogs];
@@ -349,6 +363,7 @@ export const UserManagementPage = () => {
   };
 
   const roleMatrix = accessMatrix[accessRoleKey] || {};
+  const accessUser = useMemo(() => users.find((u) => u.id === accessUserId) ?? null, [users, accessUserId]);
 
   if (loadStatus === 'loading' && users.length === 0) {
     return (
@@ -618,6 +633,7 @@ export const UserManagementPage = () => {
                     <th>Name</th>
                     <th>Role</th>
                     <th>Branch</th>
+                    <th>Access</th>
                     <th>Status</th>
                     <th>Last Login</th>
                     <th className="um-th-actions">Actions</th>
@@ -627,7 +643,6 @@ export const UserManagementPage = () => {
                   {personnelRows.map((u) => {
                     const active = u.status === 'Active';
                     const suspended = u.status === 'Inactive';
-                    const leave = u.status === 'Pending';
                     return (
                       <tr key={u.id} className="um-tr">
                         <td>
@@ -652,6 +667,12 @@ export const UserManagementPage = () => {
                         </td>
                         <td className="um-td-branch">{u.branch}</td>
                         <td>
+                          <button type="button" className="um-access-chip" onClick={() => setAccessUserId(u.id)}>
+                            <span className="material-symbols-outlined">admin_panel_settings</span>
+                            {accessSummary(u.access)}
+                          </button>
+                        </td>
+                        <td>
                           <div className="um-status">
                             <span
                               className={`um-status-dot ${active ? 'is-active' : suspended ? 'is-inactive' : 'is-pending'}`}
@@ -663,8 +684,8 @@ export const UserManagementPage = () => {
                           <span className="um-last-login">{u.lastLogin || '—'}</span>
                         </td>
                         <td className="um-td-actions">
-                          <button type="button" className="um-more" aria-label={`Actions for ${u.name}`}>
-                            <span className="material-symbols-outlined">more_vert</span>
+                          <button type="button" className="um-more" aria-label={`Manage access for ${u.name}`} onClick={() => setAccessUserId(u.id)}>
+                            <span className="material-symbols-outlined">shield_person</span>
                           </button>
                         </td>
                       </tr>
@@ -683,7 +704,7 @@ export const UserManagementPage = () => {
                 <button
                   type="button"
                   className="um-page-nav"
-                  disabled={personnelPage <= 1}
+                  disabled={safePersonnelPage <= 1}
                   onClick={() => setPersonnelPage((p) => Math.max(1, p - 1))}
                 >
                   <span className="material-symbols-outlined">chevron_left</span>
@@ -694,7 +715,7 @@ export const UserManagementPage = () => {
                     <button
                       key={p}
                       type="button"
-                      className={`um-page-num ${p === personnelPage ? 'active' : ''}`}
+                      className={`um-page-num ${p === safePersonnelPage ? 'active' : ''}`}
                       onClick={() => setPersonnelPage(p)}
                     >
                       {p}
@@ -703,7 +724,7 @@ export const UserManagementPage = () => {
                 <button
                   type="button"
                   className="um-page-nav"
-                  disabled={personnelPage >= personnelPageCount}
+                  disabled={safePersonnelPage >= personnelPageCount}
                   onClick={() => setPersonnelPage((p) => Math.min(personnelPageCount, p + 1))}
                 >
                   <span className="material-symbols-outlined">chevron_right</span>
@@ -1120,6 +1141,7 @@ export const UserManagementPage = () => {
                         <th>User name</th>
                         <th>Role</th>
                         <th>Branch</th>
+                        <th>Access</th>
                         <th>Status</th>
                         <th className="um-th-actions">Actions</th>
                       </tr>
@@ -1144,6 +1166,12 @@ export const UserManagementPage = () => {
                             </td>
                             <td className="um-td-branch">{u.branch || '—'}</td>
                             <td>
+                              <button type="button" className="um-access-chip" onClick={() => setAccessUserId(u.id)}>
+                                <span className="material-symbols-outlined">admin_panel_settings</span>
+                                {accessSummary(u.access)}
+                              </button>
+                            </td>
+                            <td>
                               <div className="um-status">
                                 <span
                                   className={`um-status-dot ${active ? 'is-active' : inactive ? 'is-inactive' : 'is-pending'}`}
@@ -1152,8 +1180,8 @@ export const UserManagementPage = () => {
                               </div>
                             </td>
                             <td className="um-td-actions">
-                              <button type="button" className="um-more" aria-label={`Actions for ${u.name}`}>
-                                <span className="material-symbols-outlined">more_vert</span>
+                              <button type="button" className="um-more" aria-label={`Manage access for ${u.name}`} onClick={() => setAccessUserId(u.id)}>
+                                <span className="material-symbols-outlined">shield_person</span>
                               </button>
                             </td>
                           </tr>
@@ -1317,6 +1345,57 @@ export const UserManagementPage = () => {
                     ))}
                   </select>
                 </label>
+                <div className="um-modal-access">
+                  <div className="um-modal-access-head">
+                    <h4>Access after creation</h4>
+                    <p>Choose what this user can see or edit immediately after account creation.</p>
+                  </div>
+                  <div className="um-user-access-grid">
+                    {USER_ACCESS_MODULES.map((module) => {
+                      const moduleAccess = assignmentDraft.access?.[module.key] || {};
+                      return (
+                        <div key={module.key} className="um-user-access-row">
+                          <div>
+                            <p className="um-user-access-title">{module.title}</p>
+                            <p className="um-user-access-hint">{module.hint}</p>
+                          </div>
+                          <label className="um-user-access-check">
+                            <input
+                              type="checkbox"
+                              checked={!!moduleAccess.view}
+                              onChange={(e) =>
+                                dispatch(
+                                  setAssignmentAccess({
+                                    module: module.key,
+                                    permission: 'view',
+                                    value: e.target.checked,
+                                  })
+                                )
+                              }
+                            />
+                            View
+                          </label>
+                          <label className="um-user-access-check">
+                            <input
+                              type="checkbox"
+                              checked={!!moduleAccess.edit}
+                              onChange={(e) =>
+                                dispatch(
+                                  setAssignmentAccess({
+                                    module: module.key,
+                                    permission: 'edit',
+                                    value: e.target.checked,
+                                  })
+                                )
+                              }
+                            />
+                            Edit
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
               <div className="um-modal-actions">
                 <button type="button" className="um-btn um-btn--secondary" onClick={() => setAssignOpen(false)}>
@@ -1324,6 +1403,83 @@ export const UserManagementPage = () => {
                 </button>
                 <button type="button" className="um-btn um-btn--primary" onClick={submitAssign}>
                   Save user
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {accessUser && (
+          <div className="um-modal-overlay" role="presentation" onClick={() => setAccessUserId(null)}>
+            <div className="um-modal um-modal--wide" role="dialog" aria-labelledby="um-user-access-title" onClick={(e) => e.stopPropagation()}>
+              <h3 id="um-user-access-title" className="um-modal-title">
+                Manage access
+              </h3>
+              <p className="um-modal-sub">
+                {accessUser.name} can be allowed to view or edit each module independently.
+              </p>
+              <div className="um-user-access-grid">
+                {USER_ACCESS_MODULES.map((module) => {
+                  const moduleAccess = accessUser.access?.[module.key] || {};
+                  return (
+                    <div key={module.key} className="um-user-access-row">
+                      <div>
+                        <p className="um-user-access-title">{module.title}</p>
+                        <p className="um-user-access-hint">{module.hint}</p>
+                      </div>
+                      <label className="um-user-access-check">
+                        <input
+                          type="checkbox"
+                          checked={!!moduleAccess.view}
+                          onChange={(e) =>
+                            dispatch(
+                              setUserAccess({
+                                userId: accessUser.id,
+                                module: module.key,
+                                permission: 'view',
+                                value: e.target.checked,
+                              })
+                            )
+                          }
+                        />
+                        View
+                      </label>
+                      <label className="um-user-access-check">
+                        <input
+                          type="checkbox"
+                          checked={!!moduleAccess.edit}
+                          onChange={(e) =>
+                            dispatch(
+                              setUserAccess({
+                                userId: accessUser.id,
+                                module: module.key,
+                                permission: 'edit',
+                                value: e.target.checked,
+                              })
+                            )
+                          }
+                        />
+                        Edit
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="um-modal-actions">
+                <button
+                  type="button"
+                  className="um-btn um-btn--primary"
+                  onClick={() => {
+                    dispatch(
+                      appendAuditLog({
+                        action: 'User Access Updated',
+                        actionKey: 'security',
+                        target: accessUser.name,
+                      })
+                    );
+                    setAccessUserId(null);
+                  }}
+                >
+                  Done
                 </button>
               </div>
             </div>

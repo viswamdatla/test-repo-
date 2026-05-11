@@ -32,6 +32,74 @@ export const STAFF_DIRECTORY_DEPARTMENTS = [
 
 export const OPERATIONAL_DEPARTMENTS = ['Driver', 'Helper', 'Maintenance', 'Service'];
 
+const TEACHER_PREVIOUS_SCHOOLS = [
+  'Green Valley Public School',
+  'St. Marys Senior Secondary',
+  'Oakridge International School',
+  'Delhi Public Academy',
+  'National Model School',
+  'Sunrise High School',
+];
+
+const TEACHER_QUALIFICATIONS = [
+  'M.Ed, B.Ed, MA English',
+  'M.Sc Mathematics, B.Ed',
+  'M.Sc Chemistry, B.Ed',
+  'M.Sc Physics, B.Ed',
+  'MA History, B.Ed',
+  'BA English, Diploma in Early Education',
+];
+
+const TEACHER_DOCUMENT_SETS = [
+  'Resume, ID Proof, Degree Certificates',
+  'Resume, B.Ed Certificate, Experience Letter',
+  'Resume, Police Verification, Degree Certificates',
+  'Resume, Address Proof, Qualification Certificates',
+];
+
+const buildTeacherDocuments = (seq, ix, extraCertificate = 'Other Certificate') => {
+  const serial = String(seq).padStart(4, '0');
+  const documents = [
+    {
+      id: 'aadhaar',
+      label: 'Aadhaar Card',
+      fileName: `teacher-aadhaar-${serial}.pdf`,
+      status: 'Uploaded',
+      required: true,
+    },
+    {
+      id: 'resume',
+      label: 'Resume',
+      fileName: `teacher-resume-${serial}.pdf`,
+      status: 'Uploaded',
+      required: true,
+    },
+    {
+      id: 'qualificationCertificate',
+      label: 'Qualification Certificate',
+      fileName: `qualification-certificate-${serial}.pdf`,
+      status: 'Uploaded',
+      required: true,
+    },
+    {
+      id: 'experienceLetter',
+      label: 'Experience Letter',
+      fileName: ix % 3 === 0 ? '' : `experience-letter-${serial}.pdf`,
+      status: ix % 3 === 0 ? 'Not Provided' : 'Uploaded',
+      required: false,
+    },
+    {
+      id: 'otherCertificate',
+      label: extraCertificate,
+      fileName: ix % 4 === 0 ? `teacher-other-certificate-${serial}.pdf` : '',
+      status: ix % 4 === 0 ? 'Uploaded' : 'Not Provided',
+      required: false,
+    },
+  ];
+
+  return documents.filter((doc) => doc.required || doc.status === 'Uploaded');
+};
+
 const createTeacherMock = () => {
   const base = [
     {
@@ -46,6 +114,12 @@ const createTeacherMock = () => {
       email: 'elena.r@campus360.edu',
       phone: '+1 (555) 012-3456',
       status: 'Active',
+      experience: '14 years in school leadership and English instruction',
+      previousSchool: 'Oakridge International School',
+      documents: 'Resume, ID Proof, Doctorate Certificate, Experience Letter',
+      workingYears: 6,
+      qualifications: 'PhD English Literature, M.Ed, B.Ed',
+      uploadedDocuments: buildTeacherDocuments(1, 0, 'Doctorate Certificate'),
     },
     {
       id: 't-002',
@@ -59,6 +133,12 @@ const createTeacherMock = () => {
       email: 'm.stevenson@campus360.edu',
       phone: '+1 (555) 789-0123',
       status: 'Active',
+      experience: '10 years teaching senior mathematics',
+      previousSchool: 'Green Valley Public School',
+      documents: 'Resume, B.Ed Certificate, Degree Certificates',
+      workingYears: 5,
+      qualifications: 'M.Sc Mathematics, B.Ed',
+      uploadedDocuments: buildTeacherDocuments(2, 1, 'B.Ed Certificate'),
     },
     {
       id: 't-003',
@@ -72,6 +152,12 @@ const createTeacherMock = () => {
       email: 's.jenkins@campus360.edu',
       phone: '+1 (555) 456-7890',
       status: 'On Leave',
+      experience: '8 years across chemistry labs and science curriculum',
+      previousSchool: 'National Model School',
+      documents: 'Resume, Lab Safety Certificate, Degree Certificates',
+      workingYears: 4,
+      qualifications: 'M.Sc Chemistry, B.Ed',
+      uploadedDocuments: buildTeacherDocuments(3, 2, 'Lab Safety Certificate'),
     },
     {
       id: 't-004',
@@ -85,6 +171,12 @@ const createTeacherMock = () => {
       email: 'a.finch@campus360.edu',
       phone: '+1 (555) 234-5678',
       status: 'Active',
+      experience: '12 years in academic administration and accounts',
+      previousSchool: 'St. Marys Senior Secondary',
+      documents: 'Resume, ID Proof, Finance Certification',
+      workingYears: 7,
+      qualifications: 'MBA Finance, B.Com',
+      uploadedDocuments: buildTeacherDocuments(4, 3, 'Finance Certification'),
     },
   ];
   const roles = ['Math Teacher', 'Physics Lecturer', 'Chemistry Teacher', 'Biology Teacher', 'English Faculty', 'History Teacher'];
@@ -101,6 +193,12 @@ const createTeacherMock = () => {
     email: `teacher${i + 1}@campus360.edu`,
     phone: `+1 (555) ${String(100 + i).padStart(3, '0')}-${String(2000 + i).padStart(4, '0')}`,
     status: statuses[i % statuses.length],
+    experience: `${4 + (i % 16)} years in ${TEACHER_DEPARTMENTS[i % TEACHER_DEPARTMENTS.length]} teaching`,
+    previousSchool: TEACHER_PREVIOUS_SCHOOLS[i % TEACHER_PREVIOUS_SCHOOLS.length],
+    documents: TEACHER_DOCUMENT_SETS[i % TEACHER_DOCUMENT_SETS.length],
+    workingYears: 1 + (i % 12),
+    qualifications: TEACHER_QUALIFICATIONS[i % TEACHER_QUALIFICATIONS.length],
+    uploadedDocuments: buildTeacherDocuments(i + 1, i, TEACHER_DOCUMENT_SETS[i % TEACHER_DOCUMENT_SETS.length].split(', ').at(-1)),
   }));
 };
 

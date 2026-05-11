@@ -17,10 +17,10 @@ export const Navbar = ({ title }) => {
     pathname.startsWith('/academics/time-table/section/') ||
     /^\/academics\/attendance\/[^/]+\/[^/]+/.test(pathname) ||
     /^\/academics\/grades\/[^/]+\/[^/]+/.test(pathname);
-  const showAcademicsTabs = pathname.startsWith('/academics') && !isAcademicsSectionRoster;
+  const isAcademicsLanding = pathname === '/academics' || pathname === '/academics/student-management';
+  const showAcademicsTabs = isAcademicsSectionRoster;
   const showCenterTitle =
-    isAcademicsSectionRoster ||
-    (!showEmployeesTabs && !showFinancialTabs && !showAcademicsTabs);
+    (!isAcademicsLanding && !showEmployeesTabs && !showFinancialTabs && !showAcademicsTabs);
 
   return (
     <header className="navbar">

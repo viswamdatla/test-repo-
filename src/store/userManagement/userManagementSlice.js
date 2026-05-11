@@ -10,6 +10,37 @@ const roleTemplateMap = {
   Accountant: 'Operations Template',
 };
 
+const accessModuleKeys = ['academics', 'finance', 'inventory', 'personnel'];
+
+const emptyUserAccess = () =>
+  accessModuleKeys.reduce((acc, key) => {
+    acc[key] = { view: false, edit: false };
+    return acc;
+  }, {});
+
+const buildUserAccessForRole = (role) => {
+  const access = emptyUserAccess();
+  const grant = (module, canEdit = false) => {
+    access[module] = { view: true, edit: canEdit };
+  };
+
+  if (role === 'Principal') {
+    accessModuleKeys.forEach((module) => grant(module, true));
+  } else if (role === 'Teacher') {
+    grant('academics', true);
+  } else if (role === 'Student' || role === 'Parent') {
+    grant('academics', false);
+  } else if (role === 'Finance' || role === 'Accountant') {
+    grant('finance', true);
+    grant('academics', false);
+  } else if (role === 'Operations') {
+    grant('inventory', true);
+    grant('personnel', false);
+  }
+
+  return access;
+};
+
 const seedAuditLogs = () => [
   {
     id: 'log-001',
@@ -216,6 +247,7 @@ const userManagementSlice = createSlice({
       role: 'Teacher',
       branch: 'Oakwood Central',
       template: 'Teachers Template',
+      access: buildUserAccessForRole('Teacher'),
     },
     searchQuery: '',
     page: 1,
@@ -230,6 +262,20 @@ const userManagementSlice = createSlice({
       state.assignmentDraft[field] = value;
       if (field === 'role') {
         state.assignmentDraft.template = getTemplateForRole(state.templates, value);
+        state.assignmentDraft.access = buildUserAccessForRole(value);
+      }
+    },
+    setAssignmentAccess(state, action) {
+      const { module, permission, value } = action.payload;
+      if (!state.assignmentDraft.access?.[module]) {
+        state.assignmentDraft.access = buildUserAccessForRole(state.assignmentDraft.role);
+      }
+      state.assignmentDraft.access[module][permission] = value;
+      if (permission === 'edit' && value) {
+        state.assignmentDraft.access[module].view = true;
+      }
+      if (permission === 'view' && !value) {
+        state.assignmentDraft.access[module].edit = false;
       }
     },
     setTemplateDraftField(state, action) {
@@ -313,6 +359,7 @@ const userManagementSlice = createSlice({
         role: draft.role,
         branch: (draft.branch || 'Oakwood Central').trim() || 'Oakwood Central',
         template: draft.template,
+        access: draft.access || buildUserAccessForRole(draft.role),
         status: 'Active',
         lastLogin: 'Just now',
       };
@@ -323,6 +370,7 @@ const userManagementSlice = createSlice({
         role: 'Teacher',
         branch: 'Oakwood Central',
         template: getTemplateForRole(state.templates, 'Teacher'),
+        access: buildUserAccessForRole('Teacher'),
       };
       state.page = 1;
       state.auditLogs.unshift({
@@ -357,6 +405,16 @@ const userManagementSlice = createSlice({
       const matrix = state.accessMatrix[roleKey];
       if (!matrix?.[module]) return;
       state.accessMatrix[roleKey][module][key] = value;
+    },
+    setUserAccess(state, action) {
+      const { userId, module, permission, value } = action.payload;
+      const user = state.users.find((u) => u.id === userId);
+      if (!user) return;
+      if (!user.access) user.access = buildUserAccessForRole(user.role);
+      if (!user.access[module]) user.access[module] = { view: false, edit: false };
+      user.access[module][permission] = value;
+      if (permission === 'edit' && value) user.access[module].view = true;
+      if (permission === 'view' && !value) user.access[module].edit = false;
     },
     appendAuditLog(state, action) {
       state.auditLogs.unshift({
@@ -400,10 +458,14 @@ const userManagementSlice = createSlice({
       .addCase(fetchUserManagement.fulfilled, (state, action) => {
         state.loadStatus = 'succeeded';
         state.users = action.payload.users;
+        state.users.forEach((user) => {
+          if (!user.access) user.access = buildUserAccessForRole(user.role);
+        });
         state.templates = action.payload.templates;
         state.auditLogs = action.payload.auditLogs || seedAuditLogs();
         state.accessMatrix = action.payload.accessMatrix || buildAccessMatrix();
         state.assignmentDraft.template = getTemplateForRole(state.templates, state.assignmentDraft.role);
+        state.assignmentDraft.access = buildUserAccessForRole(state.assignmentDraft.role);
       })
       .addCase(fetchUserManagement.rejected, (state) => {
         state.loadStatus = 'failed';
@@ -413,6 +475,7 @@ const userManagementSlice = createSlice({
 
 export const {
   setAssignmentField,
+  setAssignmentAccess,
   setTemplateDraftField,
   startTemplateEdit,
   cancelTemplateEdit,
@@ -424,6 +487,7 @@ export const {
   setAuditActionFilter,
   setAuditSearch,
   setAccessPermission,
+  setUserAccess,
   appendAuditLog,
   resetAccessMatrix,
   bulkSetUsersStatus,

@@ -279,6 +279,10 @@
   grid-column: span 5;
 }
 
+.emp-card-documents {
+  grid-column: span 7;
+}
+
 .emp-wide {
   grid-column: span 12;
 }
@@ -335,6 +339,172 @@
   }
 }
 
+.emp-detail-field--inline-pair {
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+
+  > div {
+    flex: 1;
+    min-width: 160px;
+  }
+}
+
+.emp-detail-mini-tile {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-container-low);
+}
+
+.emp-uploaded-documents-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+
+    .material-symbols-outlined {
+      color: var(--primary);
+      font-size: 26px;
+    }
+  }
+}
+
+.emp-uploaded-documents-pill {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.emp-uploaded-documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.emp-uploaded-document-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--surface-container-low);
+  border: 1px solid rgba(193, 199, 211, 0.3);
+}
+
+.emp-uploaded-document-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--primary-fixed);
+  color: var(--primary);
+
+  &.is-muted {
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+  }
+
+  .material-symbols-outlined {
+    font-size: 24px;
+  }
+}
+
+.emp-uploaded-document-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.emp-uploaded-document-label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--on-surface);
+
+  span {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--primary);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
+.emp-uploaded-document-file {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--on-surface-variant);
+  overflow-wrap: anywhere;
+}
+
+.emp-uploaded-document-status {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  &.is-missing {
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+  }
+}
+
+.emp-uploaded-document-view {
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 93, 167, 0.35);
+  background: var(--surface-container-lowest);
+  color: var(--primary);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 93, 167, 0.08);
+  }
+}
+
+.emp-uploaded-documents-empty {
+  margin: 0;
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .emp-progress-list {
   margin-top: 16px;
   display: grid;
@@ -381,7 +551,7 @@
 
 .emp-class-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -457,8 +627,21 @@
   }
 }
 
-.emp-detail-card-legacy {
-  margin-top: 16px;
+.emp-teacher-timetable {
+  display: grid;
+  gap: 16px;
+
+  .sec-tt-legend {
+    margin-bottom: 0;
+  }
+}
+
+.emp-teacher-timetable-scroll {
+  overflow-x: auto;
+
+  .sec-tt-grid-shell {
+    min-width: 860px;
+  }
 }
 
 /* Administrator layout */
@@ -1481,6 +1664,10 @@
   .emp-detail-card {
     grid-column: span 12;
   }
+
+  .emp-class-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 700px) {
@@ -1499,6 +1686,10 @@
   }
 
   .emp-detail-side-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .emp-class-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1524,6 +1715,10 @@
   .emp-btn-muted {
     flex: 1;
     min-width: 140px;
+  }
+
+  .emp-uploaded-document-row {
+    flex-wrap: wrap;
   }
 }
 

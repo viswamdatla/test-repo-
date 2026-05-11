@@ -100,7 +100,9 @@ const defaultNewClassForm = () => ({
 
 export const AcademicsModernPage = ({ pageKey }) => {
   const meta = PAGE_META[pageKey] ?? PAGE_META.studentManagement;
-  usePageTitle(meta.title);
+  const isAcademicsLanding = pageKey === 'studentManagement';
+  const pageTitle = isAcademicsLanding ? 'Academics' : meta.title;
+  usePageTitle(pageTitle);
   const navigate = useNavigate();
 
   const itemsPerRow = useItemsPerRow();
@@ -320,13 +322,17 @@ export const AcademicsModernPage = ({ pageKey }) => {
     <div className="ac-modern-page">
       <nav className="ac-modern-breadcrumb" aria-label="Breadcrumb">
         <span>Academics</span>
-        <span className="material-symbols-outlined">chevron_right</span>
-        <span className="current">{meta.title}</span>
+        {!isAcademicsLanding && (
+          <>
+            <span className="material-symbols-outlined">chevron_right</span>
+            <span className="current">{pageTitle}</span>
+          </>
+        )}
       </nav>
 
       <header className="ac-modern-header">
         <div>
-          <h1>{meta.title}</h1>
+          <h1>{pageTitle}</h1>
           <p>{meta.subtitle}</p>
         </div>
         <div className="actions">
